@@ -255,7 +255,8 @@ a { color: inherit; }
 /* ---------- La loupe (curseur de l'étage) ---------- */
 
 .loupe {
-  padding: 14px 20px 10px;
+  margin-top: -18px; /* collée à la ligne du temps */
+  padding: 4px 20px 12px;
   border-radius: 20px;
   background: rgba(var(--etage-rgb), 0.10);
   border: 1px solid rgba(var(--etage-rgb), 0.4);
@@ -264,12 +265,13 @@ a { color: inherit; }
   flex-direction: column;
   gap: 4px;
 }
-.loupe__textes { display: flex; flex-direction: column; }
+.loupe__textes { display: flex; flex-direction: column; gap: 2px; }
 .loupe__libelle { color: var(--texte-doux); }
-.loupe__position { margin: 0; display: flex; flex-direction: column; }
+.loupe__position { margin: 0; color: var(--texte-doux); }
+.loupe__position .loupe__periode { color: var(--texte); }
 .loupe__periode { font-weight: 600; }
 .loupe__date { font-family: 'JetBrains Mono', monospace; }
-.loupe__annee { margin: 0; color: var(--texte-doux); }
+.loupe__annee { margin: 0; color: var(--texte); }
 .loupe__annee strong { color: var(--etage); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
 
 .loupe__curseur {
@@ -979,3 +981,75 @@ a { color: inherit; }
 .carte__sous-titre { margin: 4px 0 0; font-weight: 600; color: var(--etage-fonce); }
 .carte__points { margin: 0; padding-left: 22px; }
 .carte__points li + li { margin-top: 2px; }
+
+/* ---------- Les grandes ères (Précambrien, Paléozoïque, Mésozoïque, Cénozoïque) ---------- */
+
+.ere {
+  position: absolute;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ere) 30%, transparent), color-mix(in srgb, var(--ere) 14%, transparent));
+  border: 1px solid color-mix(in srgb, var(--ere) 60%, transparent);
+  border-left: 4px solid var(--ere);
+}
+.ere__nom {
+  position: sticky;
+  left: 12px;
+  padding: 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ere);
+  white-space: nowrap;
+}
+.ere__detail { font-weight: 500; letter-spacing: 0.02em; text-transform: none; color: var(--texte-doux); }
+.troncon--ere {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ere) 12%, transparent), transparent 70%);
+  border-top: 3px solid color-mix(in srgb, var(--ere) 70%, transparent);
+}
+.troncon__pastille {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 4px;
+  background: var(--periode);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+  vertical-align: 1px;
+}
+
+/* ---------- Changement de thème : la ligne s'efface, la suivante apparaît ---------- */
+
+.ligne { transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease; }
+.ligne--sortie {
+  opacity: 0;
+  transform: translateX(-32px) scale(0.98);
+  filter: blur(6px);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ligne--entree { animation: ligne-entree 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  .ligne--entree .troncon__axe {
+    transform-origin: left center;
+    animation: axe-trace 0.9s cubic-bezier(0.3, 0.6, 0.2, 1) backwards;
+  }
+  .ligne--entree .ligne__item {
+    animation: point-entree 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: calc(0.15s + var(--i, 0) * 0.04s);
+  }
+}
+@keyframes ligne-entree {
+  from { opacity: 0; transform: translateX(40px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes axe-trace {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes point-entree {
+  from { opacity: 0; translate: 0 14px; }
+  to { opacity: 1; translate: 0 0; }
+}

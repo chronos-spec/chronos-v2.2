@@ -1,5 +1,18 @@
 # Journal de Chronos
 
+## 15 novembre 2026 (tard) — Lignes aérées, thèmes, ères en couleur
+
+**Ce qui a été fait**
+- Les périodes s'allongent quand leurs événements sont serrés : **jamais plus de deux étiquettes** l'une sous l'autre.
+- Le curseur de la loupe et la ligne « si … tenait en un an » sont collés sous la ligne du temps.
+- Aujourd'hui : un menu **« Choisir un thème »** : conquête spatiale, numérique, médecine et santé, énergie et climat, transports, le monde depuis 1945 (37 nouveaux événements).
+- Histoire et Aujourd'hui : **une ligne par thème**. Changer de thème efface la ligne (glissement + flou) et fait apparaître la suivante (l'axe se trace, les points arrivent en cascade). Coupé si l'appareil demande moins de mouvement.
+- Terre et Vie : une **bande de couleur par grande ère** (Précambrien, Paléozoïque, Mésozoïque, Cénozoïque) et une pastille de couleur par période, aux couleurs officielles de la charte stratigraphique internationale.
+
+**Questions ouvertes**
+- Comment ajouter beaucoup plus d'animaux par période ?
+- Une version entièrement pensée pour le téléphone.
+
 ## 15 novembre 2026 (nuit) — Recherche, vivant et arbre humain
 
 **Ce qui a été fait**

@@ -1,29 +1,58 @@
 import { forwardRef } from 'react';
 import { MESURES, xPourAns } from '../lib/echelle.js';
 import { idPeriode } from '../data/index.js';
+import { ERES, COULEUR_PERIODE } from '../data/eres.js';
 
 // La ligne du temps d'un étage : plus large que l'écran, on la fait glisser de côté.
 const HAUT_TITRES = 96; // place au-dessus de la ligne pour le nom des périodes
 const RANG_VIVANT = 15; // hauteur d'une ligne du bandeau du vivant
 const TETE_VIVANT = 28; // titre du bandeau
+const HAUT_ERES = 44; // bande des grandes ères (Paléozoïque, Mésozoïque…)
 
-const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer, onDefiler, groupes, rangsGroupes }, ref) {
+const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer, onDefiler, groupes, rangsGroupes, classe }, ref) {
   const hautBandeau = groupes ? TETE_VIVANT + rangsGroupes * RANG_VIVANT + 16 : 0;
-  const HAUT = hautBandeau + HAUT_TITRES;
-  const hauteur = HAUT + 48 + ligne.rangs * MESURES.rang;
+  const eres = blocsEres(ligne);
+  const hautEres = eres.length ? HAUT_ERES : 0;
+  const haut = hautBandeau + hautEres; // où commencent les tronçons
+  // Sous la ligne : le rond, puis au plus deux rangs d'étiquettes.
+  const hauteur = haut + HAUT_TITRES + 22 + (ligne.rangs - 1) * MESURES.rang + 122;
+  let n = 0; // pour l'apparition en cascade des points
 
   return (
-    <div className="ligne" ref={ref} onScroll={onDefiler}>
+    <div className={`ligne ${classe || ''}`} ref={ref} onScroll={onDefiler}>
       <div className="ligne__piste" style={{ width: ligne.largeur, height: hauteur }}>
         {groupes && (
           <Bandeau groupes={groupes} ligne={ligne} hauteur={hautBandeau} />
         )}
 
+        {eres.map((b) => (
+          <div
+            key={`${b.ere}-${b.x}`}
+            className="ere"
+            style={{ left: b.x, width: b.largeur, top: hautBandeau, '--ere': ERES[b.ere].couleur }}
+          >
+            <span className="ere__nom">
+              {ERES[b.ere].nom}
+              <span className="ere__detail"> · {ERES[b.ere].detail}</span>
+            </span>
+          </div>
+        ))}
+
         {ligne.troncons.map((t, i) => {
           const idFiche = idPeriode(t.categorie.id);
           const ouverte = carteOuverte === idFiche;
           return (
-            <div key={t.categorie.id} className="troncon" style={{ left: t.x, width: t.largeur, top: hautBandeau }}>
+            <div
+              key={t.categorie.id}
+              className={t.categorie.ere ? 'troncon troncon--ere' : 'troncon'}
+              style={{
+                left: t.x,
+                width: t.largeur,
+                top: haut,
+                '--ere': t.categorie.ere ? ERES[t.categorie.ere].couleur : undefined,
+                '--periode': COULEUR_PERIODE[t.categorie.id],
+              }}
+            >
               <div className="troncon__axe" aria-hidden="true" style={{ top: HAUT_TITRES }} />
               {i > 0 && (
                 <svg className="troncon__saut" aria-hidden="true" width="40" height="32" viewBox="0 0 40 32" style={{ top: HAUT_TITRES - 16 }}>
@@ -37,8 +66,9 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
                 aria-expanded={ouverte}
                 onClick={() => onBasculer(idFiche)}
               >
-                {t.categorie.groupe && <span className="troncon__groupe">{t.categorie.groupe}</span>}
+                {t.categorie.groupe && !t.categorie.ere && <span className="troncon__groupe">{t.categorie.groupe}</span>}
                 <span className="troncon__nom">
+                  {COULEUR_PERIODE[t.categorie.id] && <span className="troncon__pastille" aria-hidden="true" />}
                   {t.categorie.nom}
                   <span className="troncon__info" aria-hidden="true">i</span>
                 </span>
@@ -50,12 +80,12 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
           );
         })}
 
-        <ol className="ligne__points" aria-label={`Événements de l'étage ${etage.nom}`} style={{ top: hautBandeau }}>
+        <ol className="ligne__points" aria-label={`Événements de l'étage ${etage.nom}`} style={{ top: haut }}>
           {ligne.troncons.flatMap((t) =>
             t.points.map(({ carte, x, rang }) => {
               const ouverte = carte.id === carteOuverte;
               return (
-                <li key={carte.id} className="ligne__item" style={{ left: x, top: HAUT_TITRES }}>
+                <li key={carte.id} className="ligne__item" style={{ left: x, top: HAUT_TITRES, '--i': Math.min(n++, 14) }}>
                   <button
                     type="button"
                     id={`point-${carte.id}`}
@@ -91,6 +121,19 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
     </div>
   );
 });
+
+// Les tronçons qui se suivent dans la même ère forment un seul bloc coloré.
+function blocsEres(ligne) {
+  const blocs = [];
+  ligne.troncons.forEach((t) => {
+    const ere = t.categorie.ere;
+    if (!ere) return;
+    const dernier = blocs[blocs.length - 1];
+    if (dernier && dernier.ere === ere) dernier.largeur = t.x + t.largeur - dernier.x;
+    else blocs.push({ ere, x: t.x, largeur: t.largeur });
+  });
+  return blocs;
+}
 
 // Le bandeau des grands groupes du vivant (étage Vie) : depuis quand chaque groupe existe.
 function Bandeau({ groupes, ligne, hauteur }) {

@@ -9,22 +9,12 @@ export default function Repere({ etage, position, fraction, onGlisser }) {
   const dateDansLoupe = loupe && position.ans !== null ? dateLoupe(position.ans, loupe.depuisAns) : null;
   const idCurseur = `loupe-${etage.id}`;
 
+  // Le curseur est collé sous la ligne ; juste en dessous, l'année-loupe (« si … tenait en un an »).
   return (
     <div className="loupe">
-      <div className="loupe__textes">
-        <label className="loupe__libelle" htmlFor={idCurseur}>
-          Voyager dans l'étage
-        </label>
-        <p className="loupe__position">
-          <span className="loupe__periode">{position.troncon.categorie.nom}</span>
-          <span className="loupe__date">{ilYA}</span>
-        </p>
-        {dateDansLoupe && (
-          <p className="loupe__annee">
-            {loupe.libelle.charAt(0).toUpperCase() + loupe.libelle.slice(1)} : <strong>{dateDansLoupe}</strong>
-          </p>
-        )}
-      </div>
+      <label className="sr-only" htmlFor={idCurseur}>
+        Voyager dans l'étage
+      </label>
       <input
         id={idCurseur}
         className="loupe__curseur"
@@ -36,6 +26,18 @@ export default function Repere({ etage, position, fraction, onGlisser }) {
         aria-valuetext={`${position.troncon.categorie.nom}, ${ilYA}`}
         onChange={(e) => onGlisser(Number(e.target.value) / 1000)}
       />
+      <div className="loupe__textes">
+        {dateDansLoupe && (
+          <p className="loupe__annee">
+            {loupe.libelle.charAt(0).toUpperCase() + loupe.libelle.slice(1)} : <strong>{dateDansLoupe}</strong>
+          </p>
+        )}
+        <p className="loupe__position">
+          <span className="loupe__periode">{position.troncon.categorie.nom}</span>
+          <span className="loupe__separateur" aria-hidden="true"> · </span>
+          <span className="loupe__date">{ilYA}</span>
+        </p>
+      </div>
     </div>
   );
 }

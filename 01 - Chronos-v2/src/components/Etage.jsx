@@ -5,14 +5,20 @@ import Carte from './Carte.jsx';
 import ChoixCategorie from './ChoixCategorie.jsx';
 import ArbreHumain from './ArbreHumain.jsx';
 import { GROUPES_VIVANT, RANGS_VIVANT } from '../data/vivant.js';
-import { construireLigne, lirePosition } from '../lib/echelle.js';
+import { construireLigne, lirePosition, themesDe } from '../lib/echelle.js';
 
 const mouvementReduit = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export default function Etage({ etage, numero, total, suivant, parId, carteOuverte, onBasculer, onFermer, onRefermer, onRepere, cible }) {
-  const ligne = useMemo(() => construireLigne(etage, parId), [etage, parId]);
+  // Un étage peut avoir plusieurs thèmes (Histoire, Aujourd'hui) : une seule ligne affichée à la fois.
+  const themes = useMemo(() => themesDe(etage), [etage]);
+  const [theme, setTheme] = useState(themes[0]);
+  const [sortie, setSortie] = useState(false); // la ligne actuelle s'efface
+  const themeDe = (idCategorie) => etage.categories.find((c) => c.id === idCategorie)?.theme || 'principal';
+  const ligne = useMemo(() => construireLigne(etage, parId, theme), [etage, parId, theme]);
   const conteneur = useRef(null);
+  const apresChangement = useRef(null); // ce qu'on fait une fois la nouvelle ligne affichée
   const attente = useRef(0);
   const [etat, setEtat] = useState({ fraction: 0, position: lirePosition(ligne, 0) });
 
@@ -53,33 +59,81 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
   const [especeChoisie, setEspeceChoisie] = useState(null);
   useEffect(() => {
     if (!cible || cible.etage !== etage.id) return;
-    const el = conteneur.current;
     if (cible.type === 'espece') {
       setEspeceChoisie(cible.id);
       return;
     }
-    if (!el) return;
-    let x = null;
     if (cible.type === 'carte') {
       const fiche = parId[cible.id];
-      const t = ligne.troncons.find((tr) => tr.categorie.id === fiche?.categorie);
-      const p = t?.points.find((pt) => pt.carte.id === cible.id);
+      if (fiche && themeDe(fiche.categorie) !== theme) {
+        changerTheme(themeDe(fiche.categorie), () => viser(cible));
+        return;
+      }
+    }
+    viser(cible);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cible]);
+
+  // Fait glisser la ligne jusqu'à la cible (carte ou position).
+  function viser(c) {
+    const el = conteneur.current;
+    if (!el) return;
+    let x = null;
+    if (c.type === 'carte') {
+      const fiche = parId[c.id];
+      const t = ligneRef.current.troncons.find((tr) => tr.categorie.id === fiche?.categorie);
+      const p = t?.points.find((pt) => pt.carte.id === c.id);
       x = p ? p.x : t ? t.x + 200 : null;
-    } else if (cible.type === 'x') {
-      x = cible.x(ligne);
+    } else if (c.type === 'x') {
+      x = c.x(ligneRef.current);
     }
     if (x !== null) {
       el.scrollTo({ left: Math.max(0, x - el.clientWidth / 2), behavior: mouvementReduit() ? 'auto' : 'smooth' });
     }
-  }, [cible, etage.id, ligne, parId]);
+  }
 
-  // Le menu déroulant emmène directement à la période choisie.
+  // Changer de thème : la ligne s'efface, puis la suivante apparaît.
+  const ligneRef = useRef(ligne);
+  ligneRef.current = ligne;
+  const minuterie = useRef(0);
+  function changerTheme(nouveau, ensuite) {
+    clearTimeout(minuterie.current);
+    if (nouveau === theme) {
+      ensuite?.();
+      return;
+    }
+    const basculer = () => {
+      apresChangement.current = ensuite || null;
+      setTheme(nouveau);
+      setSortie(false);
+    };
+    if (mouvementReduit()) basculer();
+    else {
+      setSortie(true);
+      minuterie.current = setTimeout(basculer, 320);
+    }
+  }
+  useEffect(() => () => clearTimeout(minuterie.current), []);
+
+  // Une fois la nouvelle ligne affichée, on va où on voulait aller.
+  useEffect(() => {
+    const suite = apresChangement.current;
+    apresChangement.current = null;
+    if (suite) requestAnimationFrame(suite);
+  }, [theme]);
+
+  // Le menu déroulant emmène directement à la période ou au thème choisi.
   const allerA = (idCategorie) => {
-    const t = ligne.troncons.find((x) => x.categorie.id === idCategorie);
-    const el = conteneur.current;
-    if (!t || !el) return;
     onRefermer();
-    el.scrollTo({ left: Math.max(0, t.x - 24), behavior: mouvementReduit() ? 'auto' : 'smooth' });
+    const glisserVers = (instantane) => {
+      const t = ligneRef.current.troncons.find((x) => x.categorie.id === idCategorie);
+      const el = conteneur.current;
+      if (!t || !el) return;
+      el.scrollTo({ left: Math.max(0, t.x - 24), behavior: instantane || mouvementReduit() ? 'auto' : 'smooth' });
+    };
+    const nouveau = themeDe(idCategorie);
+    if (nouveau !== theme) changerTheme(nouveau, () => glisserVers(true));
+    else glisserVers(false);
   };
 
   return (
@@ -101,6 +155,8 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
         </div>
 
         <Frise
+          key={theme}
+          classe={sortie ? 'ligne--sortie' : 'ligne--entree'}
           ref={conteneur}
           etage={etage}
           ligne={ligne}

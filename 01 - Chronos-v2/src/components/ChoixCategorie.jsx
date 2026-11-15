@@ -16,7 +16,7 @@ export default function ChoixCategorie({ etage, valeur, onChanger }) {
 
   return (
     <div className="choix">
-      <label className="choix__libelle" htmlFor={idChamp}>Aller à une période</label>
+      <label className="choix__libelle" htmlFor={idChamp}>{etage.libelleChoix || 'Aller à une période'}</label>
       <div className="choix__cadre">
         <select
           id={idChamp}

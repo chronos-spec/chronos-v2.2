@@ -2,11 +2,12 @@ import { ETAGES } from './etages.js';
 import { CARTES } from './cartes.js';
 import { EVENEMENTS } from './evenements.js';
 import { ARCHIVES } from './archives.js';
+import { AUJOURDHUI } from './aujourdhui.js';
 import { PERIODES } from './periodes.js';
 
 // Rassemble les fiches complètes (cartes.js), les événements légers (evenements.js)
 // et ceux repris de l'ancienne version (archives.js), et indique pour chacun son étage et sa catégorie.
-const SOURCES = new Map([...ARCHIVES, ...EVENEMENTS, ...CARTES].map((e) => [e.id, e]));
+const SOURCES = new Map([...ARCHIVES, ...AUJOURDHUI, ...EVENEMENTS, ...CARTES].map((e) => [e.id, e]));
 
 export const PAR_ID = {};
 ETAGES.forEach((etage) => {
