@@ -3,7 +3,7 @@
 ## 15 novembre 2026 (très tard) — Bestiaire et version téléphone
 
 **Ce qui a été fait**
-- **Bestiaire** (étage Vie) : 75 animaux emblématiques, de l’Ediacarien au Quaternaire (Dickinsonia, trilobites, Dunkleosteus, Meganeura, Dimetrodon, Stégosaure, Tyrannosaure, Titanoboa, Mégalodon, Mammouth…). En vignettes sous le nom de chaque période, une couleur par grand groupe ; chacun s’ouvre en courte fiche (groupe, taille, dates) et la recherche les trouve.
+- **Bestiaire** (étage Vie) : 73 animaux emblématiques, de l’Ediacarien au Quaternaire (Dickinsonia, trilobites, Dunkleosteus, Meganeura, Dimetrodon, Stégosaure, Tyrannosaure, Titanoboa, Mégalodon, Mammouth…). En vignettes sous le nom de chaque période, une couleur par grand groupe ; chacun s’ouvre en courte fiche (groupe, taille, dates) et la recherche les trouve.
 - **Version téléphone** (écran de moins de 700 px) : la ligne devient **verticale**, le temps descend avec le pouce, un événement par ligne. Un bandeau collé en haut suit la lecture (période, date, « si … tenait en un an »). Les ères ont leur bandeau de couleur. Étage Vie : pour chaque période, les groupes qui **apparaissent** ou **disparaissent**, puis ceux « déjà là ».
 - Les thèmes (Histoire, Aujourd’hui), la recherche et l’animation marchent aussi en vertical.
 
