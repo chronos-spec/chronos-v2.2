@@ -33,6 +33,9 @@
   --carte-bouton: #ECE8DE;
   --poignee: #D6D2C8;
 
+  /* Extinction : l'ambre est réservé aux espèces et groupes disparus */
+  --eteint: #F59E0B;
+
   /* Focus clavier */
   --focus: #FFFFFF;
   --focus-carte: #1E2130;

@@ -1,10 +1,15 @@
-export default function Entete({ etages, etageActif }) {
+import Recherche from './Recherche.jsx';
+
+export default function Entete({ etages, etageActif, index: indexRecherche, onAller }) {
   const index = etages.findIndex((e) => e.id === etageActif);
   const actuel = etages[index];
 
   return (
     <header className="entete">
-      <a className="entete__marque" href="#titre-accueil">Chronos</a>
+      <div className="entete__gauche">
+        <Recherche index={indexRecherche} onAller={onAller} />
+        <a className="entete__marque" href="#titre-accueil">Chronos</a>
+      </div>
 
       {/* Ordinateur : les 6 étages, pour sauter de l'un à l'autre */}
       <nav className="entete__nav" aria-label="Étages">

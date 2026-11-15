@@ -44,6 +44,18 @@ a { color: inherit; }
 }
 .lien-evitement:focus { top: 16px; }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- Le ciel ---------- */
 
 .ciel {
@@ -335,10 +347,46 @@ a { color: inherit; }
 }
 .troncon__titre {
   position: absolute;
-  top: 10px;
-  left: 24px;
+  top: 6px;
+  left: 16px;
+  max-width: calc(100% - 32px);
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.troncon__titre:hover,
+.troncon__titre--ouvert { border-color: rgba(var(--etage-rgb), 0.5); background: rgba(var(--etage-rgb), 0.10); }
+.troncon__groupe {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--etage);
+}
+.troncon__info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  vertical-align: 3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(var(--etage-rgb), 0.7);
+  color: var(--etage);
+  font-family: Fraunces, Georgia, serif;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1;
 }
 .troncon__nom {
   font-family: Fraunces, Georgia, serif;
@@ -348,7 +396,7 @@ a { color: inherit; }
 }
 .troncon__echelle { font-family: 'JetBrains Mono', monospace; color: var(--texte-doux); white-space: nowrap; }
 
-.ligne__points { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.ligne__points { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; pointer-events: none; }
 .ligne__item { position: absolute; width: 0; height: 0; }
 
 .point {
@@ -368,9 +416,17 @@ a { color: inherit; }
   text-align: center;
   cursor: pointer;
   border-radius: 16px;
+  /* Seuls le rond et l'étiquette réagissent au doigt : la zone vide du bouton
+     ne doit pas cacher le point voisin (c'était le bug du clic sur téléphone). */
+  pointer-events: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+.point__repere,
+.point__textes { pointer-events: auto; }
 .point__repere {
   position: relative;
+  z-index: 3;
   flex: none;
   width: 44px;
   height: 44px;
@@ -641,6 +697,7 @@ a { color: inherit; }
   }
 
   .etage { padding: 104px 104px 56px 64px; }
+  .arbre { padding: 22px 24px 18px; }
   .loupe__position { flex-direction: row; flex-wrap: wrap; gap: 0 12px; }
   .etage__principal { gap: 28px; }
 
@@ -683,3 +740,242 @@ a { color: inherit; }
   .carte__titre { font-size: 36px; }
   .carte__image { min-height: 180px; }
 }
+
+/* ---------- La loupe de recherche (en haut à gauche) ---------- */
+
+.entete__gauche { display: flex; align-items: center; gap: 10px; }
+.loupe-recherche {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22px;
+  border: 1px solid var(--verre-bord);
+  background: var(--verre);
+  color: var(--texte);
+  cursor: pointer;
+}
+.loupe-recherche:hover { border-color: rgba(var(--etage-rgb), 0.7); color: var(--etage); }
+
+.recherche {
+  width: min(640px, calc(100vw - 24px));
+  max-height: calc(100svh - 48px);
+  margin: 24px auto auto;
+  padding: 0;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  border-radius: 24px;
+  background: var(--ciel-milieu);
+  color: var(--texte);
+  box-shadow: 0 24px 80px var(--ombre-profonde), 0 0 40px rgba(var(--etage-rgb), 0.2);
+}
+.recherche::backdrop { background: rgba(3, 4, 12, 0.7); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.recherche__boite { display: flex; flex-direction: column; max-height: calc(100svh - 50px); }
+.recherche__haut { display: flex; gap: 10px; align-items: center; padding: 14px; border-bottom: 1px solid var(--verre-bord); }
+.recherche__champ {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  background: rgba(var(--etage-rgb), 0.08);
+  color: var(--etage);
+}
+.recherche__champ:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.recherche__champ input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  font-size: 18px;
+  outline: none;
+}
+.recherche__champ input::placeholder { color: var(--texte-doux); }
+.recherche__fermer {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte-doux);
+  font: inherit;
+  cursor: pointer;
+}
+.recherche__fermer:hover { color: var(--texte); }
+.recherche__vide { margin: 0; padding: 18px 20px; color: var(--texte-doux); }
+.recherche__liste { list-style: none; margin: 0; padding: 8px; overflow-y: auto; }
+.resultat {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.resultat:hover,
+.resultat:focus-visible { background: rgba(var(--etage-rgb), 0.12); border-color: rgba(var(--etage-rgb), 0.4); }
+.resultat__type { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--etage); }
+.resultat__titre { font-weight: 600; }
+.resultat__details { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--texte-doux); }
+
+/* ---------- Le bandeau des grands groupes du vivant (étage Vie) ---------- */
+
+.vivant { position: absolute; left: 0; right: 0; top: 0; }
+.vivant__titre {
+  position: sticky;
+  left: 16px;
+  display: inline-block;
+  margin: 0 0 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+.vivant__liste { list-style: none; margin: 0; padding: 0; }
+.vivant__groupe {
+  position: absolute;
+  height: 15px;
+  display: flex;
+  align-items: center;
+}
+.vivant__barre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--etage), rgba(var(--etage-rgb), 0.35));
+}
+.vivant__groupe::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--etage);
+}
+.vivant__groupe--eteint .vivant__barre { background: linear-gradient(90deg, var(--etage), var(--eteint)); }
+.vivant__groupe--eteint::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--eteint);
+  box-shadow: 0 0 0 2px var(--ciel-milieu), 0 0 0 3.5px var(--eteint);
+}
+.vivant__nom {
+  position: sticky;
+  left: 8px;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--fond-etiquette);
+  font-size: 13px;
+  line-height: 15px;
+  color: var(--texte);
+  white-space: nowrap;
+}
+
+/* ---------- L'arbre des espèces humaines (étage Humains) ---------- */
+
+.arbre {
+  padding: 16px 14px 14px;
+  border-radius: 24px;
+  background: rgba(var(--etage-rgb), 0.06);
+  border: 1px solid rgba(var(--etage-rgb), 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-margin-top: 88px;
+}
+.arbre__titre { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px; }
+.arbre__aide { margin: 4px 0 0; color: var(--texte-doux); }
+.arbre__defilement {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--etage-rgb), 0.5) transparent;
+}
+.arbre__plan { position: relative; }
+.arbre__traits { position: absolute; inset: 0; overflow: visible; }
+.arbre__grille { stroke: var(--verre-bord); stroke-width: 1; }
+.arbre__graduation { fill: var(--texte-doux); font-family: 'JetBrains Mono', monospace; font-size: 13px; text-anchor: middle; }
+.arbre__graduation--fin { fill: var(--etage); }
+.arbre__lien { fill: none; stroke: rgba(var(--etage-rgb), 0.8); stroke-width: 1.5; }
+.arbre__lien--incertain { stroke-dasharray: 3 4; stroke: rgba(var(--etage-rgb), 0.6); }
+.arbre__barre { stroke: var(--etage); stroke-width: 5; stroke-linecap: round; }
+.arbre__espece--choisie .arbre__barre { stroke: var(--etoile); filter: drop-shadow(0 0 6px rgba(var(--etage-rgb), 0.9)); }
+.arbre__fleche { fill: none; stroke: var(--etage); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.arbre__fin { fill: var(--ciel-milieu); stroke: var(--eteint); stroke-width: 2; }
+.arbre__fin--halo { fill: none; stroke-width: 1.2; }
+.arbre__liste { list-style: none; margin: 0; padding: 0; }
+.arbre__liste li { position: absolute; }
+.espece {
+  min-height: 28px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--fond-etiquette);
+  color: var(--texte);
+  font: inherit;
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.espece__nom { font-family: Fraunces, Georgia, serif; font-style: italic; font-weight: 600; }
+.espece:hover { border-color: rgba(var(--etage-rgb), 0.6); }
+.espece--choisie { border-color: var(--etage); background: rgba(var(--etage-rgb), 0.22); }
+.arbre__fiche {
+  min-height: 96px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: var(--verre);
+  border: 1px solid var(--verre-bord);
+}
+.arbre__fiche p { margin: 0; }
+.arbre__fiche-titre strong { font-family: Fraunces, Georgia, serif; font-size: 22px; font-style: italic; }
+.arbre__fiche-dates { font-family: 'JetBrains Mono', monospace; color: var(--etage); }
+.arbre__fiche-texte { margin-top: 6px !important; }
+.arbre__fiche-parent { margin-top: 6px !important; color: var(--texte-doux); }
+.arbre__fiche-vide { color: var(--texte-doux); }
+.arbre__lien-bouton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--etage);
+  font: inherit;
+  font-style: italic;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.arbre__source { margin: 0; color: var(--texte-doux); font-size: 15px; }
+
+/* ---------- La fiche d'une période ---------- */
+
+.carte__sous-titre { margin: 4px 0 0; font-weight: 600; color: var(--etage-fonce); }
+.carte__points { margin: 0; padding-left: 22px; }
+.carte__points li + li { margin-top: 2px; }

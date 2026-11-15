@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ETAGES, PAR_ID } from './data/index.js';
 import Ciel from './components/Ciel.jsx';
 import Entete from './components/Entete.jsx';
 import Etage from './components/Etage.jsx';
 import AnneeCosmique from './components/AnneeCosmique.jsx';
+import { construireIndex } from './lib/recherche.js';
 
 export default function App() {
   const [etageActif, setEtageActif] = useState(null); // null = écran d'accueil
@@ -28,11 +29,37 @@ export default function App() {
   }, []);
 
   // Si on change d'étage, la carte d'un autre étage se ferme.
+  // (Sauf pendant un saut demandé par la recherche : on traverse alors d'autres étages.)
+  const etageVise = useRef(null);
   useEffect(() => {
-    if (!carteOuverte) return;
-    const carte = PAR_ID[carteOuverte];
-    if (carte && carte.etage !== etageActif) setCarteOuverte(null);
-  }, [etageActif, carteOuverte]);
+    if (etageVise.current) {
+      if (etageVise.current === etageActif) etageVise.current = null;
+      return;
+    }
+    setCarteOuverte((id) => (id && PAR_ID[id] && PAR_ID[id].etage !== etageActif ? null : id));
+  }, [etageActif]);
+
+  // La recherche : on va à l'étage, on fait glisser sa ligne, on ouvre la carte.
+  const index = useMemo(() => construireIndex(ETAGES, PAR_ID), []);
+  const [cible, setCible] = useState(null);
+  const etageActifRef = useRef(etageActif);
+  etageActifRef.current = etageActif;
+  const aller = useCallback((r) => {
+    if (r.etage !== etageActifRef.current) etageVise.current = r.etage;
+    const section = document.getElementById(r.etage);
+    const doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (r.type === 'Espèce humaine') {
+      document.getElementById('arbre-humain')?.scrollIntoView({ behavior: doux ? 'smooth' : 'auto', block: 'start' });
+    } else {
+      section?.scrollIntoView({ behavior: doux ? 'smooth' : 'auto', block: 'start' });
+    }
+    setCarteOuverte(r.carte || null);
+    setCible({ ...r.cible, etage: r.etage, n: Date.now() });
+    // Une carte ouverte reçoit le focus d'elle-même ; sinon on le pose sur le titre de l'étage.
+    if (!r.carte && r.type !== 'Espèce humaine') {
+      setTimeout(() => document.getElementById(`titre-${r.etage}`)?.focus({ preventScroll: true }), 50);
+    }
+  }, []);
 
   const fermer = useCallback(() => {
     setCarteOuverte((id) => {
@@ -71,7 +98,7 @@ export default function App() {
     <div className="app" data-etage={etageActif || 'univers'}>
       <a className="lien-evitement" href="#univers">Aller à la frise</a>
       <Ciel />
-      <Entete etages={ETAGES} etageActif={etageActif} />
+      <Entete etages={ETAGES} etageActif={etageActif} index={index} onAller={aller} />
 
       <main>
         <section className="accueil" data-section="accueil" aria-labelledby="titre-accueil">
@@ -98,6 +125,7 @@ export default function App() {
             onFermer={fermer}
             onRefermer={refermer}
             onRepere={noterRepere}
+            cible={cible}
           />
         ))}
       </main>

@@ -1,5 +1,25 @@
 # Journal de Chronos
 
+## 15 novembre 2026 (nuit) — Recherche, vivant et arbre humain
+
+**Ce qui a été fait**
+- Le curseur de la loupe passe **sous** la ligne des événements.
+- Téléphone : le toucher ouvre enfin le bon événement. Le bouton d'un point cachait son voisin ; seuls le rond et l'étiquette réagissent au doigt, et deux points gardent au moins 48 px d'écart.
+- Une **loupe de recherche** en haut à gauche : événements, périodes, groupes du vivant, espèces humaines, étages. Sans accents ni majuscules, au clavier comme au doigt.
+- **Toutes les périodes de l'ancienne version** sont là (Cosmique → Univers, Hadéen, Archéen, Protérozoïque, Cambrien à Quaternaire, Préhistoire → Humains, Néolithique, Antiquité → 1945). Chaque nom de période s'ouvre en fiche (« À retenir »).
+- **65 événements repris** de l'archive « chronos-final » (titre, date, court résumé). Les doublons des cartes existantes n'ont pas été recopiés. Plusieurs dates fausses de l'ancienne version ont été corrigées (marquées « corrigé » dans `src/data/archives.js`).
+- Étage Vie : un bandeau discret **des grands groupes du vivant** au-dessus de la ligne, à l'échelle.
+- Étage Humains : **l'arbre des espèces humaines** (18 espèces, de Toumaï à nous), parenté probable ou incertaine, métissages connus grâce à l'ADN.
+
+**Décisions prises**
+- Les périodes de Vie et de Terre sont à l'échelle de **toute** la période (bornes officielles), plus seulement de leurs événements.
+- L'ambre (`--eteint`) marque les groupes et espèces disparus, comme prévu.
+- L'arbre humain a sa propre échelle, resserrée vers le présent (sinon les 300 000 dernières années tiendraient dans un trait).
+
+**Questions ouvertes**
+- Rédiger les fiches complètes (image, source) des événements repris.
+- Faire relire les dates corrigées et l'arbre humain.
+
 ## 15 novembre 2026 (soir) — La ligne à l'échelle
 
 **Ce qui a été fait**

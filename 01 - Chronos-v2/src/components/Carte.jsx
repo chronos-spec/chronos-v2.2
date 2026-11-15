@@ -6,6 +6,7 @@ const ETIQUETTES = { bible: 'Selon la Bible', histoire: 'Fait historique' };
 export default function Carte({ carte, etage, onFermer }) {
   const titreRef = useRef(null);
   const complete = Boolean(carte.texte);
+  const periode = carte.type === 'periode';
   const cosmique = carte.cosmique || dateCosmique(carte.ans);
 
   // À l'ouverture, le focus va sur le titre : le lecteur d'écran lit la carte.
@@ -18,7 +19,7 @@ export default function Carte({ carte, etage, onFermer }) {
       <span className="carte__poignee" aria-hidden="true" />
       <div className="carte__haut">
         <div>
-          <p className="carte__etage">{etage.nom}</p>
+          <p className="carte__etage">{periode ? `${etage.nom} · Période` : etage.nom}</p>
           <h3 id={`titre-carte-${carte.id}`} className="carte__titre" tabIndex={-1} ref={titreRef}>
             {carte.titre}
           </h3>
@@ -43,8 +44,23 @@ export default function Carte({ carte, etage, onFermer }) {
           </div>
           <p className="carte__texte">{carte.texte}</p>
         </>
+      ) : periode ? (
+        <>
+          {carte.resume && <p className="carte__texte">{sansDates(carte.resume)}</p>}
+          {carte.points.length > 0 && (
+            <>
+              <p className="carte__sous-titre">À retenir</p>
+              <ul className="carte__points">
+                {carte.points.map((p) => <li key={p}>{p}</li>)}
+              </ul>
+            </>
+          )}
+        </>
       ) : (
-        <p className="carte__a-venir">La fiche complète (texte, image et source) arrive bientôt.</p>
+        <>
+          {carte.resume && <p className="carte__texte">{carte.resume}</p>}
+          <p className="carte__a-venir">La fiche complète (image et source) arrive bientôt.</p>
+        </>
       )}
 
       {cosmique && (
@@ -65,4 +81,10 @@ export default function Carte({ carte, etage, onFermer }) {
       )}
     </section>
   );
+}
+
+// La date de la période est déjà affichée : on l'enlève du début du résumé.
+function sansDates(texte) {
+  const t = texte.replace(/^(De|Depuis) [^:]{1,60} : /, '');
+  return t.charAt(0).toUpperCase() + t.slice(1);
 }

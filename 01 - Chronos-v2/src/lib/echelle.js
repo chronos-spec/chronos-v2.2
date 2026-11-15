@@ -11,6 +11,7 @@ export const MESURES = {
   saut: 120,           // espace entre deux tronçons (px)
   etiquette: 176,      // largeur d'une étiquette d'événement (px)
   rang: 132,           // hauteur d’un rang d’étiquettes (px)
+  ecartMin: 48,        // écart minimal entre deux points, pour le doigt (px)
 };
 
 export function construireLigne(etage, parId) {
@@ -20,7 +21,7 @@ export function construireLigne(etage, parId) {
     if (i > 0) x += m.saut;
     const evenements = cat.evenements.map((id) => parId[id]);
     const dates = evenements.map((e) => e.ans).filter((a) => a !== null && a !== undefined);
-    const sansEchelle = dates.length < evenements.length;
+    const sansEchelle = dates.length < evenements.length || (dates.length === 0 && cat.debut === undefined);
     const largeur = Math.max(m.tronconMin, evenements.length * m.parEvenement);
     const utile = largeur - 2 * m.marge;
 
@@ -35,11 +36,22 @@ export function construireLigne(etage, parId) {
         x: x + m.marge + (evenements.length === 1 ? utile / 2 : (k * utile) / (evenements.length - 1)),
       }));
     } else {
-      debutAns = Math.max(...dates);
-      finAns = Math.min(...dates);
+      // Bornes de la période si on les connaît, sinon celles de ses événements.
+      debutAns = cat.debut ?? Math.max(...dates);
+      finAns = cat.fin ?? Math.min(...dates);
       const duree = debutAns - finAns || 1;
       pxParAn = utile / duree;
-      points = evenements.map((e) => ({ carte: e, x: x + m.marge + (debutAns - e.ans) * pxParAn }));
+      points = evenements.map((e) => {
+        const ans = Math.min(debutAns, Math.max(finAns, e.ans));
+        return { carte: e, x: x + m.marge + (debutAns - ans) * pxParAn };
+      });
+    }
+
+    // Deux points presque au même endroit seraient impossibles à toucher du doigt :
+    // on garde au moins `ecartMin` pixels entre eux (léger décalage, l'ordre reste juste).
+    points.sort((a, b) => a.x - b.x);
+    for (let k = 1; k < points.length; k++) {
+      if (points[k].x - points[k - 1].x < m.ecartMin) points[k].x = points[k - 1].x + m.ecartMin;
     }
 
     // Les étiquettes trop proches s'empilent sur des rangs différents.
@@ -76,8 +88,22 @@ export function construireLigne(etage, parId) {
   return {
     troncons,
     largeur: x,
-    rangs: Math.max(...troncons.map((t) => t.rangs)),
+    rangs: Math.max(1, ...troncons.map((t) => t.rangs)),
   };
+}
+
+// Où se trouve une date sur la ligne ? (pour le bandeau du vivant)
+// Avant le premier tronçon : 0 ; après le dernier : la fin de la ligne.
+export function xPourAns(ligne, ans) {
+  const m = MESURES;
+  const aEchelle = ligne.troncons.filter((t) => !t.sansEchelle);
+  if (aEchelle.length === 0) return 0;
+  if (ans >= aEchelle[0].debutAns) return aEchelle[0].x + (ans === aEchelle[0].debutAns ? m.marge : 0);
+  for (const t of aEchelle) {
+    if (ans <= t.debutAns && ans >= t.finAns) return t.x + m.marge + (t.debutAns - ans) * t.pxParAn;
+    if (ans > t.debutAns) return t.x; // dans le saut entre deux tronçons
+  }
+  return ligne.largeur;
 }
 
 // Quelle date se trouve à la position x de la ligne ?
