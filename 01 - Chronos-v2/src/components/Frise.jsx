@@ -1,10 +1,12 @@
 import { forwardRef } from 'react';
 import { MESURES, xPourAns } from '../lib/echelle.js';
-import { idPeriode } from '../data/index.js';
+import { idPeriode, idAnimal } from '../data/index.js';
+import { BESTIAIRE } from '../data/bestiaire.js';
 import { ERES, COULEUR_PERIODE } from '../data/eres.js';
 
 // La ligne du temps d'un étage : plus large que l'écran, on la fait glisser de côté.
-const HAUT_TITRES = 96; // place au-dessus de la ligne pour le nom des périodes
+const TITRES = 96; // place au-dessus de la ligne pour le nom des périodes
+const BESTIAIRE_H = 80; // place en plus pour les vignettes du bestiaire
 const RANG_VIVANT = 15; // hauteur d'une ligne du bandeau du vivant
 const TETE_VIVANT = 28; // titre du bandeau
 const HAUT_ERES = 44; // bande des grandes ères (Paléozoïque, Mésozoïque…)
@@ -12,6 +14,7 @@ const HAUT_ERES = 44; // bande des grandes ères (Paléozoïque, Mésozoïque…
 const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer, onDefiler, groupes, rangsGroupes, classe }, ref) {
   const hautBandeau = groupes ? TETE_VIVANT + rangsGroupes * RANG_VIVANT + 16 : 0;
   const eres = blocsEres(ligne);
+  const HAUT_TITRES = TITRES + (ligne.troncons.some((t) => BESTIAIRE[t.categorie.id]) ? BESTIAIRE_H : 0);
   const hautEres = eres.length ? HAUT_ERES : 0;
   const haut = hautBandeau + hautEres; // où commencent les tronçons
   // Sous la ligne : le rond, puis au plus deux rangs d'étiquettes.
@@ -76,6 +79,7 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
                   {t.sansEchelle ? 'récit, sans échelle de temps' : t.categorie.periode || 'à l’échelle'}
                 </span>
               </button>
+              <Bestiaire categorie={t.categorie} carteOuverte={carteOuverte} onBasculer={onBasculer} />
             </div>
           );
         })}
@@ -121,6 +125,35 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
     </div>
   );
 });
+
+// Les animaux emblématiques de la période, en petites vignettes.
+export function Bestiaire({ categorie, carteOuverte, onBasculer }) {
+  const animaux = BESTIAIRE[categorie.id];
+  if (!animaux) return null;
+  return (
+    <ul className="bestiaire" aria-label={`Animaux du ${categorie.nom}`}>
+      {animaux.map((a) => {
+        const id = idAnimal(a.id);
+        const ouvert = carteOuverte === id;
+        return (
+          <li key={a.id}>
+            <button
+              type="button"
+              id={`point-${id}`}
+              className={ouvert ? 'animal animal--ouvert' : 'animal'}
+              data-groupe={a.groupe}
+              aria-expanded={ouvert}
+              onClick={() => onBasculer(id)}
+            >
+              <span className="animal__pastille" aria-hidden="true" />
+              {a.nom}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 // Les tronçons qui se suivent dans la même ère forment un seul bloc coloré.
 function blocsEres(ligne) {

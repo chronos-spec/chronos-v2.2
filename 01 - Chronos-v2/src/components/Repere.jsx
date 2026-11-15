@@ -41,3 +41,24 @@ export default function Repere({ etage, position, fraction, onGlisser }) {
     </div>
   );
 }
+
+// Téléphone : un petit bandeau collé en haut de l'étage, qui suit le défilement de la page.
+export function RepereVertical({ etage, position }) {
+  const loupe = etage.loupe;
+  const ilYA = texteIlYA(position.ans);
+  const dateDansLoupe = loupe && position.ans !== null ? dateLoupe(position.ans, loupe.depuisAns) : null;
+  return (
+    <div className="reperev" aria-live="off">
+      <p className="reperev__ligne">
+        <span className="loupe__periode">{position.troncon.categorie.nom}</span>
+        <span aria-hidden="true"> · </span>
+        <span className="loupe__date">{ilYA}</span>
+      </p>
+      {dateDansLoupe && (
+        <p className="reperev__annee">
+          {loupe.libelle.charAt(0).toUpperCase() + loupe.libelle.slice(1)} : <strong>{dateDansLoupe}</strong>
+        </p>
+      )}
+    </div>
+  );
+}

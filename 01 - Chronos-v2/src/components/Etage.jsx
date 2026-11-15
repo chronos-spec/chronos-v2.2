@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Repere from './Repere.jsx';
+import Repere, { RepereVertical } from './Repere.jsx';
+import FriseVerticale from './FriseVerticale.jsx';
+import { useEstMobile } from '../lib/mobile.js';
 import Frise from './Frise.jsx';
 import Carte from './Carte.jsx';
 import ChoixCategorie from './ChoixCategorie.jsx';
@@ -23,6 +25,47 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
   const [etat, setEtat] = useState({ fraction: 0, position: lirePosition(ligne, 0) });
 
   const ouverte = carteOuverte && parId[carteOuverte]?.etage === etage.id ? parId[carteOuverte] : null;
+
+  const mobile = useEstMobile();
+  const section = useRef(null);
+
+  // Téléphone : la page défile verticalement ; on lit la période et la date à hauteur d'œil.
+  useEffect(() => {
+    if (!mobile) return undefined;
+    let attenteV = 0;
+    const lire = () => {
+      cancelAnimationFrame(attenteV);
+      attenteV = requestAnimationFrame(() => {
+        const sec = section.current;
+        if (!sec) return;
+        const r = sec.getBoundingClientRect();
+        const oeil = window.innerHeight * 0.45;
+        if (r.bottom < 0 || r.top > window.innerHeight) return;
+        let idx = 0;
+        sec.querySelectorAll('.lignev__troncon').forEach((el) => {
+          if (el.getBoundingClientRect().top < oeil) idx = Number(el.dataset.troncon);
+        });
+        const t = ligneRef.current.troncons[idx];
+        if (!t) return;
+        let ans = t.sansEchelle ? null : t.debutAns;
+        const bloc = sec.querySelector(`.lignev__troncon[data-troncon="${idx}"]`);
+        bloc?.querySelectorAll('.lignev__item').forEach((li) => {
+          if (li.getBoundingClientRect().top < oeil && li.dataset.ans !== '') ans = Number(li.dataset.ans);
+        });
+        setEtat((avant) =>
+          avant.position.troncon === t && avant.position.ans === ans ? avant : { fraction: 0, position: { troncon: t, ans } }
+        );
+      });
+    };
+    lire();
+    window.addEventListener('scroll', lire, { passive: true });
+    window.addEventListener('resize', lire);
+    return () => {
+      cancelAnimationFrame(attenteV);
+      window.removeEventListener('scroll', lire);
+      window.removeEventListener('resize', lire);
+    };
+  }, [mobile, theme]);
 
   // Quand la ligne défile, on met à jour la loupe et la période affichée.
   const mesurer = useCallback(() => {
@@ -76,6 +119,10 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
 
   // Fait glisser la ligne jusqu'à la cible (carte ou position).
   function viser(c) {
+    if (mobileRef.current) {
+      viserVertical(c);
+      return;
+    }
     const el = conteneur.current;
     if (!el) return;
     let x = null;
@@ -89,6 +136,27 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
     }
     if (x !== null) {
       el.scrollTo({ left: Math.max(0, x - el.clientWidth / 2), behavior: mouvementReduit() ? 'auto' : 'smooth' });
+    }
+  }
+
+  // Téléphone : on fait défiler la page jusqu'à l'élément visé.
+  const mobileRef = useRef(mobile);
+  mobileRef.current = mobile;
+  function defilerVers(el, bloc = 'center') {
+    el?.scrollIntoView({ block: bloc, behavior: mouvementReduit() ? 'auto' : 'smooth' });
+  }
+  function trancheDe(ans) {
+    const t = ligneRef.current.troncons.find((tr) => !tr.sansEchelle && ans <= tr.debutAns && ans >= tr.finAns);
+    return t ? document.getElementById(`troncon-${etage.id}-${t.categorie.id}`) : null;
+  }
+  function viserVertical(c) {
+    if (c.type === 'carte') {
+      const fiche = parId[c.id];
+      const el = document.getElementById(`point-${c.id}`);
+      if (el) defilerVers(el);
+      else defilerVers(document.getElementById(`troncon-${etage.id}-${fiche?.categorie}`), 'start');
+    } else if (c.ans !== undefined) {
+      defilerVers(trancheDe(c.ans), 'start');
     }
   }
 
@@ -126,6 +194,10 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
   const allerA = (idCategorie) => {
     onRefermer();
     const glisserVers = (instantane) => {
+      if (mobileRef.current) {
+        defilerVers(document.getElementById(`troncon-${etage.id}-${idCategorie}`), 'start');
+        return;
+      }
       const t = ligneRef.current.troncons.find((x) => x.categorie.id === idCategorie);
       const el = conteneur.current;
       if (!t || !el) return;
@@ -138,6 +210,7 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
 
   return (
     <section
+      ref={section}
       id={etage.id}
       className={ouverte ? 'etage etage--carte' : 'etage'}
       data-etage={etage.id}
@@ -154,24 +227,42 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
           <ChoixCategorie etage={etage} valeur={etat.position.troncon.categorie.id} onChanger={allerA} />
         </div>
 
-        <Frise
-          key={theme}
-          classe={sortie ? 'ligne--sortie' : 'ligne--entree'}
-          ref={conteneur}
-          etage={etage}
-          ligne={ligne}
-          carteOuverte={carteOuverte}
-          onBasculer={onBasculer}
-          onDefiler={mesurer}
-          groupes={etage.id === 'vie' ? GROUPES_VIVANT : null}
-          rangsGroupes={RANGS_VIVANT}
-        />
+        {mobile ? (
+          <>
+            <RepereVertical etage={etage} position={etat.position} />
+            <FriseVerticale
+              key={theme}
+              classe={sortie ? 'ligne--sortie' : 'ligne--entree'}
+              etage={etage}
+              ligne={ligne}
+              carteOuverte={carteOuverte}
+              onBasculer={onBasculer}
+              groupes={etage.id === 'vie' ? GROUPES_VIVANT : null}
+            />
+          </>
+        ) : (
+          <>
+            <Frise
+              key={theme}
+              classe={sortie ? 'ligne--sortie' : 'ligne--entree'}
+              ref={conteneur}
+              etage={etage}
+              ligne={ligne}
+              carteOuverte={carteOuverte}
+              onBasculer={onBasculer}
+              onDefiler={mesurer}
+              groupes={etage.id === 'vie' ? GROUPES_VIVANT : null}
+              rangsGroupes={RANGS_VIVANT}
+            />
 
-        <Repere etage={etage} position={etat.position} fraction={etat.fraction} onGlisser={glisser} />
+            <Repere etage={etage} position={etat.position} fraction={etat.fraction} onGlisser={glisser} />
+          </>
+        )}
 
         <p className="etage__aide">
-          Faites glisser la ligne ou le curseur. Touchez un point pour ouvrir sa carte,
-          ou le nom d’une période pour la découvrir.
+          {mobile
+            ? 'Touchez un événement pour ouvrir sa carte, ou le nom d’une période pour la découvrir.'
+            : 'Faites glisser la ligne ou le curseur. Touchez un point pour ouvrir sa carte, ou le nom d’une période pour la découvrir.'}
         </p>
 
         {etage.id === 'humains' && <ArbreHumain choisie={especeChoisie} onChoisir={setEspeceChoisie} />}

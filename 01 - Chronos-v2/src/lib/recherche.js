@@ -2,7 +2,7 @@
 import { GROUPES_VIVANT } from '../data/vivant.js';
 import { ESPECES } from '../data/especes.js';
 import { xPourAns } from './echelle.js';
-import { texteAge } from '../components/ArbreHumain.jsx';
+import { texteAge } from './ages.js';
 
 export function construireIndex(etages, parId) {
   const nomEtage = Object.fromEntries(etages.map((e) => [e.id, e.nom]));
@@ -24,6 +24,12 @@ export function construireIndex(etages, parId) {
         motsCles: `${f.autresNoms.join(' ')} ${f.resume || ''} ${f.points.join(' ')}`,
         carte: f.id, cible: { type: 'carte', id: f.id },
       });
+    } else if (f.type === 'animal') {
+      ajouter({
+        cle: f.id, type: 'Animal', etage: f.etage, titre: f.titre,
+        details: `${f.groupeNom} · ${f.dateCourte}`, motsCles: `${f.resume} ${f.nomPeriode}`,
+        carte: f.id, cible: { type: 'carte', id: f.id },
+      });
     } else {
       ajouter({
         cle: f.id, type: 'Événement', etage: f.etage, titre: f.titre,
@@ -37,7 +43,7 @@ export function construireIndex(etages, parId) {
     ajouter({
       cle: g.id, type: 'Groupe du vivant', etage: 'vie', titre: g.nom,
       details: g.jusqua ? `de ${texteAge(g.depuis)} à ${texteAge(g.jusqua)}` : `depuis ${texteAge(g.depuis)}`,
-      motsCles: '', cible: { type: 'x', x: (ligne) => xPourAns(ligne, g.depuis) },
+      motsCles: '', cible: { type: 'x', ans: g.depuis, x: (ligne) => xPourAns(ligne, g.depuis) },
     });
   });
 

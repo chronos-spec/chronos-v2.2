@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ESPECES, METISSAGES } from '../data/especes.js';
+import { texteAge } from '../lib/ages.js';
 
 // L'arbre généalogique des espèces humaines.
 // Le temps va de gauche (7 millions d'années) à droite (aujourd'hui).
@@ -28,12 +29,6 @@ const GRADUATIONS = [
   [5e5, '500 000'], [2e5, '200 000'], [5e4, '50 000'],
 ];
 
-export function texteAge(ans) {
-  if (!ans) return 'aujourd’hui';
-  if (ans >= 1e9) return `${(ans / 1e9).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} milliard${ans >= 2e9 ? 's' : ''} d’années`;
-  if (ans >= 1e6) return `${(ans / 1e6).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} million${ans >= 2e6 ? 's' : ''} d’années`;
-  return `${Math.round(ans).toLocaleString('fr-FR')} ans`;
-}
 
 export default function ArbreHumain({ choisie, onChoisir }) {
   // L'arbre prend toute la largeur disponible (au moins 640 px : sinon on le fait glisser).

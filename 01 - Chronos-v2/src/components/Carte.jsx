@@ -19,7 +19,7 @@ export default function Carte({ carte, etage, onFermer }) {
       <span className="carte__poignee" aria-hidden="true" />
       <div className="carte__haut">
         <div>
-          <p className="carte__etage">{periode ? `${etage.nom} · Période` : etage.nom}</p>
+          <p className="carte__etage">{periode ? `${etage.nom} · Période` : carte.type === 'animal' ? `${etage.nom} · Bestiaire` : etage.nom}</p>
           <h3 id={`titre-carte-${carte.id}`} className="carte__titre" tabIndex={-1} ref={titreRef}>
             {carte.titre}
           </h3>
@@ -43,6 +43,16 @@ export default function Carte({ carte, etage, onFermer }) {
             {carte.image.type === 'photo' ? 'Photo' : 'Illustration'} · {carte.image.description}
           </div>
           <p className="carte__texte">{carte.texte}</p>
+        </>
+      ) : carte.type === 'animal' ? (
+        <>
+          <p className="carte__texte">{carte.resume}</p>
+          <dl className="carte__fiche">
+            <div><dt>Groupe</dt><dd>{carte.groupeNom}</dd></div>
+            <div><dt>Taille</dt><dd>{carte.taille}</dd></div>
+            <div><dt>Période</dt><dd>{carte.nomPeriode}</dd></div>
+          </dl>
+          <p className="carte__a-venir">Dates et tailles arrondies, d’après les fossiles connus. Image à venir.</p>
         </>
       ) : periode ? (
         <>
