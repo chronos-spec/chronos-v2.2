@@ -7,7 +7,7 @@
 - Téléphone : le toucher ouvre enfin le bon événement. Le bouton d'un point cachait son voisin ; seuls le rond et l'étiquette réagissent au doigt, et deux points gardent au moins 48 px d'écart.
 - Une **loupe de recherche** en haut à gauche : événements, périodes, groupes du vivant, espèces humaines, étages. Sans accents ni majuscules, au clavier comme au doigt.
 - **Toutes les périodes de l'ancienne version** sont là (Cosmique → Univers, Hadéen, Archéen, Protérozoïque, Cambrien à Quaternaire, Préhistoire → Humains, Néolithique, Antiquité → 1945). Chaque nom de période s'ouvre en fiche (« À retenir »).
-- **65 événements repris** de l'archive « chronos-final » (titre, date, court résumé). Les doublons des cartes existantes n'ont pas été recopiés. Plusieurs dates fausses de l'ancienne version ont été corrigées (marquées « corrigé » dans `src/data/archives.js`).
+- **66 événements repris** de l'archive « chronos-final » (titre, date, court résumé). Les doublons des cartes existantes n'ont pas été recopiés. Plusieurs dates fausses de l'ancienne version ont été corrigées (marquées « corrigé » dans `src/data/archives.js`).
 - Étage Vie : un bandeau discret **des grands groupes du vivant** au-dessus de la ligne, à l'échelle.
 - Étage Humains : **l'arbre des espèces humaines** (18 espèces, de Toumaï à nous), parenté probable ou incertaine, métissages connus grâce à l'ADN.
 
