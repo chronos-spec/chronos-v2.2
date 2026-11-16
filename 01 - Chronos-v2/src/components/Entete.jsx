@@ -40,8 +40,8 @@ export default function Entete({ etages, etageActif, index: indexRecherche, onAl
         onMoins={zoom.moins}
         onPlus={zoom.plus}
         onRemettre={zoom.remettre}
-        peutMoins={zoom.zoom > 0.5}
-        peutPlus={zoom.zoom < 1.25}
+        peutMoins={zoom.zoom > zoom.min}
+        peutPlus={zoom.zoom < zoom.max}
       />
 
       {/* Téléphone : où suis-je ? */}

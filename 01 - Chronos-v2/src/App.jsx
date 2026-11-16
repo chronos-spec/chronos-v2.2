@@ -28,6 +28,8 @@ export default function App() {
   const [etageSpirale, setEtageSpirale] = useState('univers');
   const etageActif = accueil ? etageVu : spirale ? etageSpirale : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
+  // Accueil : tout replier pour ne voir que les titres des six étages.
+  const [replie, setReplie] = useState(false);
 
   // Changer de page ferme la carte ; en revenant à l'accueil, on retrouve l'étage d'où l'on vient.
   const carteApresNavigation = useRef(null);
@@ -166,7 +168,7 @@ export default function App() {
       <Entete etages={ETAGES} etageActif={etageActif} index={index} onAller={aller} accueil={accueil} />
 
       {accueil ? (
-        <main>
+        <main className={replie ? 'accueil-replie' : undefined}>
           <section className="accueil" data-section="accueil" aria-labelledby="titre-accueil">
             <p className="accueil__sur-titre">Une frise de toute l'histoire</p>
             <h1 id="titre-accueil" className="accueil__titre">Chronos</h1>
@@ -175,7 +177,17 @@ export default function App() {
               <br />
               Une étape à la fois.
             </p>
-            <a className="bouton-principal" href="#univers">Commencer</a>
+            <div className="accueil__actions">
+              <a className="bouton-principal" href="#univers">Commencer</a>
+              <button
+                type="button"
+                className="verre bouton-secondaire"
+                aria-pressed={replie}
+                onClick={() => { setReplie((r) => !r); setCarteOuverte(null); }}
+              >
+                {replie ? 'Tout déplier' : 'Tout replier'}
+              </button>
+            </div>
           </section>
 
           {ETAGES.map((etage, i) => (

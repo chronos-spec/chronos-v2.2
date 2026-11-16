@@ -176,13 +176,13 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
     for (let u = uFin; u >= uDebut; u -= pas) pts.push({ u, ...projeter(u, L, m) });
     if (pts.length < 2) return;
 
-    // Ruban de 4 à 14 px, qui s'épaissit vers la zone proche de la caméra.
+    // Ruban de 8 à 26 px (épaissi pour mieux voir les étages), qui s'épaissit vers la zone proche de la caméra.
     // Sur les petits écrans, le plafond est abaissé pour préserver la scène.
-    const plafondRuban = m.w <= 480 ? 8 : 14;
+    const plafondRuban = m.w <= 480 ? 16 : 26;
     const proche = (r) => Math.max(0, Math.min(1, (r - m.demi * 0.85) / (m.demi * 0.5)));
     // La caméra cible le ruban à environ 45 % du rayon visible; la largeur culmine là.
     const proximiteCamera = (r) => 1 - Math.max(0, Math.min(1, Math.abs(r - m.demi * 0.45) / (m.demi * 0.45)));
-    const epaisseur = (r) => 4 + (plafondRuban - 4) * proximiteCamera(r);
+    const epaisseur = (r) => 8 + (plafondRuban - 8) * proximiteCamera(r);
 
     // 1 et 2 : aura et halo, dessinés en petit puis agrandis (l'agrandissement floute naturellement).
     if (!brouillon.current) brouillon.current = document.createElement('canvas');
@@ -221,7 +221,7 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
     // Étiquettes des étages : fondu progressif au zoom, sobres en vue d'ensemble.
     // Le nom reste clair (et donc lisible sans décoder la couleur) ; l'étage ajoute une lueur.
     ctx.save();
-    ctx.font = '600 18px Fraunces';
+    ctx.font = '600 24px Fraunces';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round';
@@ -235,16 +235,17 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
       const u = (uDe(bande.debut) + uDe(Math.max(1, bande.fin))) / 2;
       const p = projeter(u, L, m);
       const rayonRelatif = p.r / m.demi;
-      const alpha = lissage(0.30, 0.62, rayonRelatif) * (1 - lissage(1.02, 1.28, rayonRelatif));
+      // Les noms d'étages restent visibles plus longtemps (repères des grandes périodes).
+      const alpha = lissage(0.12, 0.35, rayonRelatif) * (1 - lissage(1.25, 1.6, rayonRelatif));
       if (alpha < 0.02 || p.x < 12 || p.x > m.w - 12 || p.y < 30 || p.y > m.h - 12) return;
-      const y = p.y - 24;
+      const y = p.y - 34;
       const largeur = ctx.measureText(etage.nom).width + 12;
-      const boite = { x1: p.x - largeur / 2, x2: p.x + largeur / 2, y1: y - 13, y2: y + 13 };
+      const boite = { x1: p.x - largeur / 2, x2: p.x + largeur / 2, y1: y - 16, y2: y + 16 };
       if (etiquettesDessinees.some((b) => !(boite.x2 < b.x1 || boite.x1 > b.x2 || boite.y2 < b.y1 || boite.y1 > b.y2))) return;
       etiquettesDessinees.push(boite);
       const couleur = palette[etage.id];
       ctx.globalAlpha = alpha;
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 8;
       ctx.strokeStyle = couleursTexte.fond || couleursTexte.ombre;
       ctx.shadowColor = `rgba(${couleur.join(',')},0.55)`;
       ctx.shadowBlur = 10;
