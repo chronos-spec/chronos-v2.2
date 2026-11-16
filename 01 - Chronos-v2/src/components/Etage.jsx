@@ -4,6 +4,7 @@ import FriseVerticale from './FriseVerticale.jsx';
 import { useEstMobile } from '../lib/mobile.js';
 import Frise from './Frise.jsx';
 import Carte from './Carte.jsx';
+import ArbreParente from './ArbreParente.jsx';
 import ChoixCategorie from './ChoixCategorie.jsx';
 import ZoomControles from './ZoomControles.jsx';
 import { lienEtage } from '../lib/route.js';
@@ -333,6 +334,11 @@ export default function Etage({
             />
 
             <Repere etage={etage} position={etat.position} fraction={etat.fraction} onGlisser={glisser} />
+
+            {/* Un animal du bestiaire est ouvert : son arbre de parenté se déroule sous la frise. */}
+            {ouverte && ouverte.id.startsWith('animal-') && (
+              <ArbreParente idAnimal={ouverte.id.slice('animal-'.length)} onFermer={onFermer} />
+            )}
           </>
         )}
 
