@@ -8,9 +8,9 @@
 - **Page d’accueil inchangée**, sauf : un bouton « Explorer l’étage » dans chaque étage, le menu du haut qui ouvre les pages d’étage, et l’arbre humain retiré (il est sur la page Humains).
 - **Une page par étage** (`#/vie`) : zoom de la frise (vue d’ensemble, normal, × 2, × 4 ; aussi Ctrl + molette), et le nom de chaque période ouvre sa page.
 - **Une page par période** (`#/vie/jurassique`) : sa frise (zoom × 2), « En bref », les groupes du vivant, le bestiaire en grandes fiches avec images, la liste de tous les événements, période précédente / suivante.
-- **Vie** : l’arbre du vivant déroulant (bactéries → … → primates), environ 90 groupes et espèces, avec images.
+- **Vie** : l’arbre du vivant déroulant (bactéries → … → primates), 86 groupes et espèces, avec images.
 - **Humains** : les familles humaines en liste déroulante (avec images), puis l’arbre généalogique.
-- **Histoire** : choix d’un ou plusieurs **lieux** (Europe et Méditerranée, Proche-Orient, Afrique, Asie, Amériques, Océanie, Grands voyages). Une ligne par lieu, toutes à la même échelle. 58 nouveaux événements dans le monde (Caral, l’Indus, Confucius, Aksoum, Mansa Moussa, Zheng He, les Incas, Magellan, la traite atlantique, Haïti, Meiji…). Ils ne figurent que sur la page Histoire.
+- **Histoire** : choix d’un ou plusieurs **lieux** (Europe et Méditerranée, Proche-Orient, Afrique, Asie, Amériques, Océanie, Grands voyages). Une ligne par lieu, toutes à la même échelle. 57 nouveaux événements dans le monde (Caral, l’Indus, Confucius, Aksoum, Mansa Moussa, Zheng He, les Incas, Magellan, la traite atlantique, Haïti, Meiji…). Ils ne figurent que sur la page Histoire.
 - **Images** : prises sur Wikipédia (Wikimedia Commons, licences libres), chargées à l’affichage, avec un lien vers la page d’origine. Tous les titres ont été vérifiés : 173 sur 174 ont une image (Liopleurodon n’en a pas de libre).
 
 **Décisions prises**
@@ -18,7 +18,7 @@
 - En vue d’ensemble (zoom 50 %), seuls les événements principaux restent ; en zoomant, tout réapparaît.
 
 **Questions ouvertes**
-- Relire les 58 événements « monde » et la liste des lieux.
+- Relire les 57 événements « monde » et la liste des lieux.
 - Images des événements (pas seulement des espèces) ?
 
 ## 15 novembre 2026 (très tard) — Bestiaire et version téléphone
