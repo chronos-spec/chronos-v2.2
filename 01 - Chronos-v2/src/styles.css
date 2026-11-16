@@ -1644,3 +1644,138 @@ a { color: inherit; }
 @media (max-width: 380px) {
   .entete__marque { font-size: 22px; }
 }
+
+/* ======================================================================
+   La spirale du temps (page d'essai #/spirale)
+   ====================================================================== */
+
+.entete__essai {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--verre-bord);
+  font-size: 12px;
+  color: var(--texte-doux);
+}
+
+.spirale { position: fixed; inset: 0; overflow: hidden; }
+.spirale__scene { position: absolute; inset: 0; touch-action: none; cursor: grab; outline: none; }
+.spirale__scene:active { cursor: grabbing; }
+.spirale__scene:focus-visible { box-shadow: inset 0 0 0 3px var(--focus); }
+.spirale__toile { position: absolute; inset: 0; width: 100%; height: 100%; }
+.spirale__points { position: absolute; inset: 0; pointer-events: none; }
+.spirale__point { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.point.spirale__bouton {
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  pointer-events: auto;
+}
+.spirale__etiquette {
+  position: absolute;
+  display: block;
+  max-width: 220px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--fond-etiquette);
+  color: var(--texte);
+  font-size: 15px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.spirale__etiquette:hover { box-shadow: 0 0 0 1px rgba(var(--etage-rgb), 0.6); }
+
+.verre {
+  background: var(--verre);
+  border: 1px solid var(--verre-bord);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.spirale__legende {
+  position: absolute;
+  top: 84px;
+  left: 20px;
+  max-width: 340px;
+  padding: 14px 18px;
+  border-radius: 20px;
+}
+.spirale__legende p { margin: 0; }
+.spirale__marque { font-family: Fraunces, Georgia, serif; font-weight: 700; font-size: 26px; }
+.spirale__regle { color: var(--texte-doux); font-size: 15px; }
+.spirale__etages { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 15px; }
+.spirale__etages li { display: flex; align-items: center; gap: 6px; }
+.spirale__pastille { width: 10px; height: 10px; border-radius: 50%; background: var(--etage); box-shadow: 0 0 8px rgba(var(--etage-rgb), 0.7); }
+.spirale__indicateur {
+  position: absolute;
+  top: 84px;
+  right: 84px;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+.spirale__indicateur-etage { color: var(--etage); }
+.spirale__boutons {
+  position: absolute;
+  right: 84px;
+  bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.spirale__action {
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  color: var(--texte);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.spirale__action:hover { border-color: rgba(var(--etage-rgb), 0.7); }
+.spirale__liste {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  max-width: min(420px, calc(100vw - 40px));
+  max-height: 50vh;
+  overflow: auto;
+  border-radius: 16px;
+}
+.spirale__liste summary { min-height: 46px; display: flex; align-items: center; padding: 0 16px; cursor: pointer; font-weight: 600; }
+.spirale__liste ol { list-style: none; margin: 0; padding: 0 8px 10px; }
+.spirale__liste button {
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.spirale__liste button:hover { background: rgba(var(--etage-rgb), 0.14); }
+.spirale__liste-date { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--texte-doux); }
+@media (max-width: 699px) {
+  .spirale__legende { top: 70px; left: 12px; right: 12px; max-width: none; padding: 10px 14px; }
+  .spirale__marque { display: none; }
+  .spirale__etages { display: none; }
+  .spirale__indicateur { top: 128px; right: auto; left: 12px; align-items: flex-start; font-size: 13px; padding: 6px 12px; }
+  .spirale__boutons { right: 12px; left: 12px; bottom: 14px; justify-content: flex-start; flex-wrap: nowrap; gap: 6px; }
+  .spirale__action { min-height: 42px; padding: 0 10px; font-size: 14px; white-space: nowrap; }
+  .spirale__boutons .zoom__bouton { min-width: 38px; height: 38px; }
+  .spirale__liste { display: none; }
+}

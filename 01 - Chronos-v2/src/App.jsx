@@ -8,6 +8,7 @@ import { construireIndex } from './lib/recherche.js';
 import { useRoute, lienEtage, allerVers } from './lib/route.js';
 import { xPourAns } from './lib/echelle.js';
 import { PageEtage, PagePeriode } from './components/Pages.jsx';
+import Spirale from './components/Spirale.jsx';
 
 // Quel étage pour une époque donnée ? (quand on fait glisser le point de l'année cosmique)
 function etagePourAns(ans) {
@@ -23,7 +24,9 @@ export default function App() {
   const route = useRoute();
   const accueil = route.page === 'accueil';
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
-  const etageActif = accueil ? etageVu : route.etage;
+  const spirale = route.page === 'etage' && route.etage === 'spirale';
+  const [etageSpirale, setEtageSpirale] = useState('univers');
+  const etageActif = accueil ? etageVu : spirale ? etageSpirale : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
 
   // Changer de page ferme la carte ; en revenant à l'accueil, on retrouve l'étage d'où l'on vient.
@@ -148,6 +151,12 @@ export default function App() {
     return () => document.removeEventListener('keydown', touche);
   }, []);
 
+  // La spirale dit quel étage on regarde (couleur du ciel, année cosmique).
+  const suivreSpirale = useCallback((idEtage, ans) => {
+    setEtageSpirale((e) => (e === idEtage ? e : idEtage));
+    noterRepere(idEtage, ans);
+  }, [noterRepere]);
+
   const communs = { parId: PAR_ID, carteOuverte, basculer, fermer, refermer, noterRepere, cible };
 
   return (
@@ -188,7 +197,15 @@ export default function App() {
         </main>
       ) : (
         <main id="contenu">
-          {route.page === 'etage' ? (
+          {spirale ? (
+            <Spirale
+              parId={PAR_ID}
+              carteOuverte={carteOuverte}
+              onBasculer={basculer}
+              onFermer={fermer}
+              onEtage={suivreSpirale}
+            />
+          ) : route.page === 'etage' ? (
             <PageEtage key={route.etage} idEtage={route.etage} communs={communs} />
           ) : (
             <PagePeriode key={`${route.etage}/${route.periode}`} idEtage={route.etage} idPeriode={route.periode} communs={communs} />

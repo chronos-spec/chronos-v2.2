@@ -28,6 +28,9 @@ export default function Entete({ etages, etageActif, index: indexRecherche, onAl
             {e.nom}
           </a>
         ))}
+        <a href="#/spirale" className="entete__lien entete__lien--spirale" aria-current={!accueil && window.location.hash === '#/spirale' ? 'page' : undefined}>
+          Spirale <span className="entete__essai">essai</span>
+        </a>
       </nav>
 
       <ZoomControles
