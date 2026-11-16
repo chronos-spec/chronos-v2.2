@@ -53,9 +53,12 @@ function lireCouleursTexte() {
   const styles = getComputedStyle(document.querySelector('.app') || document.documentElement);
   const sonde = document.createElement('span');
   sonde.hidden = true;
+  const hote = document.querySelector('.app') || document.body;
   sonde.style.color = styles.getPropertyValue('--texte-doux').trim();
-  (document.querySelector('.app') || document.body).appendChild(sonde);
+  hote.appendChild(sonde);
   const rgb = getComputedStyle(sonde).color.match(/[\d.]+/g)?.slice(0, 3).join(',') || '';
+  sonde.style.color = styles.getPropertyValue('--texte').trim();
+  const rgbTexte = getComputedStyle(sonde).color.match(/[\d.]+/g)?.slice(0, 3).join(',') || '';
   sonde.remove();
   const etoile = document.createElement('span');
   etoile.hidden = true;
@@ -63,7 +66,13 @@ function lireCouleursTexte() {
   (document.querySelector('.app') || document.body).appendChild(etoile);
   const rgbEtoile = getComputedStyle(etoile).color.match(/[\d.]+/g)?.slice(0, 3).join(',') || '';
   etoile.remove();
-  couleursTexteMemo = { etoile: rgbEtoile, doux: rgb, ombre: styles.getPropertyValue('--ombre-profonde').trim() };
+  couleursTexteMemo = {
+    etoile: rgbEtoile,
+    doux: rgb,
+    texte: rgbTexte,
+    ombre: styles.getPropertyValue('--ombre-profonde').trim(),
+    fond: styles.getPropertyValue('--fond-etiquette').trim(),
+  };
   return couleursTexteMemo;
 }
 
@@ -167,9 +176,13 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
     for (let u = uFin; u >= uDebut; u -= pas) pts.push({ u, ...projeter(u, L, m) });
     if (pts.length < 2) return;
 
-    // Ruban plus épais près de la caméra, mais borné pour rester lisible sur petit écran.
-    const epaisseur = (r) => Math.max(2.4, Math.min(Math.max(5, Math.min(m.w, m.h) * 0.018), r / 32));
+    // Ruban de 4 à 14 px, qui s'épaissit vers la zone proche de la caméra.
+    // Sur les petits écrans, le plafond est abaissé pour préserver la scène.
+    const plafondRuban = m.w <= 480 ? 8 : 14;
     const proche = (r) => Math.max(0, Math.min(1, (r - m.demi * 0.85) / (m.demi * 0.5)));
+    // La caméra cible le ruban à environ 45 % du rayon visible; la largeur culmine là.
+    const proximiteCamera = (r) => 1 - Math.max(0, Math.min(1, Math.abs(r - m.demi * 0.45) / (m.demi * 0.45)));
+    const epaisseur = (r) => 4 + (plafondRuban - 4) * proximiteCamera(r);
 
     // 1 et 2 : aura et halo, dessinés en petit puis agrandis (l'agrandissement floute naturellement).
     if (!brouillon.current) brouillon.current = document.createElement('canvas');
@@ -201,25 +214,43 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
       return { style: `rgba(${col[0]},${col[1]},${col[2]},${a})`, largeur: epaisseur(q.r) };
     });
     tracer(ctx, pts, (q) => ({
-      style: `rgba(${couleursTexte.etoile},${0.55 * intensiteU(q.u) * (1 - proche(q.r))})`,
-      largeur: epaisseur(q.r) / 3,
+      style: `rgba(${couleursTexte.etoile},${0.82 * intensiteU(q.u) * (1 - 0.35 * proche(q.r))})`,
+      largeur: epaisseur(q.r) * 0.46,
     }));
 
-    // Étiquettes des six étages, qui entrent dans le champ à mesure qu'on zoome.
+    // Étiquettes des étages : fondu progressif au zoom, sobres en vue d'ensemble.
+    // Le nom reste clair (et donc lisible sans décoder la couleur) ; l'étage ajoute une lueur.
     ctx.save();
     ctx.font = '600 18px Fraunces';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = couleursTexte.ombre;
-    ctx.shadowBlur = 12;
+    ctx.lineJoin = 'round';
+    const lissage = (a, b, x) => {
+      const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+      return t * t * (3 - 2 * t);
+    };
+    const etiquettesDessinees = [];
     ETAGES.forEach((etage, i) => {
       const bande = BANDES[i];
       const u = (uDe(bande.debut) + uDe(Math.max(1, bande.fin))) / 2;
       const p = projeter(u, L, m);
-      if (p.r < 48 || p.r > m.demi * 1.2) return;
-      const alpha = Math.max(0, Math.min(1, (p.r - 40) / 48, (m.demi * 1.25 - p.r) / (m.demi * 0.25)));
-      ctx.fillStyle = `rgba(${palette[etage.id].join(',')},${alpha})`;
-      ctx.fillText(etage.nom, p.x, p.y - 20);
+      const rayonRelatif = p.r / m.demi;
+      const alpha = lissage(0.30, 0.62, rayonRelatif) * (1 - lissage(1.02, 1.28, rayonRelatif));
+      if (alpha < 0.02 || p.x < 12 || p.x > m.w - 12 || p.y < 30 || p.y > m.h - 12) return;
+      const y = p.y - 24;
+      const largeur = ctx.measureText(etage.nom).width + 12;
+      const boite = { x1: p.x - largeur / 2, x2: p.x + largeur / 2, y1: y - 13, y2: y + 13 };
+      if (etiquettesDessinees.some((b) => !(boite.x2 < b.x1 || boite.x1 > b.x2 || boite.y2 < b.y1 || boite.y1 > b.y2))) return;
+      etiquettesDessinees.push(boite);
+      const couleur = palette[etage.id];
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = couleursTexte.fond || couleursTexte.ombre;
+      ctx.shadowColor = `rgba(${couleur.join(',')},0.55)`;
+      ctx.shadowBlur = 10;
+      ctx.strokeText(etage.nom, p.x, y);
+      ctx.fillStyle = `rgba(${couleursTexte.texte},1)`;
+      ctx.fillText(etage.nom, p.x, y);
     });
     ctx.restore();
 
