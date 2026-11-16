@@ -9,12 +9,18 @@
 // Lecointre & Le Guyader, « Classification phylogénétique du vivant » (4e éd., 2016) ;
 // Brusatte, « The Rise and Fall of the Dinosaurs » (2018) pour les archosaures.
 
-export const GROUPES = [
-  { id: 'animaux', nom: 'Animaux', depuis: 6.0e8, texte: 'Des êtres faits de nombreuses cellules, qui se nourrissent d’autres êtres vivants.' },
+import { ARBRE_VIVANT } from './arbreVivant.js';
+
+const GROUPES_ANIMAUX = [
+  { id: 'animaux', parent: 'eucaryotes', nom: 'Animaux', depuis: 6.0e8, texte: 'Des êtres faits de nombreuses cellules, qui se nourrissent d’autres êtres vivants.' },
 
   { id: 'ediacara', parent: 'animaux', nom: 'Faune d’Édiacara', depuis: 5.75e8, eteint: true, debat: true,
     texte: 'Les premiers grands animaux, aux formes étranges. On ne sait pas encore bien où les placer.' },
 
+  { id: 'eponges', parent: 'animaux', nom: 'Éponges', depuis: 5.4e8,
+    texte: 'Des animaux sans organes, fixés au fond de l’eau, qui filtrent l’eau de mer.' },
+  { id: 'cnidaires', parent: 'animaux', nom: 'Méduses et coraux (Cnidaires)', depuis: 5.6e8,
+    texte: 'Des animaux à tentacules qui piquent.' },
   { id: 'bilateriens', parent: 'animaux', nom: 'Bilatériens', depuis: 5.55e8,
     texte: 'Les animaux avec un côté gauche et un côté droit, un avant et un arrière.' },
 
@@ -40,6 +46,8 @@ export const GROUPES = [
     texte: 'Les arthropodes à mâchoires : mille-pattes, crustacés, insectes.' },
   { id: 'myriapodes', parent: 'mandibulates', nom: 'Myriapodes (mille-pattes)', depuis: 4.25e8,
     texte: 'Des arthropodes au corps long et aux très nombreuses pattes.' },
+  { id: 'crustaces', parent: 'mandibulates', nom: 'Crustacés', depuis: 5.1e8,
+    texte: 'Crabes, crevettes, homards, cloportes.' },
   { id: 'insectes', parent: 'mandibulates', nom: 'Insectes', depuis: 4.0e8,
     texte: 'Six pattes, et souvent des ailes. Les premiers animaux à voler.' },
 
@@ -52,6 +60,8 @@ export const GROUPES = [
 
   { id: 'deuterostomiens', parent: 'bilateriens', nom: 'Deutérostomiens', depuis: 5.4e8,
     texte: 'L’autre grande branche : étoiles de mer, oursins… et nous.' },
+  { id: 'echinodermes', parent: 'deuterostomiens', nom: 'Étoiles de mer et oursins', depuis: 5.2e8,
+    texte: 'Des animaux marins à symétrie en cinq branches. Ce sont des cousins (lointains) des vertébrés.' },
   { id: 'cordes', parent: 'deuterostomiens', nom: 'Cordés', depuis: 5.3e8,
     texte: 'Les animaux avec une corde dans le dos, l’ébauche d’une colonne vertébrale.' },
   { id: 'vertebres', parent: 'cordes', nom: 'Vertébrés', depuis: 5.18e8,
@@ -72,6 +82,8 @@ export const GROUPES = [
     texte: 'Les vertébrés à quatre pattes, sortis de l’eau.' },
   { id: 'tetrapodes-souche', parent: 'tetrapodes', nom: 'Premiers tétrapodes', depuis: 3.75e8, eteint: true,
     texte: 'Mi-poissons, mi-amphibiens, ils vivaient encore surtout dans l’eau.' },
+  { id: 'amphibiens', parent: 'tetrapodes', nom: 'Amphibiens', depuis: 3.3e8,
+    texte: 'Grenouilles, salamandres : ils pondent dans l’eau.' },
   { id: 'amniotes', parent: 'tetrapodes', nom: 'Amniotes', depuis: 3.18e8,
     texte: 'Leurs œufs ont une coquille ou une enveloppe : ils peuvent pondre loin de l’eau.' },
 
@@ -185,15 +197,53 @@ export const PLACE_ANIMAL = {
   gastornis: 'oiseaux', phorusrhacos: 'oiseaux', dodo: 'oiseaux',
 };
 
-// Des repères vivants pour comparer (on ne les trouve pas dans le bestiaire).
-export const REPERES = [
-  { id: 'humain', nom: 'Nous, les humains', place: 'primates', texte: 'Homo sapiens, un primate apparu il y a environ 300 000 ans.' },
-  { id: 'poule', nom: 'La poule', place: 'oiseaux', texte: 'Un oiseau, donc un dinosaure théropode vivant.' },
-  { id: 'crocodile', nom: 'Le crocodile', place: 'pseudosuchiens', texte: 'Le plus proche parent vivant des oiseaux, avec eux dans les archosaures.' },
-  { id: 'lezard', nom: 'Le lézard', place: 'squamates', texte: 'Un squamate, comme les serpents.' },
-  { id: 'requin-blanc', nom: 'Le requin blanc', place: 'chondrichtyens', texte: 'Un poisson au squelette de cartilage.' },
-  { id: 'araignee', nom: 'L’araignée', place: 'chelicerates', texte: 'Une cousine des scorpions.' },
+// L'arbre du vivant (arbreVivant.js) apporte le reste : microbes, plantes, champignons,
+// et des espèces d'aujourd'hui. Pour les animaux, on range ses espèces dans les groupes ci-dessus.
+const PLACE_VIVANT = {
+  'v-eponges': 'eponges', 'v-meduse': 'cnidaires', 'v-corail': 'cnidaires',
+  'v-escargot': 'mollusques', 'v-pieuvre': 'cephalopodes',
+  'v-abeille': 'insectes', 'v-fourmi': 'insectes', 'v-papillon': 'insectes', 'v-scarabee': 'insectes',
+  'v-araignees': 'chelicerates', 'v-crustaces': 'crustaces',
+  'v-etoile-mer': 'echinodermes', 'v-oursin': 'echinodermes',
+  'v-lamproie': 'agnathes', 'v-requin': 'chondrichtyens', 'v-coelacanthe': 'sarcopterygiens', 'v-saumon': 'osteichtyens',
+  'v-grenouille': 'amphibiens', 'v-salamandre': 'amphibiens',
+  'v-tortues': 'diapsides', 'v-lezards': 'squamates', 'v-crocodiles': 'pseudosuchiens',
+  'v-moineau': 'oiseaux', 'v-aigle': 'oiseaux', 'v-manchot': 'oiseaux', 'v-autruche': 'oiseaux',
+  'v-ornithorynque': 'mammiferes', 'v-kangourou': 'mammiferes',
+  'v-baleine': 'cetaces', 'v-chauve-souris': 'placentaires', 'v-rongeurs': 'placentaires',
+  'v-elephant': 'proboscidiens', 'v-felins': 'carnivores',
+  'v-lemurien': 'primates', 'v-gorille': 'primates', 'v-chimpanze': 'primates', 'v-humain': 'primates',
+};
+
+const RACINES = [
+  { id: 'vivant', nom: 'Le vivant', depuis: 3.7e9, debat: true,
+    texte: 'Tous les êtres vivants descendent d’un ancêtre commun, une cellule très simple.' },
+  { id: 'eucaryotes', parent: 'vivant', nom: 'Eucaryotes (cellules à noyau)', depuis: 1.8e9,
+    texte: 'Des cellules plus grandes, avec un noyau. Elles ont donné les algues, les plantes, les champignons et les animaux.' },
 ];
+
+// Les groupes et espèces de arbreVivant.js hors animaux (bactéries, plantes, champignons…).
+const GROUPES_AUTRES = [];
+const FEUILLES_VIVANT = [];
+function parcourir(noeud, parent) {
+  if (noeud.id === 'v-animaux') {
+    // Animaux : seules les feuilles nous intéressent, rangées par PLACE_VIVANT.
+    const feuilles = (n) => (n.enfants ? n.enfants.flatMap(feuilles) : [n]);
+    feuilles(noeud).forEach((f) => {
+      if (PLACE_VIVANT[f.id]) FEUILLES_VIVANT.push({ ...f, groupe: PLACE_VIVANT[f.id] });
+    });
+    return;
+  }
+  if (noeud.enfants) {
+    GROUPES_AUTRES.push({ id: noeud.id, parent, nom: noeud.nom, depuis: noeud.depuis, eteint: noeud.eteint, texte: noeud.texte, wiki: noeud.wiki });
+    noeud.enfants.forEach((e) => parcourir(e, noeud.id));
+  } else {
+    FEUILLES_VIVANT.push({ ...noeud, groupe: parent });
+  }
+}
+ARBRE_VIVANT.forEach((n) => parcourir(n, ['v-bacteries', 'v-archees'].includes(n.id) ? 'vivant' : 'eucaryotes'));
+
+export const GROUPES = [...RACINES, ...GROUPES_AUTRES, ...GROUPES_ANIMAUX];
 
 export const GROUPE_PAR_ID = Object.fromEntries(GROUPES.map((g) => [g.id, g]));
 
@@ -203,7 +253,21 @@ export const ENFANTS = GROUPES.reduce((acc, g) => {
   return acc;
 }, {});
 
-// Le chemin de la racine (Animaux) jusqu'au groupe donné.
+// Toutes les espèces (feuilles) : celles d'aujourd'hui (arbreVivant.js), puis le bestiaire (disparues).
+// id → { id, nom, groupe, texte, wiki?, eteint, vivant }
+export function construireFeuilles(bestiaire, wikiAnimaux = {}) {
+  const liste = [
+    ...FEUILLES_VIVANT.map((f) => ({ id: f.id, nom: f.nom, groupe: f.groupe, texte: f.texte, wiki: f.wiki, eteint: !!f.eteint, vivant: !f.eteint })),
+    ...Object.entries(bestiaire).flatMap(([periode, animaux]) =>
+      animaux.filter((a) => PLACE_ANIMAL[a.id]).map((a) => ({
+        id: a.id, nom: a.nom, groupe: PLACE_ANIMAL[a.id], texte: a.texte, wiki: wikiAnimaux[a.id], eteint: true, periode,
+      }))
+    ),
+  ];
+  return liste;
+}
+
+// Le chemin de la racine (Le vivant) jusqu'au groupe donné.
 export function chemin(idGroupe) {
   const ch = [];
   for (let g = GROUPE_PAR_ID[idGroupe]; g; g = GROUPE_PAR_ID[g.parent]) ch.unshift(g.id);

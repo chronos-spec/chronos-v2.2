@@ -28,6 +28,16 @@ export default function Entete({ etages, etageActif, index: indexRecherche, onAl
             {e.nom}
           </a>
         ))}
+        {/* Voir toute la frise d'un coup, puis zoomer niveau par niveau. */}
+        <a href="#/ensemble" className="entete__lien entete__lien--outil" aria-current={!accueil && window.location.hash === '#/ensemble' ? 'page' : undefined}>
+          Tout voir
+        </a>
+        <a href="#/ensemble/vie" className="entete__lien entete__lien--outil" aria-current={!accueil && window.location.hash === '#/ensemble/vie' ? 'page' : undefined}>
+          Vue d’ensemble
+        </a>
+        <a href="#/recit" className="entete__lien entete__lien--outil" aria-current={!accueil && window.location.hash === '#/recit' ? 'page' : undefined}>
+          Récit
+        </a>
         <a href="#/spirale" className="entete__lien entete__lien--spirale" aria-current={!accueil && window.location.hash === '#/spirale' ? 'page' : undefined}>
           Spirale <span className="entete__essai">essai</span>
         </a>

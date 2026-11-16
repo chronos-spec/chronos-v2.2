@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import Etage from './Etage.jsx';
 import ChoixLieux from './ChoixLieux.jsx';
 import ArbreDeroulant from './ArbreDeroulant.jsx';
+import ArbreParente from './ArbreParente.jsx';
 import ArbreHumain from './ArbreHumain.jsx';
 import ImageWiki from './ImageWiki.jsx';
 import { ETAGES, evenementsPage, idAnimal } from '../data/index.js';
@@ -10,7 +11,6 @@ import { PERIODES } from '../data/periodes.js';
 import { ERES } from '../data/eres.js';
 import { BESTIAIRE, GROUPES_ANIMAUX } from '../data/bestiaire.js';
 import { GROUPES_VIVANT } from '../data/vivant.js';
-import { ARBRE_VIVANT } from '../data/arbreVivant.js';
 import { ESPECES, GROUPES_HUMAINS } from '../data/especes.js';
 import { WIKI_ANIMAUX, WIKI_ESPECES } from '../data/wiki.js';
 import { lienEtage, lienPeriode } from '../lib/route.js';
@@ -30,9 +30,8 @@ function versionPage(etage) {
 function useLieux(cible, parId) {
   // Si la recherche vise un événement d'un autre lieu, on affiche aussi ce lieu.
   const [lieux, setLieux] = useState(() => {
-    const vise = cible?.type === 'carte' ? parId[cible.id]?.lieux : null;
-    const depart = ['europe', ...(vise && !vise.includes('europe') ? [vise[0]] : [])];
-    return LIEUX.map((l) => l.id).filter((l) => depart.includes(l));
+    // Une seule ligne pour tout le monde : au départ, tous les continents sont affichés.
+    return LIEUX.map((l) => l.id);
   });
   const voies = useMemo(
     () => LIEUX.filter((l) => lieux.includes(l.id)).map((l) => ({ ...l, filtre: (carte) => carte.lieux?.includes(l.id) })),
@@ -73,6 +72,18 @@ export function PageEtage({ idEtage, communs }) {
   const etageBase = ETAGES.find((e) => e.id === idEtage);
   const etage = useMemo(() => etageBase && versionPage(etageBase), [etageBase]);
   const { lieux, setLieux, voies, filtre } = useLieux(communs.cible, communs.parId);
+  // L'arbre du vivant (étage Vie) : l'espèce choisie vient de la frise (animal ouvert) ou de l'arbre.
+  const [choixArbre, setChoixArbre] = useState(null);
+  const ouvert = communs.carteOuverte?.startsWith('animal-') ? communs.carteOuverte.slice('animal-'.length) : null;
+  const idFeuilleArbre = ouvert || choixArbre;
+  const choisirDansArbre = (id) => {
+    setChoixArbre(id && id.startsWith('v-') ? id : null);
+    if (!id || id.startsWith('v-')) {
+      if (ouvert) communs.refermer();
+    } else if (communs.carteOuverte !== `animal-${id}`) {
+      communs.basculer(`animal-${id}`);
+    }
+  };
   const [especeChoisie, setEspeceChoisie] = useState(null);
   useTitreDocument(etageBase ? etageBase.nom : 'Page introuvable');
 
@@ -93,6 +104,7 @@ export function PageEtage({ idEtage, communs }) {
       <Fil elements={[{ nom: 'Chronos', lien: `#${etage.id}` }, { nom: etage.nom }]} />
       <Etage
         mode="page"
+        arbreSousFrise={etage.id !== 'vie'}
         outils={histoire ? <ChoixLieux choisis={lieux} onChanger={setLieux} /> : null}
         etage={etage}
         numero={i + 1}
@@ -104,18 +116,19 @@ export function PageEtage({ idEtage, communs }) {
         onRefermer={communs.refermer}
         onRepere={communs.noterRepere}
         cible={communs.cible}
-        voies={histoire ? voies : null}
+        voies={null}
         filtre={histoire ? filtre : null}
         lienPeriode={(idCat) => lienPeriode(etage.id, idCat)}
       />
 
       {etage.id === 'vie' && (
         <div className="page__suite">
-          <ArbreDeroulant
+          {/* Un seul arbre : l'arbre du vivant, qui sert aussi d'arbre de parenté. */}
+          <ArbreParente
             idTitre="titre-arbre-vivant"
-            titre="L’arbre du vivant"
-            aide="Touchez un groupe pour voir ses sous-groupes et quelques espèces. Les groupes disparus sont marqués en ambre."
-            noeuds={ARBRE_VIVANT}
+            idFeuille={idFeuilleArbre}
+            onChoisir={choisirDansArbre}
+            onFermer={() => choisirDansArbre(null)}
           />
         </div>
       )}
@@ -212,7 +225,7 @@ export function PagePeriode({ idEtage, idPeriode, communs }) {
         onRefermer={communs.refermer}
         onRepere={communs.noterRepere}
         cible={communs.cible}
-        voies={histoire ? voies : null}
+        voies={null}
         filtre={histoire ? filtre : null}
       />
 

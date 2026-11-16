@@ -9,6 +9,8 @@ import { useRoute, lienEtage, allerVers } from './lib/route.js';
 import { xPourAns } from './lib/echelle.js';
 import { PageEtage, PagePeriode } from './components/Pages.jsx';
 import Spirale from './components/Spirale.jsx';
+import VueEnsemble from './components/VueEnsemble.jsx';
+import Recit from './components/Recit.jsx';
 
 // Quel étage pour une époque donnée ? (quand on fait glisser le point de l'année cosmique)
 function etagePourAns(ans) {
@@ -26,7 +28,8 @@ export default function App() {
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
   const spirale = route.page === 'etage' && route.etage === 'spirale';
   const [etageSpirale, setEtageSpirale] = useState('univers');
-  const etageActif = accueil ? etageVu : spirale ? etageSpirale : route.etage;
+  const pageSpeciale = !accueil && ['ensemble', 'recit'].includes(route.etage);
+  const etageActif = accueil ? etageVu : spirale ? etageSpirale : pageSpeciale ? (route.etage === 'ensemble' ? route.periode || null : null) : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
   // Accueil : tout replier pour ne voir que les titres des six étages.
   const [replie, setReplie] = useState(false);
@@ -209,7 +212,11 @@ export default function App() {
         </main>
       ) : (
         <main id="contenu">
-          {spirale ? (
+          {route.etage === 'ensemble' ? (
+            <VueEnsemble focus={route.page === 'periode' ? route.periode : null} />
+          ) : route.etage === 'recit' ? (
+            <Recit />
+          ) : spirale ? (
             <Spirale
               parId={PAR_ID}
               carteOuverte={carteOuverte}
@@ -225,7 +232,7 @@ export default function App() {
         </main>
       )}
 
-      <AnneeCosmique ans={etageActif ? reperes[etageActif] ?? null : 13.8e9} onGlisser={voyager} />
+      {!pageSpeciale && <AnneeCosmique ans={etageActif ? reperes[etageActif] ?? null : 13.8e9} onGlisser={voyager} />}
     </div>
   );
 }

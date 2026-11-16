@@ -22,7 +22,7 @@ const mouvementReduit = () =>
 // mode « page » : la page dédiée à l'étage ou à une période (zoom, voies par lieu, liens vers les périodes).
 export default function Etage({
   etage, numero, total, suivant, parId, carteOuverte, onBasculer, onFermer, onRefermer, onRepere, cible,
-  mode = 'accueil', outils = null, voies = null, filtre = null, lienPeriode = null, sansMenu = false, titre = null, zoomInitial = 1,
+  mode = 'accueil', outils = null, voies = null, filtre = null, lienPeriode = null, sansMenu = false, titre = null, zoomInitial = 1, arbreSousFrise = true,
 }) {
   const page = mode === 'page';
   const [zoom, setZoom] = useState(zoomInitial);
@@ -336,8 +336,8 @@ export default function Etage({
             <Repere etage={etage} position={etat.position} fraction={etat.fraction} onGlisser={glisser} />
 
             {/* Un animal du bestiaire est ouvert : son arbre de parenté se déroule sous la frise. */}
-            {ouverte && ouverte.id.startsWith('animal-') && (
-              <ArbreParente idAnimal={ouverte.id.slice('animal-'.length)} onFermer={onFermer} />
+            {arbreSousFrise && ouverte && ouverte.id.startsWith('animal-') && (
+              <ArbreParente idFeuille={ouverte.id.slice('animal-'.length)} onFermer={onFermer} />
             )}
           </>
         )}
