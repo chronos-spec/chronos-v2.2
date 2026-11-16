@@ -1,0 +1,1792 @@
+/* Mise en page et effets. Aucune couleur écrite ici : tout vient de theme.css. */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 72px;
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  margin: 0;
+  background: var(--ciel-milieu);
+  color: var(--texte);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.lien-evitement {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 100;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--carte);
+  color: var(--carte-texte);
+}
+.lien-evitement:focus { top: 16px; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Le ciel ---------- */
+
+.ciel {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--ciel-haut) 0%, var(--ciel-milieu) 55%, var(--ciel-bas) 100%);
+}
+.ciel__lueur {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 55%, rgba(var(--etage-rgb), 0.16), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 95% 5%, rgba(var(--etage-rgb), 0.08), transparent 70%);
+  transition: background 600ms ease;
+}
+.ciel__etoiles { position: absolute; inset: 0; }
+.etoile { fill: var(--etoile); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .etoile--scintille { animation: scintille 7s ease-in-out infinite; }
+}
+@keyframes scintille {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.9; }
+}
+
+/* ---------- L'en-tête ---------- */
+
+.entete {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  min-height: 64px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--entete-fond);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.entete__marque {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: 26px;
+  text-decoration: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.entete__nav { display: none; }
+.entete__pastille {
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  background: rgba(var(--etage-rgb), 0.16);
+  color: var(--texte);
+  font-weight: 600;
+}
+
+/* ---------- L'accueil ---------- */
+
+.accueil {
+  min-height: 100svh;
+  padding: 96px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  scroll-snap-align: start;
+}
+.accueil__sur-titre {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--texte-doux);
+}
+.accueil__titre {
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(64px, 14vw, 140px);
+  line-height: 1;
+  text-shadow: 0 0 60px rgba(var(--etage-rgb), 0.45);
+}
+.accueil__texte {
+  margin: 0 0 16px;
+  font-size: 22px;
+  color: var(--texte-doux);
+}
+.bouton-principal {
+  min-height: 52px;
+  padding: 0 32px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 26px;
+  background: var(--carte);
+  color: var(--carte-texte);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0 40px rgba(var(--etage-rgb), 0.45);
+}
+
+/* ---------- Un étage ---------- */
+
+.etage {
+  position: relative;
+  min-height: 100svh;
+  padding: 88px 68px 56px 20px; /* à droite : la place de l'année cosmique */
+  max-width: 1600px;
+  margin: 0 auto;
+  display: grid;
+  gap: 28px;
+  align-content: start;
+  scroll-snap-align: start;
+  overflow: clip;
+}
+.etage__principal {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+.etage__tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+.etage__intro { display: flex; flex-direction: column; gap: 4px; }
+.etage__numero {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--etage);
+}
+.etage__titre {
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(48px, 9vw, 72px);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(var(--etage-rgb), 0.35);
+}
+.etage__sous-titre { margin: 0; color: var(--texte-doux); }
+.etage__aide { margin: -8px 0 0; color: var(--texte-doux); }
+.etage__suivant {
+  align-self: flex-start;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texte-doux);
+  text-decoration: none;
+}
+.etage__suivant-nom { color: var(--etage); font-weight: 600; }
+
+/* ---------- Le menu des périodes ---------- */
+
+.choix { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 380px; }
+.choix__libelle { color: var(--texte-doux); }
+.choix__cadre { position: relative; }
+.choix__menu {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 48px 0 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  background: rgba(var(--etage-rgb), 0.12);
+  color: var(--texte);
+  font: inherit;
+  font-weight: 600;
+  color-scheme: dark;
+  cursor: pointer;
+}
+.choix__menu:hover { border-color: var(--etage); }
+.choix__menu option,
+.choix__menu optgroup { background: var(--ciel-milieu); color: var(--texte); }
+.choix__fleche {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  margin-top: -8px;
+  color: var(--etage);
+  pointer-events: none;
+}
+.choix__periode { display: none; }
+
+/* ---------- La loupe (curseur de l'étage) ---------- */
+
+.loupe {
+  margin-top: -18px; /* collée à la ligne du temps */
+  padding: 4px 20px 12px;
+  border-radius: 20px;
+  background: rgba(var(--etage-rgb), 0.10);
+  border: 1px solid rgba(var(--etage-rgb), 0.4);
+  box-shadow: 0 12px 32px var(--ombre-profonde);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.loupe__textes { display: flex; flex-direction: column; gap: 2px; }
+.loupe__libelle { color: var(--texte-doux); }
+.loupe__position { margin: 0; color: var(--texte-doux); }
+.loupe__position .loupe__periode { color: var(--texte); }
+.loupe__periode { font-weight: 600; }
+.loupe__date { font-family: 'JetBrains Mono', monospace; }
+.loupe__annee { margin: 0; color: var(--texte); }
+.loupe__annee strong { color: var(--etage); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+.loupe__curseur {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  cursor: grab;
+}
+.loupe__curseur:active { cursor: grabbing; }
+.loupe__curseur::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(90deg, rgba(var(--etage-rgb), 0.7) 0 1px, transparent 1px 10%), rgba(var(--etage-rgb), 0.25);
+}
+.loupe__curseur::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(var(--etage-rgb), 0.3);
+}
+.loupe__curseur::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -11px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--etoile);
+  box-shadow: 0 0 0 5px rgba(var(--etage-rgb), 0.45), 0 0 18px 6px rgba(var(--etage-rgb), 0.75);
+}
+.loupe__curseur::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--etoile);
+  box-shadow: 0 0 0 5px rgba(var(--etage-rgb), 0.45), 0 0 18px 6px rgba(var(--etage-rgb), 0.75);
+}
+
+/* ---------- La ligne du temps (plus large que l'écran) ---------- */
+
+.ligne {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--etage-rgb), 0.5) transparent;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+}
+.ligne__piste { position: relative; }
+
+.troncon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(var(--etage-rgb), 0.06), transparent 70%);
+}
+.troncon__axe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, rgba(var(--etage-rgb), 0.3), var(--etage) 50%, rgba(var(--etage-rgb), 0.3));
+}
+.troncon__saut {
+  position: absolute;
+  left: -80px;
+  color: var(--etage);
+}
+.troncon__titre {
+  position: absolute;
+  top: 6px;
+  left: 16px;
+  max-width: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.troncon__titre:hover,
+.troncon__titre--ouvert { border-color: rgba(var(--etage-rgb), 0.5); background: rgba(var(--etage-rgb), 0.10); }
+.troncon__groupe {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--etage);
+}
+.troncon__info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  vertical-align: 3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(var(--etage-rgb), 0.7);
+  color: var(--etage);
+  font-family: Fraunces, Georgia, serif;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1;
+}
+.troncon__nom {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.2;
+}
+.troncon__echelle { font-family: 'JetBrains Mono', monospace; color: var(--texte-doux); white-space: nowrap; }
+
+.ligne__points { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; pointer-events: none; }
+.ligne__item { position: absolute; width: 0; height: 0; }
+
+.point {
+  position: absolute;
+  left: -88px; /* pas de « transform » : les étiquettes passent ainsi devant les tiges */
+  top: -22px;
+  width: 176px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 16px;
+  /* Seuls le rond et l'étiquette réagissent au doigt : la zone vide du bouton
+     ne doit pas cacher le point voisin (c'était le bug du clic sur téléphone). */
+  pointer-events: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.point__repere,
+.point__textes { pointer-events: auto; }
+.point__repere {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.point__disque {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ciel-milieu);
+  border: 2px solid var(--etage);
+  box-shadow: 0 0 10px 1px rgba(var(--etage-rgb), 0.4);
+  transition: transform 200ms ease;
+}
+.point:hover .point__disque { transform: scale(1.2); }
+.point__tige { position: relative; z-index: 1; width: 2px; margin: -6px 0; background: rgba(var(--etage-rgb), 0.4); }
+.point__textes { position: relative; z-index: 2; display: flex; flex-direction: column; padding: 2px 6px; border-radius: 10px; background: var(--fond-etiquette); }
+.point__titre { font-weight: 600; line-height: 1.3; }
+.point__date { font-family: 'JetBrains Mono', monospace; color: var(--texte-doux); }
+
+.point--ouvert .point__disque {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: radial-gradient(circle, var(--etoile) 0%, var(--etoile) 30%, var(--etage) 100%);
+  box-shadow:
+    0 0 0 6px rgba(var(--etage-rgb), 0.32),
+    0 0 0 13px rgba(var(--etage-rgb), 0.12),
+    0 0 30px 12px rgba(var(--etage-rgb), 0.7),
+    0 0 100px 40px rgba(var(--etage-rgb), 0.3);
+}
+.point--ouvert .point__titre {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 20px;
+  text-shadow: 0 0 22px rgba(var(--etage-rgb), 0.55);
+}
+.point--ouvert .point__date { color: var(--etage); }
+
+/* Les ondes autour du point ouvert */
+.onde {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--etage-rgb), 0.3);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.onde--1 { width: 76px; height: 76px; opacity: 1; }
+.onde--2 { width: 160px; height: 160px; opacity: 0.6; }
+.onde--3 { width: 290px; height: 290px; opacity: 0.3; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .onde { animation: onde 12s ease-in-out infinite; }
+  .onde--2 { animation-delay: -4s; }
+  .onde--3 { animation-delay: -8s; }
+  .point--ouvert .point__disque { animation: respire 4s ease-in-out infinite; }
+}
+@keyframes onde {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.08); }
+}
+@keyframes respire {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(0.82); }
+}
+
+/* ---------- L'année cosmique (fixe, à droite) ---------- */
+
+.cosmique {
+  position: fixed;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-46%);
+  z-index: 15;
+  width: 48px;
+  height: min(72vh, 600px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.cosmique__titre {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--texte-doux);
+  white-space: nowrap;
+}
+.cosmique__regle {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-radius: 24px;
+  background: var(--verre);
+  border: 1px solid var(--verre-bord);
+}
+.cosmique__mois {
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+  color: var(--texte-doux);
+}
+.cosmique__curseur {
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: var(--etoile);
+  box-shadow: 0 0 0 4px rgba(var(--etage-rgb), 0.5), 0 0 16px 6px rgba(var(--etage-rgb), 0.8);
+}
+.cosmique__bulle { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cosmique__curseur { transition: top 450ms ease; }
+}
+
+/* ---------- La carte (téléphone : panneau en bas) ---------- */
+
+.carte {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  max-height: 80svh;
+  overflow-y: auto;
+  padding: 12px 22px 24px;
+  border-radius: 28px 28px 0 0;
+  background:
+    radial-gradient(circle 260px at 8% 0%, rgba(var(--etage-rgb), 0.16), transparent 100%),
+    linear-gradient(180deg, var(--carte-haut) 0, var(--carte) 140px);
+  color: var(--carte-texte);
+  box-shadow:
+    0 -1px 0 rgba(var(--etage-rgb), 0.6),
+    0 -18px 48px rgba(var(--etage-rgb), 0.3),
+    0 -60px 120px var(--ombre-profonde);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.carte :focus-visible { outline-color: var(--focus-carte); }
+.carte__poignee {
+  align-self: center;
+  flex: none;
+  width: 48px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--poignee);
+}
+.carte__haut { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.carte__etage {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--etage-fonce);
+}
+.carte__titre {
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.1;
+}
+.carte__titre:focus { outline: none; }
+.carte__fermer {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--carte-bouton);
+  color: var(--carte-texte);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.carte__date {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--etage-fonce);
+}
+.carte__image {
+  flex: none;
+  min-height: 96px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  border: 1.5px dashed var(--etage-fonce);
+  background:
+    radial-gradient(circle 120px at 18% 30%, rgba(var(--etage-rgb), 0.3), transparent 100%),
+    var(--etage-pale);
+  color: var(--etage-encre);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.carte__texte { margin: 0; }
+.carte__a-venir { margin: 0; color: var(--carte-texte-doux); font-style: italic; }
+.carte__nature {
+  align-self: flex-start;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: var(--etage-pale);
+  color: var(--etage-encre);
+}
+.carte__nature--bible { border: 1.5px dashed var(--etage-fonce); }
+/* Sur téléphone, la carte cache le repère : on le rappelle dans la carte. */
+.carte__repere {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--carte-bouton);
+  color: var(--carte-texte);
+}
+.carte__repere-date { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+.carte__source { margin: 0; color: var(--carte-texte-doux); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .carte { animation: monte 320ms ease-out; }
+}
+@keyframes monte {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Ordinateur : carte à droite, bulle de l'année cosmique ---------- */
+
+@media (min-width: 960px) {
+  .entete { padding: 12px 104px 12px 64px; }
+  .entete__pastille { display: none; }
+  .entete__nav {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 26px;
+    background: var(--verre);
+    border: 1px solid var(--verre-bord);
+  }
+  .entete__lien {
+    min-height: 44px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    border-radius: 22px;
+    color: var(--texte-doux);
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .entete__lien:hover { color: var(--texte); }
+  .entete__lien[aria-current] {
+    color: var(--texte);
+    font-weight: 600;
+    background: rgba(var(--etage-rgb), 0.16);
+    border-color: rgba(var(--etage-rgb), 0.5);
+  }
+
+  .etage { padding: 104px 104px 56px 64px; }
+  .arbre { padding: 22px 24px 18px; }
+  .loupe__position { flex-direction: row; flex-wrap: wrap; gap: 0 12px; }
+  .etage__principal { gap: 28px; }
+
+  .cosmique { right: 20px; width: 56px; }
+  .cosmique__bulle {
+    display: block;
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: var(--verre);
+    border: 1px solid rgba(var(--etage-rgb), 0.5);
+    color: var(--texte);
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* Quand une carte est ouverte, elle prend une colonne à droite. */
+  .etage--carte { grid-template-columns: minmax(0, 1fr) 400px; column-gap: 40px; }
+  .carte {
+    position: sticky;
+    top: 104px;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    align-self: start;
+    max-height: calc(100vh - 128px);
+    padding: 26px 32px;
+    border-radius: 32px;
+    box-shadow:
+      0 0 0 1px rgba(var(--etage-rgb), 0.6),
+      0 18px 48px rgba(var(--etage-rgb), 0.28),
+      0 40px 120px var(--ombre-profonde);
+  }
+  .carte__poignee { display: none; }
+  .carte__repere { display: none; }
+  .carte__titre { font-size: 36px; }
+  .carte__image { min-height: 180px; }
+}
+
+/* ---------- La loupe de recherche (en haut à gauche) ---------- */
+
+.entete__gauche { display: flex; align-items: center; gap: 10px; }
+.loupe-recherche {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22px;
+  border: 1px solid var(--verre-bord);
+  background: var(--verre);
+  color: var(--texte);
+  cursor: pointer;
+}
+.loupe-recherche:hover { border-color: rgba(var(--etage-rgb), 0.7); color: var(--etage); }
+
+.recherche {
+  width: min(640px, calc(100vw - 24px));
+  max-height: calc(100svh - 48px);
+  margin: 24px auto auto;
+  padding: 0;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  border-radius: 24px;
+  background: var(--ciel-milieu);
+  color: var(--texte);
+  box-shadow: 0 24px 80px var(--ombre-profonde), 0 0 40px rgba(var(--etage-rgb), 0.2);
+}
+.recherche::backdrop { background: rgba(3, 4, 12, 0.7); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.recherche__boite { display: flex; flex-direction: column; max-height: calc(100svh - 50px); }
+.recherche__haut { display: flex; gap: 10px; align-items: center; padding: 14px; border-bottom: 1px solid var(--verre-bord); }
+.recherche__champ {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  background: rgba(var(--etage-rgb), 0.08);
+  color: var(--etage);
+}
+.recherche__champ:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.recherche__champ input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  font-size: 18px;
+  outline: none;
+}
+.recherche__champ input::placeholder { color: var(--texte-doux); }
+.recherche__fermer {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte-doux);
+  font: inherit;
+  cursor: pointer;
+}
+.recherche__fermer:hover { color: var(--texte); }
+.recherche__vide { margin: 0; padding: 18px 20px; color: var(--texte-doux); }
+.recherche__liste { list-style: none; margin: 0; padding: 8px; overflow-y: auto; }
+.resultat {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.resultat:hover,
+.resultat:focus-visible { background: rgba(var(--etage-rgb), 0.12); border-color: rgba(var(--etage-rgb), 0.4); }
+.resultat__type { font-size: 14px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--etage); }
+.resultat__titre { font-weight: 600; }
+.resultat__details { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--texte-doux); }
+
+/* ---------- Le bandeau des grands groupes du vivant (étage Vie) ---------- */
+
+.vivant { position: absolute; left: 0; right: 0; top: 0; }
+.vivant__titre {
+  position: sticky;
+  left: 16px;
+  display: inline-block;
+  margin: 0 0 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+.vivant__liste { list-style: none; margin: 0; padding: 0; }
+.vivant__groupe {
+  position: absolute;
+  height: 15px;
+  display: flex;
+  align-items: center;
+}
+.vivant__barre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--etage), rgba(var(--etage-rgb), 0.35));
+}
+.vivant__groupe::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--etage);
+}
+.vivant__groupe--eteint .vivant__barre { background: linear-gradient(90deg, var(--etage), var(--eteint)); }
+.vivant__groupe--eteint::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--eteint);
+  box-shadow: 0 0 0 2px var(--ciel-milieu), 0 0 0 3.5px var(--eteint);
+}
+.vivant__nom {
+  position: sticky;
+  left: 8px;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--fond-etiquette);
+  font-size: 13px;
+  line-height: 15px;
+  color: var(--texte);
+  white-space: nowrap;
+}
+
+/* ---------- L'arbre des espèces humaines (étage Humains) ---------- */
+
+.arbre {
+  padding: 16px 14px 14px;
+  border-radius: 24px;
+  background: rgba(var(--etage-rgb), 0.06);
+  border: 1px solid rgba(var(--etage-rgb), 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-margin-top: 88px;
+}
+.arbre__titre { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px; }
+.arbre__aide { margin: 4px 0 0; color: var(--texte-doux); }
+.arbre__defilement {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--etage-rgb), 0.5) transparent;
+}
+.arbre__plan { position: relative; }
+.arbre__traits { position: absolute; inset: 0; overflow: visible; }
+.arbre__grille { stroke: var(--verre-bord); stroke-width: 1; }
+.arbre__graduation { fill: var(--texte-doux); font-family: 'JetBrains Mono', monospace; font-size: 13px; text-anchor: middle; }
+.arbre__graduation--fin { fill: var(--etage); }
+.arbre__lien { fill: none; stroke: rgba(var(--etage-rgb), 0.8); stroke-width: 1.5; }
+.arbre__lien--incertain { stroke-dasharray: 3 4; stroke: rgba(var(--etage-rgb), 0.6); }
+.arbre__barre { stroke: var(--etage); stroke-width: 5; stroke-linecap: round; }
+.arbre__espece--choisie .arbre__barre { stroke: var(--etoile); filter: drop-shadow(0 0 6px rgba(var(--etage-rgb), 0.9)); }
+.arbre__fleche { fill: none; stroke: var(--etage); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.arbre__fin { fill: var(--ciel-milieu); stroke: var(--eteint); stroke-width: 2; }
+.arbre__fin--halo { fill: none; stroke-width: 1.2; }
+.arbre__liste { list-style: none; margin: 0; padding: 0; }
+.arbre__liste li { position: absolute; }
+.espece {
+  min-height: 28px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--fond-etiquette);
+  color: var(--texte);
+  font: inherit;
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.espece__nom { font-family: Fraunces, Georgia, serif; font-style: italic; font-weight: 600; }
+.espece:hover { border-color: rgba(var(--etage-rgb), 0.6); }
+.espece--choisie { border-color: var(--etage); background: rgba(var(--etage-rgb), 0.22); }
+.arbre__fiche {
+  min-height: 96px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: var(--verre);
+  border: 1px solid var(--verre-bord);
+}
+.arbre__fiche p { margin: 0; }
+.arbre__fiche-titre strong { font-family: Fraunces, Georgia, serif; font-size: 22px; font-style: italic; }
+.arbre__fiche-dates { font-family: 'JetBrains Mono', monospace; color: var(--etage); }
+.arbre__fiche-texte { margin-top: 6px !important; }
+.arbre__fiche-parent { margin-top: 6px !important; color: var(--texte-doux); }
+.arbre__fiche-vide { color: var(--texte-doux); }
+.arbre__lien-bouton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--etage);
+  font: inherit;
+  font-style: italic;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.arbre__source { margin: 0; color: var(--texte-doux); font-size: 15px; }
+
+/* ---------- La fiche d'une période ---------- */
+
+.carte__sous-titre { margin: 4px 0 0; font-weight: 600; color: var(--etage-fonce); }
+.carte__points { margin: 0; padding-left: 22px; }
+.carte__points li + li { margin-top: 2px; }
+
+/* ---------- Les grandes ères (Précambrien, Paléozoïque, Mésozoïque, Cénozoïque) ---------- */
+
+.ere {
+  position: absolute;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ere) 30%, transparent), color-mix(in srgb, var(--ere) 14%, transparent));
+  border: 1px solid color-mix(in srgb, var(--ere) 60%, transparent);
+  border-left: 4px solid var(--ere);
+}
+.ere__nom {
+  position: sticky;
+  left: 12px;
+  padding: 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ere);
+  white-space: nowrap;
+}
+.ere__detail { font-weight: 500; letter-spacing: 0.02em; text-transform: none; color: var(--texte-doux); }
+.troncon--ere {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ere) 12%, transparent), transparent 70%);
+  border-top: 3px solid color-mix(in srgb, var(--ere) 70%, transparent);
+}
+.troncon__pastille {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 4px;
+  background: var(--periode);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+  vertical-align: 1px;
+}
+
+/* ---------- Changement de thème : la ligne s'efface, la suivante apparaît ---------- */
+
+.ligne, .lignev { transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease; }
+.ligne--sortie {
+  opacity: 0;
+  transform: translateX(-32px) scale(0.98);
+  filter: blur(6px);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ligne--entree { animation: ligne-entree 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  .ligne--entree .troncon__axe {
+    transform-origin: left center;
+    animation: axe-trace 0.9s cubic-bezier(0.3, 0.6, 0.2, 1) backwards;
+  }
+  .ligne--entree .ligne__item {
+    animation: point-entree 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: calc(0.15s + var(--i, 0) * 0.04s);
+  }
+}
+@keyframes ligne-entree {
+  from { opacity: 0; transform: translateX(40px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes axe-trace {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes point-entree {
+  from { opacity: 0; translate: 0 14px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* ---------- Le bestiaire (étage Vie) ---------- */
+
+.bestiaire {
+  position: absolute;
+  top: 92px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.animal {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--verre-bord);
+  border-radius: 16px;
+  background: var(--fond-etiquette);
+  color: var(--texte);
+  font: inherit;
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.animal:hover { border-color: rgba(var(--etage-rgb), 0.7); }
+.animal--ouvert { border-color: var(--etage); background: rgba(var(--etage-rgb), 0.2); }
+.animal__pastille { width: 9px; height: 9px; border-radius: 50%; background: var(--animal, var(--etage)); }
+.animal[data-groupe='corps-mou'] { --animal: #F49AC1; }
+.animal[data-groupe='arthropode'] { --animal: #F6B26B; }
+.animal[data-groupe='mollusque'] { --animal: #D5A6BD; }
+.animal[data-groupe='corde'],
+.animal[data-groupe='poisson'] { --animal: #6FA8DC; }
+.animal[data-groupe='amphibien'] { --animal: #93C47D; }
+.animal[data-groupe='reptile'],
+.animal[data-groupe='reptile-marin'] { --animal: #76A5AF; }
+.animal[data-groupe='synapside'] { --animal: #C27BA0; }
+.animal[data-groupe='dinosaure'] { --animal: #E06666; }
+.animal[data-groupe='pterosaure'] { --animal: #B4A7D6; }
+.animal[data-groupe='oiseau'] { --animal: #FFD966; }
+.animal[data-groupe='mammifere'] { --animal: #E8C4A0; }
+
+.carte__fiche { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; }
+.carte__fiche div { display: contents; }
+.carte__fiche dt { color: var(--etage-fonce); font-weight: 600; }
+.carte__fiche dd { margin: 0; }
+
+/* ---------- Téléphone : la ligne verticale ---------- */
+
+@media (max-width: 699px) {
+  /* Les étages sont longs : pas d'aimantation, on défile librement avec le pouce. */
+  html { scroll-snap-type: none; }
+  .etage, .accueil { scroll-snap-align: none; }
+  .etage { padding-left: 14px; gap: 20px; }
+  .etage__principal { gap: 18px; }
+}
+
+.reperev {
+  position: sticky;
+  top: 70px;
+  z-index: 6;
+  padding: 8px 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--ciel-milieu) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--etage-rgb), 0.45);
+  box-shadow: 0 8px 24px var(--ombre-profonde);
+}
+.reperev p { margin: 0; }
+.reperev__ligne { color: var(--texte-doux); font-size: 16px; }
+.reperev__ligne .loupe__date { font-size: 15px; }
+.reperev__ligne .loupe__periode { color: var(--texte); font-weight: 600; }
+.reperev__annee { font-size: 15px; color: var(--texte-doux); }
+.reperev__annee strong { color: var(--etage); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+.lignev { display: flex; flex-direction: column; }
+.lignev__saut {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 6px 10px;
+  color: rgba(var(--etage-rgb), 0.8);
+  font-size: 14px;
+}
+.lignev__saut span { color: var(--texte-doux); }
+.lignev__ere {
+  margin: 18px 0 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border-left: 4px solid var(--ere);
+  background: color-mix(in srgb, var(--ere) 18%, transparent);
+  color: var(--ere);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lignev__troncon {
+  position: relative;
+  padding: 6px 0 18px;
+  border-radius: 18px;
+  scroll-margin-top: 150px;
+}
+.lignev__troncon--ere {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ere) 12%, transparent), transparent 260px);
+  border-top: 3px solid color-mix(in srgb, var(--ere) 70%, transparent);
+}
+.troncon__titre.lignev__titre { position: static; max-width: none; margin: 6px 4px 0; }
+.lignev .bestiaire { position: static; margin: 10px 8px 0; }
+.lignev .animal { font-size: 14px; min-height: 34px; }
+
+.lignev__points { position: relative; list-style: none; margin: 10px 0 0; padding: 0; }
+.lignev__points::before {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, rgba(var(--etage-rgb), 0.25), var(--etage) 20%, var(--etage) 80%, rgba(var(--etage-rgb), 0.25));
+}
+.lignev__item { position: relative; }
+.pointv {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 6px 10px 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.pointv:active { background: rgba(var(--etage-rgb), 0.12); }
+.pointv--ouvert { background: rgba(var(--etage-rgb), 0.16); border-color: rgba(var(--etage-rgb), 0.5); }
+.pointv__disque {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border-radius: 50%;
+  border: 3px solid var(--etage);
+  background: var(--ciel-milieu);
+}
+.pointv--ouvert .pointv__disque {
+  background: var(--etoile);
+  box-shadow: 0 0 0 4px rgba(var(--etage-rgb), 0.35), 0 0 16px 4px rgba(var(--etage-rgb), 0.7);
+}
+.pointv__textes { display: flex; flex-direction: column; min-width: 0; }
+.pointv__titre { font-weight: 600; line-height: 1.3; }
+.pointv__date { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--texte-doux); }
+
+.vivants { margin: 10px 8px 0; }
+.vivants__titre {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+.vivants__liste { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.vivants__groupe {
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--verre-bord);
+  background: var(--fond-etiquette);
+  font-size: 14px;
+}
+.vivants__groupe--nouveau { border-color: var(--etage); color: var(--texte); }
+.vivants__mention { color: var(--etage); }
+.vivants__groupe--fin { border-color: var(--eteint); }
+.vivants__deja { margin: 6px 0 0; font-size: 14px; color: var(--texte-doux); }
+.vivants__mention--fin { color: var(--eteint); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lignev.ligne--entree { animation: ligne-entree 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  .lignev.ligne--entree .lignev__item {
+    animation: point-entree 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: calc(0.1s + var(--i, 0) * 0.04s);
+  }
+}
+
+/* ======================================================================
+   Pages d'étage et de période, zoom, lieux, arbres, images
+   ====================================================================== */
+
+/* ---------- Zoom (page et frises) ---------- */
+
+.zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--verre-bord);
+  background: var(--verre);
+}
+.zoom__bouton,
+.zoom__valeur {
+  min-width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  cursor: pointer;
+}
+.zoom__bouton { font-size: 22px; line-height: 1; }
+.zoom__bouton:hover:not(:disabled),
+.zoom__valeur:hover { background: rgba(var(--etage-rgb), 0.18); }
+.zoom__bouton:disabled { opacity: 0.35; cursor: default; }
+.zoom__valeur { padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 15px; white-space: nowrap; color: var(--texte-doux); }
+.entete__zoom { margin-left: auto; }
+@media (max-width: 699px) {
+  .entete__zoom .zoom__valeur { display: none; }
+  .entete__zoom .zoom__bouton { min-width: 34px; height: 34px; }
+  .entete__pastille { font-size: 15px; padding: 5px 10px; }
+}
+
+.etage__outils { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.etage__ouvrir {
+  align-self: flex-start;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--etage-rgb), 0.6);
+  background: rgba(var(--etage-rgb), 0.12);
+  color: var(--texte);
+  font-weight: 600;
+  text-decoration: none;
+}
+.etage__ouvrir:hover { background: rgba(var(--etage-rgb), 0.24); }
+
+/* ---------- L'année cosmique : masquer, faire glisser ---------- */
+
+.cosmique { transition: transform 0.35s ease, opacity 0.35s ease; }
+.cosmique--masquee { transform: translate(90px, -46%); opacity: 0; pointer-events: none; }
+.cosmique__masquer {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--verre-bord);
+  border-radius: 50%;
+  background: var(--verre);
+  color: var(--texte-doux);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.cosmique__masquer:hover { color: var(--texte); border-color: rgba(var(--etage-rgb), 0.7); }
+.cosmique__regle { touch-action: none; cursor: pointer; }
+.cosmique__curseur { cursor: grab; }
+.cosmique__curseur::after { content: ''; position: absolute; inset: -14px; } /* zone de prise plus large pour le doigt */
+.cosmique__curseur--glisse { cursor: grabbing; transition: none !important; }
+.cosmique__curseur--glisse .cosmique__bulle,
+.cosmique__curseur:focus-visible .cosmique__bulle {
+  display: block;
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--fond-etiquette);
+  border: 1px solid rgba(var(--etage-rgb), 0.6);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  color: var(--texte);
+}
+.cosmique__montrer {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  z-index: 15;
+  transform: translateY(-50%);
+  min-height: 44px;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--verre-bord);
+  border-right: 0;
+  border-radius: 14px 0 0 14px;
+  background: var(--verre);
+  color: var(--texte);
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+}
+
+/* ---------- Voies (un lieu par ligne) ---------- */
+
+.voie { position: absolute; left: 0; height: 30px; pointer-events: none; }
+.voie__nom {
+  position: sticky;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  padding: 3px 12px 3px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--lieu) 60%, transparent);
+  background: color-mix(in srgb, var(--lieu) 16%, var(--ciel-milieu));
+  color: var(--lieu);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.voie__nom::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--lieu); }
+.troncon__axe[style*='--lieu'] {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--lieu) 30%, transparent), var(--lieu) 50%, color-mix(in srgb, var(--lieu) 30%, transparent));
+}
+.ligne__item[style*='--lieu'] .point__disque { border-color: var(--lieu); }
+
+.lieux { position: relative; width: 100%; max-width: 380px; }
+.lieux__resume {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 52px;
+  justify-content: center;
+  padding: 6px 44px 6px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  background: rgba(var(--etage-rgb), 0.08);
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+.lieux__resume::-webkit-details-marker { display: none; }
+.lieux__resume::after { content: '▾'; position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--etage); }
+.lieux[open] .lieux__resume::after { content: '▴'; }
+.lieux__libelle { font-size: 14px; color: var(--texte-doux); }
+.lieux__choisis { font-weight: 600; }
+.lieux__liste {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(420px, calc(100vw - 40px));
+  margin: 0;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+  background: var(--ciel-milieu);
+  box-shadow: 0 20px 50px var(--ombre-profonde);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lieux__choix {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.lieux__choix:hover { background: rgba(var(--etage-rgb), 0.12); }
+.lieux__choix input { width: 20px; height: 20px; accent-color: var(--lieu); }
+.lieux__pastille { width: 12px; height: 12px; border-radius: 50%; background: var(--lieu); }
+.lieux__raccourcis { display: flex; gap: 8px; margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--verre-bord); }
+.lieux__raccourcis button,
+.arbre-d__boutons button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--verre-bord);
+  background: var(--verre);
+  color: var(--texte);
+  font: inherit;
+  cursor: pointer;
+}
+.lieux__raccourcis button:hover,
+.arbre-d__boutons button:hover { border-color: rgba(var(--etage-rgb), 0.7); }
+.pointv__lieux { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.lieu-pastille {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--lieu) 60%, transparent);
+  color: var(--lieu);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- Les pages ---------- */
+
+.page {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 84px 68px 48px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.page .etage { padding: 0; min-height: 0; max-width: none; margin: 0; scroll-snap-align: none; }
+.page__barre { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.page__note { margin: 0; color: var(--texte-doux); max-width: 46ch; }
+.page__suite { display: flex; flex-direction: column; gap: 32px; }
+.page__titre2 { margin: 0 0 12px; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px; }
+.page__ere {
+  align-self: flex-start;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 12px;
+  border-left: 4px solid var(--ere);
+  background: color-mix(in srgb, var(--ere) 18%, transparent);
+  color: var(--ere);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.fil ol { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--texte-doux); }
+.fil li + li::before { content: '›'; margin-right: 6px; }
+.fil a { color: var(--texte-doux); }
+.fil a:hover { color: var(--texte); }
+.fil [aria-current] { color: var(--texte); font-weight: 600; }
+.page__navigation {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--verre-bord);
+}
+.page__navigation a { color: var(--texte); font-weight: 600; text-decoration: none; padding: 10px 0; }
+.page__navigation a:hover { color: var(--etage); }
+.page__navigation > :last-child { text-align: right; }
+.page__navigation > :nth-child(2) { text-align: center; color: var(--texte-doux); }
+.troncon__titre--lien { text-decoration: none; }
+.troncon__titre--lien:hover { border-color: rgba(var(--etage-rgb), 0.6); background: rgba(var(--etage-rgb), 0.14); }
+.carte__lien-page { align-self: flex-start; font-weight: 600; color: var(--etage-fonce); }
+
+.periode-fiche__texte { margin: 0; max-width: 70ch; font-size: 19px; }
+.periode-fiche__points { margin: 10px 0 0; padding-left: 22px; color: var(--texte-doux); }
+.vivants__liste--page { gap: 6px; }
+
+.liste-evenements { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-width: 900px; }
+.liste-evenements__bouton {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) 1fr;
+  gap: 2px 16px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.liste-evenements__bouton:hover { background: rgba(var(--etage-rgb), 0.1); border-color: rgba(var(--etage-rgb), 0.4); }
+.liste-evenements__date { grid-row: span 2; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--etage); }
+.liste-evenements__titre { font-weight: 600; }
+.liste-evenements__resume { color: var(--texte-doux); }
+@media (max-width: 699px) {
+  .page { padding: 76px 14px 40px; }
+  .liste-evenements__bouton { grid-template-columns: 1fr; }
+  .liste-evenements__date { grid-row: auto; }
+  .page__navigation { grid-template-columns: 1fr 1fr; }
+  .page__navigation > :nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* ---------- Images ---------- */
+
+.image-wiki {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(var(--etage-rgb), 0.08);
+  border: 1px solid var(--verre-bord);
+}
+.image-wiki img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.image-wiki--moyenne { aspect-ratio: 4 / 3; }
+.image-wiki--carte { aspect-ratio: 16 / 10; flex: none; }
+.image-wiki--mini { display: inline-block; flex: none; width: 56px; height: 56px; border-radius: 12px; }
+.image-wiki figcaption { position: absolute; right: 6px; bottom: 6px; }
+.image-wiki figcaption a {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 13px;
+  text-decoration: none;
+}
+.image-wiki__attente {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texte-doux);
+  font-size: 14px;
+}
+.carte .image-wiki { border-color: rgba(0, 0, 0, 0.1); background: rgba(0, 0, 0, 0.05); }
+.carte .image-wiki__attente { color: #6b6455; }
+
+.bestiaire-grille,
+.arbre-d__especes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.espece-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 10px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--verre-bord);
+  background: var(--verre);
+}
+.espece-carte p { margin: 0; }
+.espece-carte .image-wiki { margin-bottom: 6px; }
+.espece-carte__nom { font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 20px; }
+.espece-carte__dates { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--etage); }
+.espece-carte__groupe { font-size: 14px; color: var(--texte-doux); text-transform: uppercase; letter-spacing: 0.05em; }
+.espece-carte__texte { color: var(--texte-doux); }
+.espece-carte--eteinte { border-color: color-mix(in srgb, var(--eteint) 45%, transparent); }
+.espece-carte__eteint { color: var(--eteint); font-family: Inter, system-ui, sans-serif; font-size: 15px; font-weight: 500; }
+
+/* ---------- Arbres déroulants ---------- */
+
+.arbre-d { display: flex; flex-direction: column; gap: 14px; }
+.arbre-d__tete { display: flex; flex-direction: column; gap: 6px; }
+.arbre-d__titre { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 30px; }
+.arbre-d__aide { margin: 0; color: var(--texte-doux); }
+.arbre-d__boutons { display: flex; gap: 8px; }
+.arbre-d__groupes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.arbre-d__niveau[data-niveau]:not([data-niveau='0']) {
+  margin: 8px 0 4px 26px;
+  padding-left: 16px;
+  border-left: 2px solid rgba(var(--etage-rgb), 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.arbre-d__bouton {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--verre-bord);
+  border-radius: 18px;
+  background: var(--verre);
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.arbre-d__bouton:hover,
+.arbre-d__bouton[aria-expanded='true'] { border-color: rgba(var(--etage-rgb), 0.7); background: rgba(var(--etage-rgb), 0.12); }
+.arbre-d__groupe--eteint > .arbre-d__bouton { border-color: color-mix(in srgb, var(--eteint) 50%, transparent); }
+.arbre-d__chevron { flex: none; width: 18px; margin-top: 16px; color: var(--etage); }
+.arbre-d__textes { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.arbre-d__nom { font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 21px; }
+.arbre-d__nombre { font-family: Inter, system-ui, sans-serif; font-size: 14px; font-weight: 500; color: var(--texte-doux); }
+.arbre-d__depuis { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--etage); }
+.arbre-d__texte { color: var(--texte-doux); }
+.arbre-d__credit { margin: 0; font-size: 14px; color: var(--texte-doux); }
+@media (max-width: 699px) {
+  .entete { gap: 8px; padding: 10px 12px; }
+  .entete__pastille { white-space: nowrap; font-size: 14px; padding: 5px 9px; }
+}
+@media (max-width: 380px) {
+  .entete__marque { font-size: 22px; }
+}
+
+/* ======================================================================
+   La spirale du temps (page d'essai #/spirale)
+   ====================================================================== */
+
+.entete__essai {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--verre-bord);
+  font-size: 12px;
+  color: var(--texte-doux);
+}
+
+.spirale { position: fixed; inset: 0; overflow: hidden; }
+.spirale__scene { position: absolute; inset: 0; touch-action: none; cursor: grab; outline: none; }
+.spirale__scene:active { cursor: grabbing; }
+.spirale__scene:focus-visible { box-shadow: inset 0 0 0 3px var(--focus); }
+.spirale__toile { position: absolute; inset: 0; width: 100%; height: 100%; }
+.spirale__points { position: absolute; inset: 0; pointer-events: none; }
+.spirale__point { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.point.spirale__bouton {
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  pointer-events: auto;
+}
+.spirale__etiquette {
+  position: absolute;
+  display: block;
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 240px;
+  padding: 8px;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  border-radius: 10px;
+  background: var(--fond-etiquette);
+  color: var(--texte);
+  font-size: 18px;
+  line-height: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.spirale__etiquette:hover { box-shadow: 0 0 0 1px rgba(var(--etage-rgb), 0.6); }
+
+.verre {
+  background: var(--verre);
+  border: 1px solid var(--verre-bord);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.spirale__legende {
+  position: absolute;
+  top: 84px;
+  left: 20px;
+  max-width: 340px;
+  padding: 14px 18px;
+  border-radius: 20px;
+}
+.spirale__legende p { margin: 0; }
+.spirale__marque { font-family: Fraunces; font-weight: 700; font-size: 26px; }
+.spirale__regle { color: var(--texte-doux); font-size: 18px; }
+.spirale__etages { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 18px; }
+.spirale__etages li { display: flex; align-items: center; }
+.spirale__etage { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 8px; border: 0; border-radius: 12px; background: transparent; color: var(--texte); font: inherit; cursor: pointer; }
+.spirale__etage:hover { background: rgba(var(--etage-rgb), 0.12); }
+.spirale__pastille { width: 10px; height: 10px; border-radius: 50%; background: var(--etage); box-shadow: 0 0 8px rgba(var(--etage-rgb), 0.7); }
+.spirale__indicateur {
+  position: absolute;
+  top: 84px;
+  right: 84px;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+}
+.spirale__indicateur-etage { color: var(--etage); }
+.spirale__boutons {
+  position: absolute;
+  right: 84px;
+  bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.spirale__action {
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  color: var(--texte);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.spirale__action:hover { border-color: rgba(var(--etage-rgb), 0.7); }
+.spirale__liste {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  max-width: min(420px, calc(100vw - 40px));
+  max-height: 50vh;
+  overflow: auto;
+  border-radius: 16px;
+}
+.spirale__liste summary { min-height: 46px; display: flex; align-items: center; padding: 0 16px; cursor: pointer; font-weight: 600; font-size: 18px; }
+.spirale__liste ol { list-style: none; margin: 0; padding: 0 8px 10px; }
+.spirale__liste button {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.spirale__liste button:hover { background: rgba(var(--etage-rgb), 0.14); }
+.spirale__liste-date { font-family: 'JetBrains Mono'; font-size: 18px; color: var(--texte-doux); }
+@media (max-width: 699px) {
+  .spirale__legende { top: 70px; left: 12px; right: 12px; max-width: none; padding: 10px 14px; }
+  .spirale__marque { display: none; }
+  .spirale__etages { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 4px; margin-top: 4px; }
+  .spirale__etages li { flex: 0 0 auto; }
+  .spirale__etage { min-height: 44px; padding: 4px 6px; font-size: 18px; }
+  .spirale__indicateur { top: 148px; right: auto; left: 12px; align-items: flex-start; font-size: 18px; padding: 8px 12px; }
+  .spirale__boutons { right: 8px; left: 8px; bottom: 8px; justify-content: center; flex-wrap: wrap; gap: 8px; }
+  .spirale__action { min-height: 44px; padding: 0 12px; font-size: 18px; white-space: nowrap; }
+  .spirale__boutons .zoom__bouton { min-width: 44px; min-height: 44px; height: 44px; }
+  .spirale__liste { display: block; left: 8px; bottom: 112px; max-width: calc(100vw - 16px); max-height: 28vh; }
+  .spirale__liste-date { font-size: 18px; }
+}
