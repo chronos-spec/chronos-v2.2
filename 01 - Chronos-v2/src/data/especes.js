@@ -49,3 +49,13 @@ export const METISSAGES = [
   ['sapiens', 'denisova'],
   ['neandertal', 'denisova'],
 ];
+
+// Les grandes familles, pour la liste déroulante de la page Humains.
+export const GROUPES_HUMAINS = [
+  { id: 'gh-premiers', nom: 'Les premiers hominines', texte: 'Entre 7 et 4,4 millions d’années, en Afrique : les plus anciens membres connus de notre lignée.', especes: ['sahelanthropus', 'orrorin', 'ardipithecus'] },
+  { id: 'gh-australopitheques', nom: 'Les australopithèques', texte: 'Ils marchent debout mais gardent un petit cerveau. Lucy en est la plus célèbre.', especes: ['anamensis', 'afarensis', 'africanus'] },
+  { id: 'gh-paranthropes', nom: 'Les paranthropes', texte: 'Une branche « robuste », spécialisée dans les plantes dures, éteinte sans descendants.', especes: ['paranthropus'] },
+  { id: 'gh-premiers-homo', nom: 'Les premiers Homo', texte: 'Un cerveau un peu plus gros et des outils taillés.', especes: ['habilis', 'rudolfensis', 'naledi'] },
+  { id: 'gh-erectus', nom: 'Homo erectus et ses descendants d’Asie et d’Europe', texte: 'Le grand voyageur, sorti d’Afrique, et les espèces nées de lui sur d’autres continents.', especes: ['erectus', 'antecessor', 'floresiensis', 'luzonensis'] },
+  { id: 'gh-recents', nom: 'Les humains récents', texte: 'L’ancêtre commun et ses trois branches : Néandertal, les Dénisoviens et nous.', especes: ['heidelbergensis', 'neandertal', 'denisova', 'sapiens'] },
+];

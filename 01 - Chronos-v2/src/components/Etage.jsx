@@ -5,20 +5,35 @@ import { useEstMobile } from '../lib/mobile.js';
 import Frise from './Frise.jsx';
 import Carte from './Carte.jsx';
 import ChoixCategorie from './ChoixCategorie.jsx';
-import ArbreHumain from './ArbreHumain.jsx';
+import ZoomControles from './ZoomControles.jsx';
+import { lienEtage } from '../lib/route.js';
 import { GROUPES_VIVANT, RANGS_VIVANT } from '../data/vivant.js';
-import { construireLigne, lirePosition, themesDe } from '../lib/echelle.js';
+import { construireLigne, lirePosition, themesDe, xPourAns } from '../lib/echelle.js';
+
+// Zoom des frises (pages d'étage et de période) : en dessous de 1, vue d'ensemble (événements principaux).
+const ZOOMS = [0.5, 1, 2, 4];
+const NOMS_ZOOM = { 0.5: 'Vue d’ensemble', 1: 'Normal', 2: '× 2', 4: '× 4' };
 
 const mouvementReduit = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export default function Etage({ etage, numero, total, suivant, parId, carteOuverte, onBasculer, onFermer, onRefermer, onRepere, cible }) {
+// mode « accueil » : l'étage dans la page d'accueil (inchangé).
+// mode « page » : la page dédiée à l'étage ou à une période (zoom, voies par lieu, liens vers les périodes).
+export default function Etage({
+  etage, numero, total, suivant, parId, carteOuverte, onBasculer, onFermer, onRefermer, onRepere, cible,
+  mode = 'accueil', outils = null, voies = null, filtre = null, lienPeriode = null, sansMenu = false, titre = null, zoomInitial = 1,
+}) {
+  const page = mode === 'page';
+  const [zoom, setZoom] = useState(zoomInitial);
   // Un étage peut avoir plusieurs thèmes (Histoire, Aujourd'hui) : une seule ligne affichée à la fois.
   const themes = useMemo(() => themesDe(etage), [etage]);
   const [theme, setTheme] = useState(themes[0]);
   const [sortie, setSortie] = useState(false); // la ligne actuelle s'efface
   const themeDe = (idCategorie) => etage.categories.find((c) => c.id === idCategorie)?.theme || 'principal';
-  const ligne = useMemo(() => construireLigne(etage, parId, theme), [etage, parId, theme]);
+  const ligne = useMemo(
+    () => construireLigne(etage, parId, theme, { zoom: page ? zoom : 1, filtre }),
+    [etage, parId, theme, zoom, page, filtre]
+  );
   const conteneur = useRef(null);
   const apresChangement = useRef(null); // ce qu'on fait une fois la nouvelle ligne affichée
   const attente = useRef(0);
@@ -99,13 +114,9 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
   };
 
   // La recherche demande d'aller à un endroit précis de cet étage.
-  const [especeChoisie, setEspeceChoisie] = useState(null);
   useEffect(() => {
     if (!cible || cible.etage !== etage.id) return;
-    if (cible.type === 'espece') {
-      setEspeceChoisie(cible.id);
-      return;
-    }
+    if (cible.type === 'espece') return; // géré par la page de l'étage (arbre humain)
     if (cible.type === 'carte') {
       const fiche = parId[cible.id];
       if (fiche && themeDe(fiche.categorie) !== theme) {
@@ -135,15 +146,15 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
       x = c.x(ligneRef.current);
     }
     if (x !== null) {
-      el.scrollTo({ left: Math.max(0, x - el.clientWidth / 2), behavior: mouvementReduit() ? 'auto' : 'smooth' });
+      el.scrollTo({ left: Math.max(0, x - el.clientWidth / 2), behavior: c.instant || mouvementReduit() ? 'auto' : 'smooth' });
     }
   }
 
   // Téléphone : on fait défiler la page jusqu'à l'élément visé.
   const mobileRef = useRef(mobile);
   mobileRef.current = mobile;
-  function defilerVers(el, bloc = 'center') {
-    el?.scrollIntoView({ block: bloc, behavior: mouvementReduit() ? 'auto' : 'smooth' });
+  function defilerVers(el, bloc = 'center', instant = false) {
+    el?.scrollIntoView({ block: bloc, behavior: instant || mouvementReduit() ? 'auto' : 'smooth' });
   }
   function trancheDe(ans) {
     const t = ligneRef.current.troncons.find((tr) => !tr.sansEchelle && ans <= tr.debutAns && ans >= tr.finAns);
@@ -156,7 +167,7 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
       if (el) defilerVers(el);
       else defilerVers(document.getElementById(`troncon-${etage.id}-${fiche?.categorie}`), 'start');
     } else if (c.ans !== undefined) {
-      defilerVers(trancheDe(c.ans), 'start');
+      defilerVers(trancheDe(c.ans), 'start', c.instant);
     }
   }
 
@@ -208,23 +219,84 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
     else glisserVers(false);
   };
 
+  // Zoomer la frise en gardant au centre l'époque regardée.
+  const changerZoom = (nouveau) => {
+    if (nouveau === zoom) return;
+    const ans = etat.position.ans;
+    apresZoom.current = ans;
+    setZoom(nouveau);
+  };
+  const apresZoom = useRef(null);
+  useEffect(() => {
+    const ans = apresZoom.current;
+    apresZoom.current = null;
+    const el = conteneur.current;
+    if (ans === null || ans === undefined || !el) return;
+    const x = xPourAns(ligne, ans);
+    el.scrollLeft = Math.max(0, x - el.clientWidth / 2);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoom]);
+  const iZoom = ZOOMS.indexOf(zoom);
+  const zoomMoins = () => changerZoom(ZOOMS[Math.max(0, iZoom - 1)]);
+  const zoomPlus = () => changerZoom(ZOOMS[Math.min(ZOOMS.length - 1, iZoom + 1)]);
+  // Ctrl + molette (ou pincement sur le pavé tactile) zoome la frise.
+  const zoomRef = useRef({});
+  zoomRef.current = { zoomMoins, zoomPlus };
+  useEffect(() => {
+    const el = conteneur.current;
+    if (!page || !el) return undefined;
+    let dernier = 0;
+    const roue = (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const maintenant = Date.now();
+      if (maintenant - dernier < 250) return;
+      dernier = maintenant;
+      if (e.deltaY > 0) zoomRef.current.zoomMoins();
+      else zoomRef.current.zoomPlus();
+    };
+    el.addEventListener('wheel', roue, { passive: false });
+    return () => el.removeEventListener('wheel', roue);
+  }, [page, theme, mobile]);
+
+  const Titre = page ? 'h1' : 'h2';
+
   return (
     <section
       ref={section}
       id={etage.id}
       className={ouverte ? 'etage etage--carte' : 'etage'}
       data-etage={etage.id}
-      data-section={etage.id}
+      data-section={page ? undefined : etage.id}
       aria-labelledby={`titre-${etage.id}`}
     >
       <div className="etage__principal">
         <div className="etage__tete">
           <div className="etage__intro">
-            <p className="etage__numero">Étage {numero} sur {total}</p>
-            <h2 id={`titre-${etage.id}`} className="etage__titre" tabIndex={-1}>{etage.nom}</h2>
-            <p className="etage__sous-titre">{etage.sousTitre}</p>
+            <p className="etage__numero">{page ? (titre ? titre.surTitre : `Étage ${numero} sur ${total}`) : `Étage ${numero} sur ${total}`}</p>
+            <Titre id={`titre-${etage.id}`} className="etage__titre" tabIndex={-1}>{titre ? titre.nom : etage.nom}</Titre>
+            <p className="etage__sous-titre">{titre ? titre.sousTitre : etage.sousTitre}</p>
+            {!page && (
+              <a className="etage__ouvrir" href={lienEtage(etage.id)}>
+                Explorer l’étage {etage.nom} <span aria-hidden="true">→</span>
+              </a>
+            )}
           </div>
-          <ChoixCategorie etage={etage} valeur={etat.position.troncon.categorie.id} onChanger={allerA} />
+          <div className="etage__outils">
+            {outils}
+            {!sansMenu && <ChoixCategorie etage={etage} valeur={etat.position.troncon.categorie.id} onChanger={allerA} />}
+            {page && (
+              <ZoomControles
+                libelle="Zoom de la frise"
+                valeur={NOMS_ZOOM[zoom]}
+                onMoins={zoomMoins}
+                onPlus={zoomPlus}
+                onRemettre={() => changerZoom(1)}
+                peutMoins={iZoom > 0}
+                peutPlus={iZoom < ZOOMS.length - 1}
+              />
+            )}
+          </div>
         </div>
 
         {mobile ? (
@@ -232,6 +304,9 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
             <RepereVertical etage={etage} position={etat.position} />
             <FriseVerticale
               key={theme}
+              zoom={page ? zoom : 1}
+              voies={voies}
+              lienPeriode={lienPeriode}
               classe={sortie ? 'ligne--sortie' : 'ligne--entree'}
               etage={etage}
               ligne={ligne}
@@ -244,6 +319,8 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
           <>
             <Frise
               key={theme}
+              voies={voies}
+              lienPeriode={lienPeriode}
               classe={sortie ? 'ligne--sortie' : 'ligne--entree'}
               ref={conteneur}
               etage={etage}
@@ -262,12 +339,12 @@ export default function Etage({ etage, numero, total, suivant, parId, carteOuver
         <p className="etage__aide">
           {mobile
             ? 'Touchez un événement pour ouvrir sa carte, ou le nom d’une période pour la découvrir.'
-            : 'Faites glisser la ligne ou le curseur. Touchez un point pour ouvrir sa carte, ou le nom d’une période pour la découvrir.'}
+            : page
+              ? 'Faites glisser la ligne ou le curseur ; zoomez avec − et + (ou Ctrl + molette). Touchez un point pour ouvrir sa carte, ou le nom d’une période pour ouvrir sa page.'
+              : 'Faites glisser la ligne ou le curseur. Touchez un point pour ouvrir sa carte, ou le nom d’une période pour la découvrir.'}
         </p>
 
-        {etage.id === 'humains' && <ArbreHumain choisie={especeChoisie} onChoisir={setEspeceChoisie} />}
-
-        {suivant ? (
+        {page ? null : suivant ? (
           <a className="etage__suivant" href={`#${suivant.id}`} data-etage={suivant.id}>
             Étage suivant : <span className="etage__suivant-nom">{suivant.nom}</span>
             <span aria-hidden="true"> ↓</span>

@@ -5,10 +5,37 @@ import Entete from './components/Entete.jsx';
 import Etage from './components/Etage.jsx';
 import AnneeCosmique from './components/AnneeCosmique.jsx';
 import { construireIndex } from './lib/recherche.js';
+import { useRoute, lienEtage, allerVers } from './lib/route.js';
+import { xPourAns } from './lib/echelle.js';
+import { PageEtage, PagePeriode } from './components/Pages.jsx';
+
+// Quel étage pour une époque donnée ? (quand on fait glisser le point de l'année cosmique)
+function etagePourAns(ans) {
+  if (ans > 4.6e9) return 'univers';
+  if (ans > 4.0e9) return 'terre';
+  if (ans > 7e6) return 'vie';
+  if (ans > 5300) return 'humains';
+  if (ans > 81) return 'histoire';
+  return 'aujourdhui';
+}
 
 export default function App() {
-  const [etageActif, setEtageActif] = useState(null); // null = écran d'accueil
+  const route = useRoute();
+  const accueil = route.page === 'accueil';
+  const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
+  const etageActif = accueil ? etageVu : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
+
+  // Changer de page ferme la carte ; en revenant à l'accueil, on retrouve l'étage d'où l'on vient.
+  const carteApresNavigation = useRef(null);
+  useEffect(() => {
+    setCarteOuverte(carteApresNavigation.current);
+    carteApresNavigation.current = null;
+    if (accueil) {
+      document.title = 'Chronos';
+      if (route.ancre) requestAnimationFrame(() => document.getElementById(route.ancre)?.scrollIntoView({ block: 'start' }));
+    }
+  }, [route.page, route.etage, route.periode, accueil, route.ancre]);
 
   // Quel étage est à l'écran ? (on observe chaque section)
   useEffect(() => {
@@ -26,7 +53,7 @@ export default function App() {
     );
     sections.forEach((s) => observateur.observe(s));
     return () => observateur.disconnect();
-  }, []);
+  }, [accueil]);
 
   // Si on change d'étage, la carte d'un autre étage se ferme.
   // (Sauf pendant un saut demandé par la recherche : on traverse alors d'autres étages.)
@@ -44,7 +71,23 @@ export default function App() {
   const [cible, setCible] = useState(null);
   const etageActifRef = useRef(etageActif);
   etageActifRef.current = etageActif;
+  const routeRef = useRef(route);
+  routeRef.current = route;
   const aller = useCallback((r) => {
+    const rt = routeRef.current;
+    const fiche = r.carte ? PAR_ID[r.carte] : null;
+    const surUnePage = rt.page !== 'accueil';
+    // Ce qui n'existe que sur la page d'un étage (Histoire du monde, espèces humaines),
+    // ou une recherche faite depuis une page : on va sur la page de l'étage.
+    if (surUnePage || (fiche && fiche.surAccueil === false) || r.type === 'Espèce humaine') {
+      setCible({ ...r.cible, etage: r.etage, n: Date.now() });
+      if (rt.page === 'etage' && rt.etage === r.etage) setCarteOuverte(r.carte || null);
+      else {
+        carteApresNavigation.current = r.carte || null;
+        allerVers(lienEtage(r.etage));
+      }
+      return;
+    }
     if (r.etage !== etageActifRef.current) etageVise.current = r.etage;
     const section = document.getElementById(r.etage);
     const doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -59,6 +102,17 @@ export default function App() {
     if (!r.carte && r.type !== 'Espèce humaine') {
       setTimeout(() => document.getElementById(`titre-${r.etage}`)?.focus({ preventScroll: true }), 50);
     }
+  }, []);
+
+  // Faire glisser le point de l'année cosmique : on voyage jusqu'à l'époque choisie.
+  const voyager = useCallback((ans) => {
+    const rt = routeRef.current;
+    const idEtage = rt.page === 'accueil' ? etagePourAns(ans) : rt.etage;
+    if (rt.page === 'accueil' && idEtage !== etageActifRef.current) {
+      etageVise.current = idEtage;
+      document.getElementById(idEtage)?.scrollIntoView({ block: 'start' });
+    }
+    setCible({ type: 'x', ans, x: (ligne) => xPourAns(ligne, ans), etage: idEtage, instant: true, n: Date.now() });
   }, []);
 
   const fermer = useCallback(() => {
@@ -94,43 +148,55 @@ export default function App() {
     return () => document.removeEventListener('keydown', touche);
   }, []);
 
+  const communs = { parId: PAR_ID, carteOuverte, basculer, fermer, refermer, noterRepere, cible };
+
   return (
     <div className="app" data-etage={etageActif || 'univers'}>
-      <a className="lien-evitement" href="#univers">Aller à la frise</a>
+      <a className="lien-evitement" href={accueil ? '#univers' : '#contenu'}>{accueil ? 'Aller à la frise' : 'Aller au contenu'}</a>
       <Ciel />
-      <Entete etages={ETAGES} etageActif={etageActif} index={index} onAller={aller} />
+      <Entete etages={ETAGES} etageActif={etageActif} index={index} onAller={aller} accueil={accueil} />
 
-      <main>
-        <section className="accueil" data-section="accueil" aria-labelledby="titre-accueil">
-          <p className="accueil__sur-titre">Une frise de toute l'histoire</p>
-          <h1 id="titre-accueil" className="accueil__titre">Chronos</h1>
-          <p className="accueil__texte">
-            Du Big Bang à aujourd'hui, en six étages.
-            <br />
-            Une étape à la fois.
-          </p>
-          <a className="bouton-principal" href="#univers">Commencer</a>
-        </section>
+      {accueil ? (
+        <main>
+          <section className="accueil" data-section="accueil" aria-labelledby="titre-accueil">
+            <p className="accueil__sur-titre">Une frise de toute l'histoire</p>
+            <h1 id="titre-accueil" className="accueil__titre">Chronos</h1>
+            <p className="accueil__texte">
+              Du Big Bang à aujourd'hui, en six étages.
+              <br />
+              Une étape à la fois.
+            </p>
+            <a className="bouton-principal" href="#univers">Commencer</a>
+          </section>
 
-        {ETAGES.map((etage, i) => (
-          <Etage
-            key={etage.id}
-            etage={etage}
-            numero={i + 1}
-            total={ETAGES.length}
-            suivant={ETAGES[i + 1]}
-            parId={PAR_ID}
-            carteOuverte={carteOuverte}
-            onBasculer={basculer}
-            onFermer={fermer}
-            onRefermer={refermer}
-            onRepere={noterRepere}
-            cible={cible}
-          />
-        ))}
-      </main>
+          {ETAGES.map((etage, i) => (
+            <Etage
+              key={etage.id}
+              etage={etage}
+              numero={i + 1}
+              total={ETAGES.length}
+              suivant={ETAGES[i + 1]}
+              parId={PAR_ID}
+              carteOuverte={carteOuverte}
+              onBasculer={basculer}
+              onFermer={fermer}
+              onRefermer={refermer}
+              onRepere={noterRepere}
+              cible={cible}
+            />
+          ))}
+        </main>
+      ) : (
+        <main id="contenu">
+          {route.page === 'etage' ? (
+            <PageEtage key={route.etage} idEtage={route.etage} communs={communs} />
+          ) : (
+            <PagePeriode key={`${route.etage}/${route.periode}`} idEtage={route.etage} idPeriode={route.periode} communs={communs} />
+          )}
+        </main>
+      )}
 
-      <AnneeCosmique ans={etageActif ? reperes[etageActif] ?? null : 13.8e9} />
+      <AnneeCosmique ans={etageActif ? reperes[etageActif] ?? null : 13.8e9} onGlisser={voyager} />
     </div>
   );
 }

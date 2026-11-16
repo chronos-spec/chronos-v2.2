@@ -10,7 +10,8 @@ const HAUTEUR_PAR_EVENEMENT = 110; // hauteur « idéale » d'une période, par 
 const ECART_MIN = 6;
 const ECART_MAX = 200;
 
-export default function FriseVerticale({ etage, ligne, carteOuverte, onBasculer, groupes, classe }) {
+export default function FriseVerticale({ etage, ligne, carteOuverte, onBasculer, groupes, classe, zoom = 1, voies = null, lienPeriode = null }) {
+  const couleurLieu = voies ? Object.fromEntries(voies.map((v) => [v.id, v])) : null;
   let ereAvant = null;
   let n = 0;
 
@@ -24,8 +25,8 @@ export default function FriseVerticale({ etage, ligne, carteOuverte, onBasculer,
         const ouverte = carteOuverte === idFiche;
 
         // Espaces entre les événements (à l'échelle dans la période, mais bornés).
-        const points = [...t.points].sort((a, b) => (t.sansEchelle ? a.x - b.x : b.carte.ans - a.carte.ans));
-        const hauteur = Math.max(360, points.length * HAUTEUR_PAR_EVENEMENT);
+        const points = t.points.filter((p) => !voies || voies.some((v) => v.filtre(p.carte))).sort((a, b) => (t.sansEchelle ? a.x - b.x : b.carte.ans - a.carte.ans));
+        const hauteur = Math.max(360, points.length * HAUTEUR_PAR_EVENEMENT) * zoom;
         const pxParAn = t.sansEchelle ? 0 : hauteur / ((t.debutAns - t.finAns) || 1);
         let precedent = t.debutAns;
 
@@ -50,23 +51,36 @@ export default function FriseVerticale({ etage, ligne, carteOuverte, onBasculer,
               id={`troncon-${etage.id}-${cat.id}`}
               style={{ '--ere': cat.ere ? ERES[cat.ere].couleur : undefined, '--periode': COULEUR_PERIODE[cat.id] }}
             >
+              {lienPeriode ? (
+                <a id={`point-${idFiche}`} className="troncon__titre troncon__titre--lien lignev__titre" href={lienPeriode(cat.id)}>
+                  {cat.groupe && !cat.ere && <span className="troncon__groupe">{cat.groupe}</span>}
+                  <span className="troncon__nom">
+                    {COULEUR_PERIODE[cat.id] && <span className="troncon__pastille" aria-hidden="true" />}
+                    {cat.nom}
+                    <span className="troncon__info" aria-hidden="true">→</span>
+                  </span>
+                  <span className="troncon__echelle">{t.sansEchelle ? 'récit, sans échelle de temps' : cat.periode || 'à l’échelle'}</span>
+                  <span className="sr-only"> : ouvrir la page de la période</span>
+                </a>
+              ) : (
               <button
-                type="button"
-                id={`point-${idFiche}`}
-                className={ouverte ? 'troncon__titre troncon__titre--ouvert lignev__titre' : 'troncon__titre lignev__titre'}
-                aria-expanded={ouverte}
-                onClick={() => onBasculer(idFiche)}
-              >
-                {cat.groupe && !cat.ere && <span className="troncon__groupe">{cat.groupe}</span>}
-                <span className="troncon__nom">
-                  {COULEUR_PERIODE[cat.id] && <span className="troncon__pastille" aria-hidden="true" />}
-                  {cat.nom}
-                  <span className="troncon__info" aria-hidden="true">i</span>
-                </span>
-                <span className="troncon__echelle">
-                  {t.sansEchelle ? 'récit, sans échelle de temps' : cat.periode || 'à l’échelle'}
-                </span>
-              </button>
+                  type="button"
+                  id={`point-${idFiche}`}
+                  className={ouverte ? 'troncon__titre troncon__titre--ouvert lignev__titre' : 'troncon__titre lignev__titre'}
+                  aria-expanded={ouverte}
+                  onClick={() => onBasculer(idFiche)}
+                >
+                  {cat.groupe && !cat.ere && <span className="troncon__groupe">{cat.groupe}</span>}
+                  <span className="troncon__nom">
+                    {COULEUR_PERIODE[cat.id] && <span className="troncon__pastille" aria-hidden="true" />}
+                    {cat.nom}
+                    <span className="troncon__info" aria-hidden="true">i</span>
+                  </span>
+                  <span className="troncon__echelle">
+                    {t.sansEchelle ? 'récit, sans échelle de temps' : cat.periode || 'à l’échelle'}
+                  </span>
+                </button>
+              )}
 
               {groupes && <Vivants groupes={groupes} debut={t.debutAns} fin={t.finAns} />}
               <Bestiaire categorie={cat} carteOuverte={carteOuverte} onBasculer={onBasculer} />
@@ -75,7 +89,7 @@ export default function FriseVerticale({ etage, ligne, carteOuverte, onBasculer,
                 {points.map(({ carte }) => {
                   let ecart = ECART_MIN;
                   if (!t.sansEchelle) {
-                    ecart = Math.min(ECART_MAX, Math.max(ECART_MIN, (precedent - carte.ans) * pxParAn));
+                    ecart = Math.min(ECART_MAX * zoom, Math.max(ECART_MIN, (precedent - carte.ans) * pxParAn));
                     precedent = carte.ans;
                   }
                   const ouvert = carte.id === carteOuverte;
@@ -93,6 +107,13 @@ export default function FriseVerticale({ etage, ligne, carteOuverte, onBasculer,
                         <span className="pointv__textes">
                           <span className="pointv__titre">{carte.titre}</span>
                           <span className="pointv__date">{carte.dateCourte}</span>
+                          {couleurLieu && carte.lieux && (
+                            <span className="pointv__lieux">
+                              {carte.lieux.filter((l) => couleurLieu[l]).map((l) => (
+                                <span key={l} className="lieu-pastille" style={{ '--lieu': couleurLieu[l].couleur }}>{couleurLieu[l].court}</span>
+                              ))}
+                            </span>
+                          )}
                         </span>
                       </button>
                     </li>

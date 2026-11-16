@@ -26,17 +26,22 @@ export function themesDe(etage) {
   return themes;
 }
 
-export function construireLigne(etage, parId, theme = 'principal') {
+// options.zoom : agrandit la ligne (2 = deux fois plus d'espace). En dessous de 1, on ne garde
+// que les événements principaux (vue d'ensemble).
+// options.filtre : ne garder que certains événements (ex. un lieu).
+export function construireLigne(etage, parId, theme = 'principal', options = {}) {
   const m = MESURES;
+  const zoom = options.zoom || 1;
+  const garder = (e) => (zoom >= 1 || e.principal) && (!options.filtre || options.filtre(e));
   const espace = m.etiquette + 12; // place d'une étiquette sur un même rang
   let x = 0;
   const categories = etage.categories.filter((c) => (c.theme || 'principal') === theme);
   const troncons = categories.map((cat, i) => {
     if (i > 0) x += m.saut;
-    const evenements = cat.evenements.map((id) => parId[id]);
+    const evenements = cat.evenements.map((id) => parId[id]).filter(garder);
     const dates = evenements.map((e) => e.ans).filter((a) => a !== null && a !== undefined);
     const sansEchelle = dates.length < evenements.length || (dates.length === 0 && cat.debut === undefined);
-    let largeur = Math.max(m.tronconMin, evenements.length * m.parEvenement);
+    let largeur = Math.max(m.tronconMin, evenements.length * m.parEvenement) * zoom;
     let utile = largeur - 2 * m.marge;
 
     // On allonge la période si ses événements sont trop serrés :
@@ -58,6 +63,7 @@ export function construireLigne(etage, parId, theme = 'principal') {
         }
       }
       utile = Math.min(besoin, utile * m.allongementMax);
+      utile = Math.max(utile, (largeur - 2 * m.marge));
       largeur = utile + 2 * m.marge;
     }
 
@@ -94,20 +100,7 @@ export function construireLigne(etage, parId, theme = 'principal') {
     if (points.length) largeur = Math.max(largeur, points[points.length - 1].x - x + m.marge);
 
     // Les étiquettes trop proches s'empilent sur des rangs différents.
-    const finRangs = [];
-    points
-      .slice()
-      .sort((a, b) => a.x - b.x)
-      .forEach((p) => {
-        let r = finRangs.findIndex((fin) => p.x - fin >= espace);
-        if (r === -1) {
-          r = finRangs.length;
-          finRangs.push(p.x);
-        } else {
-          finRangs[r] = p.x;
-        }
-        p.rang = r;
-      });
+    const nbRangs = rangerPoints(points);
 
     const troncon = {
       categorie: cat,
@@ -118,7 +111,7 @@ export function construireLigne(etage, parId, theme = 'principal') {
       pxParAn,
       sansEchelle,
       points,
-      rangs: finRangs.length,
+      rangs: nbRangs,
     };
     x += largeur;
     return troncon;
@@ -130,6 +123,26 @@ export function construireLigne(etage, parId, theme = 'principal') {
     largeur: x,
     rangs: Math.max(1, ...troncons.map((t) => t.rangs)),
   };
+}
+
+// Range des points (triés ou non) en rangs d'étiquettes ; renvoie le nombre de rangs.
+export function rangerPoints(points) {
+  const espace = MESURES.etiquette + 12;
+  const finRangs = [];
+  points
+    .slice()
+    .sort((a, b) => a.x - b.x)
+    .forEach((p) => {
+      let r = finRangs.findIndex((fin) => p.x - fin >= espace);
+      if (r === -1) {
+        r = finRangs.length;
+        finRangs.push(p.x);
+      } else {
+        finRangs[r] = p.x;
+      }
+      p.rang = r;
+    });
+  return finRangs.length;
 }
 
 // Où se trouve une date sur la ligne ? (pour le bandeau du vivant)

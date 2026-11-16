@@ -1,3 +1,5 @@
+import ImageWiki from './ImageWiki.jsx';
+import { lienPeriode } from '../lib/route.js';
 import { useEffect, useRef } from 'react';
 import { dateCosmique } from '../lib/calendrier.js';
 
@@ -46,6 +48,7 @@ export default function Carte({ carte, etage, onFermer }) {
         </>
       ) : carte.type === 'animal' ? (
         <>
+          <ImageWiki titre={carte.wiki} alt={carte.titre} taille="carte" />
           <p className="carte__texte">{carte.resume}</p>
           <dl className="carte__fiche">
             <div><dt>Groupe</dt><dd>{carte.groupeNom}</dd></div>
@@ -65,6 +68,9 @@ export default function Carte({ carte, etage, onFermer }) {
               </ul>
             </>
           )}
+          <a className="carte__lien-page" href={lienPeriode(carte.etage, carte.categorie)}>
+            Ouvrir la page de la période <span aria-hidden="true">→</span>
+          </a>
         </>
       ) : (
         <>

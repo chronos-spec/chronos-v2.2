@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { MESURES, xPourAns } from '../lib/echelle.js';
+import { MESURES, xPourAns, rangerPoints } from '../lib/echelle.js';
 import { idPeriode, idAnimal } from '../data/index.js';
 import { BESTIAIRE } from '../data/bestiaire.js';
 import { ERES, COULEUR_PERIODE } from '../data/eres.js';
@@ -11,14 +11,33 @@ const RANG_VIVANT = 15; // hauteur d'une ligne du bandeau du vivant
 const TETE_VIVANT = 28; // titre du bandeau
 const HAUT_ERES = 44; // bande des grandes ères (Paléozoïque, Mésozoïque…)
 
-const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer, onDefiler, groupes, rangsGroupes, classe }, ref) {
+const ETIQ_VOIE = 38; // place du nom d'un lieu au-dessus de sa ligne
+
+// voies : plusieurs lignes parallèles à la même échelle (Histoire : une par lieu).
+// lienPeriode : si présent, le nom d'une période est un lien vers sa page.
+const Frise = forwardRef(function Frise(
+  { etage, ligne, carteOuverte, onBasculer, onDefiler, groupes, rangsGroupes, classe, voies, lienPeriode },
+  ref
+) {
   const hautBandeau = groupes ? TETE_VIVANT + rangsGroupes * RANG_VIVANT + 16 : 0;
   const eres = blocsEres(ligne);
   const HAUT_TITRES = TITRES + (ligne.troncons.some((t) => BESTIAIRE[t.categorie.id]) ? BESTIAIRE_H : 0);
   const hautEres = eres.length ? HAUT_ERES : 0;
   const haut = hautBandeau + hautEres; // où commencent les tronçons
-  // Sous la ligne : le rond, puis au plus deux rangs d'étiquettes.
-  const hauteur = haut + HAUT_TITRES + 22 + (ligne.rangs - 1) * MESURES.rang + 122;
+  const tousLesPoints = ligne.troncons.flatMap((t) => t.points);
+
+  // Les voies : une seule (la ligne normale) ou une par lieu, rangées l'une sous l'autre.
+  const etiquette = voies ? ETIQ_VOIE : 0;
+  let y = HAUT_TITRES;
+  const lignes = (voies || [null]).map((v) => {
+    const points = v ? tousLesPoints.filter((p) => v.filtre(p.carte)).map((p) => ({ ...p })) : tousLesPoints;
+    const rangs = v ? rangerPoints(points) : ligne.rangs;
+    const axe = y + etiquette;
+    y = axe + 22 + (Math.max(1, rangs) - 1) * MESURES.rang + 122;
+    return { voie: v, points, axe };
+  });
+  const hauteur = haut + y;
+  const dejaVu = new Set(); // un même événement peut être dans plusieurs voies
   let n = 0; // pour l'apparition en cascade des points
 
   return (
@@ -41,9 +60,31 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
           </div>
         ))}
 
+        {lignes.map(({ voie, axe }) =>
+          voie ? (
+            <div key={`nom-${voie.id}`} className="voie" style={{ top: haut + axe - ETIQ_VOIE + 4, width: ligne.largeur, '--lieu': voie.couleur }}>
+              <span className="voie__nom">{voie.nom}</span>
+            </div>
+          ) : null
+        )}
+
         {ligne.troncons.map((t, i) => {
           const idFiche = idPeriode(t.categorie.id);
           const ouverte = carteOuverte === idFiche;
+          const lien = lienPeriode ? lienPeriode(t.categorie.id) : null;
+          const contenuTitre = (
+            <>
+              {t.categorie.groupe && !t.categorie.ere && <span className="troncon__groupe">{t.categorie.groupe}</span>}
+              <span className="troncon__nom">
+                {COULEUR_PERIODE[t.categorie.id] && <span className="troncon__pastille" aria-hidden="true" />}
+                {t.categorie.nom}
+                <span className="troncon__info" aria-hidden="true">{lien ? '→' : 'i'}</span>
+              </span>
+              <span className="troncon__echelle">
+                {t.sansEchelle ? 'récit, sans échelle de temps' : t.categorie.periode || 'à l’échelle'}
+              </span>
+            </>
+          );
           return (
             <div
               key={t.categorie.id}
@@ -56,43 +97,56 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
                 '--periode': COULEUR_PERIODE[t.categorie.id],
               }}
             >
-              <div className="troncon__axe" aria-hidden="true" style={{ top: HAUT_TITRES }} />
+              {lignes.map(({ voie, axe }) => (
+                <div
+                  key={voie ? voie.id : 'axe'}
+                  className="troncon__axe"
+                  aria-hidden="true"
+                  style={{ top: axe, '--lieu': voie ? voie.couleur : undefined }}
+                />
+              ))}
               {i > 0 && (
-                <svg className="troncon__saut" aria-hidden="true" width="40" height="32" viewBox="0 0 40 32" style={{ top: HAUT_TITRES - 16 }}>
+                <svg className="troncon__saut" aria-hidden="true" width="40" height="32" viewBox="0 0 40 32" style={{ top: lignes[0].axe - 16 }}>
                   <path d="M10 28 L18 4 M22 28 L30 4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               )}
-              <button
-                type="button"
-                id={`point-${idFiche}`}
-                className={ouverte ? 'troncon__titre troncon__titre--ouvert' : 'troncon__titre'}
-                aria-expanded={ouverte}
-                onClick={() => onBasculer(idFiche)}
-              >
-                {t.categorie.groupe && !t.categorie.ere && <span className="troncon__groupe">{t.categorie.groupe}</span>}
-                <span className="troncon__nom">
-                  {COULEUR_PERIODE[t.categorie.id] && <span className="troncon__pastille" aria-hidden="true" />}
-                  {t.categorie.nom}
-                  <span className="troncon__info" aria-hidden="true">i</span>
-                </span>
-                <span className="troncon__echelle">
-                  {t.sansEchelle ? 'récit, sans échelle de temps' : t.categorie.periode || 'à l’échelle'}
-                </span>
-              </button>
+              {lien ? (
+                <a id={`point-${idFiche}`} className="troncon__titre troncon__titre--lien" href={lien}>
+                  {contenuTitre}
+                  <span className="sr-only"> : ouvrir la page de la période</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  id={`point-${idFiche}`}
+                  className={ouverte ? 'troncon__titre troncon__titre--ouvert' : 'troncon__titre'}
+                  aria-expanded={ouverte}
+                  onClick={() => onBasculer(idFiche)}
+                >
+                  {contenuTitre}
+                </button>
+              )}
               <Bestiaire categorie={t.categorie} carteOuverte={carteOuverte} onBasculer={onBasculer} />
             </div>
           );
         })}
 
-        <ol className="ligne__points" aria-label={`Événements de l'étage ${etage.nom}`} style={{ top: haut }}>
-          {ligne.troncons.flatMap((t) =>
-            t.points.map(({ carte, x, rang }) => {
+        {lignes.map(({ voie, points, axe }) => (
+          <ol
+            key={voie ? voie.id : 'points'}
+            className="ligne__points"
+            aria-label={voie ? `Événements : ${voie.nom}` : `Événements de l'étage ${etage.nom}`}
+            style={{ top: haut }}
+          >
+            {points.map(({ carte, x, rang }) => {
               const ouverte = carte.id === carteOuverte;
+              const premier = !dejaVu.has(carte.id);
+              dejaVu.add(carte.id);
               return (
-                <li key={carte.id} className="ligne__item" style={{ left: x, top: HAUT_TITRES, '--i': Math.min(n++, 14) }}>
+                <li key={carte.id} className="ligne__item" style={{ left: x, top: axe, '--i': Math.min(n++, 14), '--lieu': voie ? voie.couleur : undefined }}>
                   <button
                     type="button"
-                    id={`point-${carte.id}`}
+                    id={premier ? `point-${carte.id}` : `point-${carte.id}--${voie.id}`}
                     className={ouverte ? 'point point--ouvert' : 'point'}
                     aria-expanded={ouverte}
                     aria-controls={ouverte ? `carte-${carte.id}` : undefined}
@@ -118,9 +172,9 @@ const Frise = forwardRef(function Frise({ etage, ligne, carteOuverte, onBasculer
                   </button>
                 </li>
               );
-            })
-          )}
-        </ol>
+            })}
+          </ol>
+        ))}
       </div>
     </div>
   );
