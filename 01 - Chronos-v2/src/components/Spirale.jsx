@@ -8,7 +8,7 @@ import { texteAge } from '../lib/ages.js';
 // Aujourd'hui au centre, le Big Bang au bord. Spirale logarithmique :
 // un tour vers l'extérieur = 10 fois plus de temps. Comme chaque tour est aussi
 // G fois plus grand à l'écran, zoomer ×G revient exactement à la même image,
-// décalée d'un tour : on « plonge » sans fin vers le présent.
+// décalée d'un tour. L'angle reste fixe : on plonge sans fin vers le présent, sans rotation.
 // Le dessin (lueurs, flou) est sur un canvas ; les points sont de vrais boutons
 // HTML par-dessus, et la liste complète reste accessible au clavier et aux lecteurs d'écran.
 // ---------------------------------------------------------------------------
@@ -142,7 +142,9 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
   const projeter = (u, L, m) => {
     const v = u + L;
     const r = R0 * Math.pow(G, v);
-    const a = 2 * Math.PI * v - Math.PI / 2;
+    // L'angle ne dépend que de l'âge (u), pas du zoom (L) : la spirale ne tourne plus,
+    // elle grandit autour du centre. Zoomer = plonger droit vers le présent.
+    const a = 2 * Math.PI * u - Math.PI / 2;
     return { x: m.cx + r * Math.cos(a), y: m.cy + r * Math.sin(a) * INCLINAISON, r };
   };
 

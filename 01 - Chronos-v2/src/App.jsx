@@ -10,6 +10,7 @@ import { xPourAns } from './lib/echelle.js';
 import { PageEtage, PagePeriode } from './components/Pages.jsx';
 import Spirale from './components/Spirale.jsx';
 import VueEnsemble from './components/VueEnsemble.jsx';
+import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
 
 // Quel étage pour une époque donnée ? (quand on fait glisser le point de l'année cosmique)
@@ -212,8 +213,10 @@ export default function App() {
         </main>
       ) : (
         <main id="contenu">
-          {route.etage === 'ensemble' ? (
-            <VueEnsemble focus={route.page === 'periode' ? route.periode : null} />
+          {route.etage === 'ensemble' && route.page !== 'periode' ? (
+            <LigneInfinie parId={PAR_ID} carteOuverte={carteOuverte} onBasculer={basculer} onFermer={fermer} />
+          ) : route.etage === 'ensemble' ? (
+            <VueEnsemble focus={route.periode} />
           ) : route.etage === 'recit' ? (
             <Recit />
           ) : spirale ? (

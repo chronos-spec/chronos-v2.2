@@ -3,6 +3,16 @@ import { MESURES, xPourAns, rangerPoints } from '../lib/echelle.js';
 import { idPeriode, idAnimal } from '../data/index.js';
 import { BESTIAIRE } from '../data/bestiaire.js';
 import { ERES, COULEUR_PERIODE } from '../data/eres.js';
+import { LIEUX } from '../data/histoireMonde.js';
+
+// Histoire sur une seule ligne : chaque point prend la couleur de son lieu (le premier cité ;
+// la France passe avant l'Europe).
+const COULEUR_LIEU = Object.fromEntries(LIEUX.map((l) => [l.id, l.couleur]));
+const couleurLieu = (carte) => {
+  const l = carte.lieux;
+  if (!l || !l.length) return undefined;
+  return COULEUR_LIEU[l.includes('france') ? 'france' : l[0]];
+};
 
 // La ligne du temps d'un étage : plus large que l'écran, on la fait glisser de côté.
 const TITRES = 96; // place au-dessus de la ligne pour le nom des périodes
@@ -143,7 +153,7 @@ const Frise = forwardRef(function Frise(
               const premier = !dejaVu.has(carte.id);
               dejaVu.add(carte.id);
               return (
-                <li key={carte.id} className="ligne__item" style={{ left: x, top: axe, '--i': Math.min(n++, 14), '--lieu': voie ? voie.couleur : undefined }}>
+                <li key={carte.id} className="ligne__item" style={{ left: x, top: axe, '--i': Math.min(n++, 14), '--lieu': voie ? voie.couleur : couleurLieu(carte) }}>
                   <button
                     type="button"
                     id={premier ? `point-${carte.id}` : `point-${carte.id}--${voie.id}`}
