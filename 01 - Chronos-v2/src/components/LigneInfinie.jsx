@@ -5,16 +5,21 @@ import { texteAge } from '../lib/ages.js';
 
 // ---------------------------------------------------------------------------
 // « TOUT VOIR » : une seule ligne, du Big Bang (à gauche) à aujourd'hui (à droite).
-// L'échelle est logarithmique : chaque graduation vaut 10 fois plus de temps que la suivante.
-// Sans cela, toute l'histoire humaine tiendrait dans un pixel.
-// Deux curseurs : « Se déplacer » (où l'on regarde) et « Zoom » (de quelle distance).
-// Plus on zoome, plus il y a de place : les événements apparaissent du plus important au plus détaillé.
-// On peut aussi faire glisser la ligne, et zoomer à la molette.
+// L'échelle est PROPORTIONNELLE : la même distance représente toujours la même durée.
+// En première vue, on voit donc la vraie place de chaque étage : l'Univers et la Vie
+// occupent presque tout, l'histoire humaine n'est qu'un trait au bord droit.
+// Pas d'événement en première vue : seulement les six étages, et quelques grandes périodes.
+// En zoomant, les événements apparaissent par vagues : d'abord les fiches complètes,
+// puis les événements principaux, puis les détails, puis les animaux.
+// Les boutons « Aller à » zooment directement sur un étage (sinon il faudrait zoomer
+// des millions de fois pour voir l'Histoire).
 // ---------------------------------------------------------------------------
 
-const U_MAX = Math.log10(13.8e9 + 1);
-const xMonde = (ans) => 1 - Math.log10(Math.max(0, ans) + 1) / U_MAX; // 0 = Big Bang, 1 = aujourd'hui
-const ZOOM_MAX = 400;
+const AGE_UNIVERS = 13.8e9;
+const xMonde = (ans) => 1 - Math.max(0, ans) / AGE_UNIVERS; // 0 = Big Bang, 1 = aujourd'hui
+const ansDe = (xm) => (1 - xm) * AGE_UNIVERS;
+const ZOOM_MAX = AGE_UNIVERS / 20; // au plus près : environ 20 ans à l'écran
+const ZOOM_EVENEMENTS = 1.5; // en dessous : première vue, sans aucun événement
 
 const BANDES = [
   { id: 'univers', debut: 13.8e9, fin: 4.6e9 },
@@ -28,23 +33,28 @@ const BANDES = [
 // Importance : 1 = fiches complètes, 2 = événements principaux, 3 = les autres, 4 = animaux.
 const importance = (e) => (e.type === 'animal' ? 4 : e.texte ? 1 : e.principal ? 2 : 3);
 
-const H_RANGEE = 48;
+const H_RANGEE = 56;
+const RANGEES_MAX = 3; // jamais plus de trois étiquettes l'une au-dessus de l'autre
+const PLACE_PAR_ETIQUETTE = 200; // au plus une étiquette pour 200 px de largeur
+
+// Un pas de graduation « rond » : 1, 2 ou 5 × une puissance de 10.
+function pasRond(brut) {
+  const p = 10 ** Math.floor(Math.log10(brut));
+  const r = brut / p;
+  return (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * p;
+}
+
+const mouvementReduit = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer }) {
   const boite = useRef(null);
   const [largeur, setLargeur] = useState(1200);
-  const [hauteur, setHauteur] = useState(600);
-  // Autant de rangées d'étiquettes que la hauteur de l'écran le permet.
-  const RANGEES = Math.max(3, Math.floor((hauteur - 190) / H_RANGEE));
   const [zoom, setZoom] = useState(1); // 1 = tout voir
   const [centre, setCentre] = useState(0.5); // position du milieu de l'écran, de 0 à 1
 
   useEffect(() => {
     document.title = 'Tout voir · Chronos';
-    const mesurer = () => {
-      setLargeur(boite.current?.clientWidth || 1200);
-      setHauteur(boite.current?.clientHeight || 600);
-    };
+    const mesurer = () => setLargeur(boite.current?.clientWidth || 1200);
     mesurer();
     window.addEventListener('resize', mesurer);
     return () => window.removeEventListener('resize', mesurer);
@@ -52,12 +62,43 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
 
   // Le centre ne peut pas sortir de la ligne.
   const borner = (c, z) => Math.min(1 - 0.5 / z, Math.max(0.5 / z, c));
+  const bornerZoom = (z) => Math.min(ZOOM_MAX, Math.max(1, z));
   const changerZoom = (z, ancre = 0.5) => {
-    const nz = Math.min(ZOOM_MAX, Math.max(1, z));
+    const nz = bornerZoom(z);
     // On garde fixe le point sous la souris (ancre = sa place à l'écran, de 0 à 1).
     const xAncre = centre - 0.5 / zoom + ancre / zoom;
     setZoom(nz);
     setCentre(borner(xAncre + 0.5 / nz - ancre / nz, nz));
+  };
+
+  // Voyage animé vers une vue (zoom en échelle « ×10 » pour que le trajet paraisse régulier).
+  const anim = useRef(0);
+  const allerVers = (zCible, cCible) => {
+    cancelAnimationFrame(anim.current);
+    const z1 = bornerZoom(zCible);
+    const c1 = borner(cCible, z1);
+    if (mouvementReduit()) { setZoom(z1); setCentre(c1); return; }
+    const z0 = zoom;
+    const c0 = centre;
+    const t0 = performance.now();
+    const duree = 400;
+    const pas = (t) => {
+      const k = Math.min(1, (t - t0) / duree);
+      const e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2; // départ et arrivée en douceur
+      const z = Math.exp(Math.log(z0) + (Math.log(z1) - Math.log(z0)) * e);
+      setZoom(z);
+      setCentre(borner(c0 + (c1 - c0) * e, z));
+      if (k < 1) anim.current = requestAnimationFrame(pas);
+    };
+    anim.current = requestAnimationFrame(pas);
+  };
+  useEffect(() => () => cancelAnimationFrame(anim.current), []);
+
+  // Zoomer pour qu'un étage remplisse l'écran (avec un peu de marge).
+  const allerAEtage = (b) => {
+    const x1 = xMonde(b.debut);
+    const x2 = xMonde(b.fin);
+    allerVers(1 / ((x2 - x1) * 1.08), (x1 + x2) / 2);
   };
 
   const gauche = centre - 0.5 / zoom;
@@ -72,37 +113,52 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     [parId]
   );
 
-  // Placement des étiquettes, du plus important au plus détaillé, sans chevauchement.
+  // Découverte progressive : on n'ajoute un niveau de détail que s'il y a la place pour tout ce niveau.
   const places = useMemo(() => {
-    const rangees = Array.from({ length: RANGEES }, () => []);
-    const res = [];
-    for (const e of evenements) {
+    if (zoom < ZOOM_EVENEMENTS) return [];
+    const visibles = evenements.filter((e) => {
       const x = versEcran(e.xm);
-      if (x < -50 || x > largeur + 50) continue;
+      return x >= -20 && x <= largeur + 20;
+    });
+    const budget = Math.max(3, Math.floor(largeur / PLACE_PAR_ETIQUETTE) * 2);
+    let niveau = 0;
+    for (let n = 1; n <= 4; n++) {
+      const compte = visibles.filter((e) => e.rang <= n).length;
+      if (compte > budget && niveau > 0) break;
+      niveau = n;
+    }
+    const rangees = Array.from({ length: RANGEES_MAX }, () => []);
+    const res = [];
+    for (const e of visibles) {
+      if (e.rang > niveau) continue;
+      const x = versEcran(e.xm);
       const l = Math.min(260, e.titre.length * 8.2 + 28);
       const x1 = x - 12;
       const x2 = x1 + l;
-      const r = rangees.findIndex((ra) => ra.every(([a, b]) => x2 + 8 < a || x1 > b + 8));
-      if (r < 0) continue;
+      const r = rangees.findIndex((ra) => ra.every(([a, b]) => x2 + 16 < a || x1 > b + 16));
+      if (r < 0) continue; // pas la place : il apparaîtra en zoomant encore
       rangees[r].push([x1, x2]);
       res.push({ e, x, r });
-      if (res.length > 200) break;
     }
     return res;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [evenements, zoom, centre, largeur, RANGEES]);
+  }, [evenements, zoom, centre, largeur]);
 
-  // Les graduations : une par puissance de 10 (1 an, 10 ans, 100 ans…).
+  // Les graduations : un pas « rond » adapté à ce que l'on voit (environ 5 à l'écran).
+  const deAns = ansDe(Math.max(0, gauche));
+  const aAns = ansDe(Math.min(1, gauche + 1 / zoom));
+  const pas = pasRond((deAns - aAns) / 5);
   const graduations = [];
-  for (let n = 0; n <= 10; n++) {
-    const ans = 10 ** n;
-    graduations.push({ ans, x: versEcran(xMonde(ans)), nom: n < 6 ? `${ans.toLocaleString('fr-FR')} an${ans > 1 ? 's' : ''}` : texteAge(ans).replace('d’années', '') });
+  for (let ans = Math.ceil(aAns / pas) * pas; ans <= deAns && graduations.length < 20; ans += pas) {
+    const x = versEcran(xMonde(ans));
+    graduations.push({ ans, x, nom: ans < 1 ? 'Aujourd’hui' : `−${texteAge(ans)}` });
   }
 
   // Glisser la ligne à la souris ou au doigt.
   const glisse = useRef(null);
   const debut = (ev) => {
     if (ev.target.closest('button')) return;
+    cancelAnimationFrame(anim.current);
     glisse.current = { x: ev.clientX, c: centre };
     ev.currentTarget.setPointerCapture?.(ev.pointerId);
   };
@@ -113,30 +169,32 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   };
   const fin = () => { glisse.current = null; };
 
-  // Molette : zoomer autour de la souris.
+  // Molette : zoomer autour de la souris (assez vite, car le voyage va jusqu'à ×700 millions).
   useEffect(() => {
     const el = boite.current;
     if (!el) return undefined;
     const roue = (ev) => {
       ev.preventDefault();
+      cancelAnimationFrame(anim.current);
       const r = el.getBoundingClientRect();
-      changerZoom(zoom * Math.exp(-ev.deltaY * 0.0015), (ev.clientX - r.left) / r.width);
+      changerZoom(zoom * Math.exp(-ev.deltaY * 0.003), (ev.clientX - r.left) / r.width);
     };
     el.addEventListener('wheel', roue, { passive: false });
     return () => el.removeEventListener('wheel', roue);
   });
 
   // Ce que l'on regarde, en mots (pour tous, et pour les lecteurs d'écran).
-  const ansDe = (xm) => 10 ** ((1 - xm) * U_MAX) - 1;
-  const deAns = ansDe(Math.max(0, gauche));
-  const aAns = ansDe(Math.min(1, gauche + 1 / zoom));
   const resume = zoom <= 1.01
-    ? 'Toute l’histoire, du Big Bang à aujourd’hui'
+    ? 'Toute l’histoire, du Big Bang à aujourd’hui, à l’échelle'
     : `De il y a ${texteAge(deAns)} à ${aAns < 1 ? 'aujourd’hui' : `il y a ${texteAge(aAns)}`}`;
+  const indice = zoom < ZOOM_EVENEMENTS
+    ? 'Zoomez sur une période, ou choisissez un étage, pour faire apparaître les événements.'
+    : places.length === 0 ? 'Aucun événement ici : déplacez-vous ou zoomez ailleurs.' : null;
 
   const ouverte = carteOuverte ? parId[carteOuverte] : null;
   const etageCarte = ouverte ? ETAGES.find((x) => x.id === ouverte.etage) : null;
   const zoomLog = Math.log(zoom) / Math.log(ZOOM_MAX); // 0 … 1 pour le curseur
+  const etageDe = (id) => ETAGES.find((e) => e.id === id);
 
   return (
     <div className="infinie">
@@ -147,6 +205,15 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         </div>
         <a className="verre bouton-secondaire infinie__lien" href="#/ensemble/vie">La vie en tableau</a>
       </div>
+
+      <nav className="infinie__sauts" aria-label="Aller directement à un étage">
+        <button type="button" className="verre infinie__saut" onClick={() => allerVers(1, 0.5)}>Tout voir</button>
+        {BANDES.map((b) => (
+          <button key={b.id} type="button" className="verre infinie__saut" data-etage={b.id} onClick={() => allerAEtage(b)}>
+            {etageDe(b.id).nom}
+          </button>
+        ))}
+      </nav>
 
       <div
         ref={boite}
@@ -162,10 +229,11 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
           const x2 = versEcran(xMonde(b.fin));
           if (x2 < 0 || x1 > largeur) return null;
           const etage = ETAGES.find((e) => e.id === b.id);
-          const g = Math.max(0, x1);
-          const w = Math.min(largeur, x2) - g;
+          // Un étage trop fin pour être vu garde au moins 3 px : on sait qu'il est là.
+          const g = Math.max(0, Math.min(x1, largeur - 3));
+          const w = Math.max(3, Math.min(largeur, x2) - g);
           return (
-            <div key={b.id} className="infinie__bande" data-etage={b.id} style={{ left: g, width: w }}>
+            <div key={b.id} className="infinie__bande" data-etage={b.id} style={{ left: g, width: w }} aria-hidden="true">
               {w > 70 && <span className="infinie__bande-nom">{etage.nom}</span>}
             </div>
           );
@@ -181,10 +249,10 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
               const x1 = versEcran(xMonde(Math.min(c.debut, b.debut)));
               const x2 = versEcran(xMonde(Math.max(c.fin ?? 0, b.fin)));
               const w = x2 - x1;
-              if (w < 90 || x2 < 0 || x1 > largeur) return null;
+              if (w < 140 || x2 < 0 || x1 > largeur) return null; // une période n'apparaît que si son nom tient
               const g = Math.max(0, x1);
               return (
-                <div key={`${et.id}-${c.id}`} className="infinie__periode" data-etage={et.id} style={{ left: g, width: Math.min(largeur, x2) - g }}>
+                <div key={`${et.id}-${c.id}`} aria-hidden="true" className="infinie__periode" data-etage={et.id} style={{ left: g, width: Math.min(largeur, x2) - g }}>
                   <span>{c.nom}</span>
                 </div>
               );
@@ -192,6 +260,8 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         )}
 
         <div className="infinie__axe" aria-hidden="true" />
+
+        {indice && <p className="infinie__indice">{indice}</p>}
 
         {graduations.map((g) =>
           g.x >= 0 && g.x <= largeur ? (
@@ -243,7 +313,8 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         </label>
         <p className="infinie__aide">
           Faites glisser la ligne, ou zoomez à la molette. Touchez un événement pour ouvrir sa fiche.
-          Échelle « ×10 » : chaque graduation représente 10 fois plus de temps que la suivante.
+          L’échelle est réelle : la même distance représente toujours la même durée. Les boutons du haut
+          vous emmènent directement à un étage.
         </p>
       </div>
 

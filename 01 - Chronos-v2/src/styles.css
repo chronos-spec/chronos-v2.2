@@ -2057,3 +2057,23 @@ a { color: inherit; }
 @media (min-width: 700px) {
   .infinie .carte { position: fixed; top: 96px; right: 48px; left: auto; bottom: auto; width: 420px; z-index: 30; max-height: calc(calc(100vh / var(--zp, 1)) - 140px); }
 }
+
+/* « Tout voir » proportionnel : boutons « Aller à », indice de première vue. */
+.infinie__sauts { display: flex; flex-wrap: wrap; gap: 8px; }
+.infinie__saut {
+  min-height: 44px; padding: 8px 16px; border-radius: 999px; cursor: pointer;
+  font: 600 16px Inter, sans-serif; color: var(--texte);
+  border: 1px solid rgba(var(--etage-rgb, 255, 255, 255), 0.55);
+}
+.infinie__saut:hover { background: rgba(var(--etage-rgb, 255, 255, 255), 0.25); }
+.infinie__saut:focus-visible { outline: 3px solid #ffe3a8; outline-offset: 2px; }
+.infinie__indice {
+  position: absolute; left: 50%; top: 32px; transform: translateX(-50%); margin: 0;
+  max-width: 60ch; padding: 8px 16px; border-radius: 12px; text-align: center;
+  font-size: 18px; color: var(--texte-doux); background: rgba(0, 0, 0, 0.35); pointer-events: none;
+}
+.infinie__evt { animation: infinie-apparition 300ms ease-out both; }
+@keyframes infinie-apparition { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .infinie__evt { animation: none; } }
+/* La ligne au tiers bas de la scène, pour équilibrer le vide au-dessus. */
+.infinie__scene { --axe: 38%; }
