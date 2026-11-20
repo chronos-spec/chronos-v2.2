@@ -94,8 +94,8 @@ export default function MentionsLegales() {
       <section aria-labelledby="legal-cookies">
         <h2 id="legal-cookies">Cookies et stockage</h2>
         <p>
-          Chronos ne dépose aucun cookie. Il garde seulement, dans votre navigateur, deux réglages que vous avez choisis
-          (le zoom de la page, et l’affichage ou non de « l’année cosmique »). Ces réglages ne quittent jamais votre
+          Chronos ne dépose aucun cookie. Il garde seulement, dans votre navigateur, quelques réglages que vous avez choisis
+          (le zoom de la page, l’affichage ou non de « l’année cosmique ») et vos réponses au jeu. Ces réglages ne quittent jamais votre
           appareil et ne servent pas à vous suivre : ils ne demandent donc pas de consentement. Vous pouvez les effacer
           en vidant les données du site dans votre navigateur.
         </p>

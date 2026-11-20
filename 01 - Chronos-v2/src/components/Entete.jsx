@@ -1,5 +1,6 @@
 import Recherche from './Recherche.jsx';
 import ZoomControles from './ZoomControles.jsx';
+import Jeu from './Jeu.jsx';
 import { lienEtage } from '../lib/route.js';
 import { useZoomPage } from '../lib/zoomPage.js';
 
@@ -42,6 +43,8 @@ export default function Entete({ etages, etageActif, index: indexRecherche, onAl
           Spirale <span className="entete__essai">essai</span>
         </a>
       </nav>
+
+      <Jeu />
 
       <ZoomControles
         classe="entete__zoom"
