@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import Etage from './Etage.jsx';
 import ChoixLieux from './ChoixLieux.jsx';
+import ChoixCivilisation from './ChoixCivilisation.jsx';
+import { CIVILISATION_PAR_ID } from '../data/civilisations.js';
 import ArbreDeroulant from './ArbreDeroulant.jsx';
 import ArbreParente from './ArbreParente.jsx';
 import { prendreDemandeArbre } from '../lib/arbreCible.js';
@@ -38,8 +40,27 @@ function useLieux(cible, parId) {
     () => LIEUX.filter((l) => lieux.includes(l.id)).map((l) => ({ ...l, filtre: (carte) => carte.lieux?.includes(l.id) })),
     [lieux]
   );
-  const filtre = useMemo(() => (e) => !e.lieux || e.lieux.some((l) => lieux.includes(l)), [lieux]);
-  return { lieux, setLieux, voies, filtre };
+  // Une civilisation choisie : seuls ses événements restent sur la ligne (les lieux sont ignorés).
+  const [civ, setCivBrut] = useState(null);
+  // En choisissant une civilisation, la ligne glisse jusqu'à son premier événement.
+  const [cibleCiv, setCibleCiv] = useState(null);
+  const setCiv = (id) => {
+    setCivBrut(id);
+    if (!id) return setCibleCiv(null);
+    const premier = CIVILISATION_PAR_ID[id].evenements
+      .map((e) => parId[e])
+      .filter((e) => e && e.etage === 'histoire')
+      .sort((a, b) => b.ans - a.ans)[0];
+    setCibleCiv(premier ? { type: 'carte', id: premier.id, etage: 'histoire', n: Date.now() } : null);
+  };
+  const filtre = useMemo(() => {
+    if (civ) {
+      const ids = new Set(CIVILISATION_PAR_ID[civ].evenements);
+      return (e) => ids.has(e.id);
+    }
+    return (e) => !e.lieux || e.lieux.some((l) => lieux.includes(l));
+  }, [lieux, civ]);
+  return { lieux, setLieux, voies, filtre, civ, setCiv, cibleCiv };
 }
 
 function useTitreDocument(titre) {
@@ -72,7 +93,7 @@ function Fil({ elements }) {
 export function PageEtage({ idEtage, communs }) {
   const etageBase = ETAGES.find((e) => e.id === idEtage);
   const etage = useMemo(() => etageBase && versionPage(etageBase), [etageBase]);
-  const { lieux, setLieux, voies, filtre } = useLieux(communs.cible, communs.parId);
+  const { lieux, setLieux, voies, filtre, civ, setCiv, cibleCiv } = useLieux(communs.cible, communs.parId);
   // L'arbre du vivant (étage Vie) : l'espèce choisie vient de la frise (animal ouvert) ou de l'arbre.
   const [choixArbre, setChoixArbre] = useState(null);
   const [groupeVise, setGroupeVise] = useState(null);
@@ -125,7 +146,12 @@ export function PageEtage({ idEtage, communs }) {
       <Etage
         mode="page"
         arbreSousFrise={etage.id !== 'vie'}
-        outils={histoire ? <ChoixLieux choisis={lieux} onChanger={setLieux} /> : null}
+        outils={histoire ? (
+          <div className="histoire__outils">
+            {!civ && <ChoixLieux choisis={lieux} onChanger={setLieux} />}
+            <ChoixCivilisation choisie={civ} onChanger={setCiv} />
+          </div>
+        ) : null}
         etage={etage}
         numero={i + 1}
         total={ETAGES.length}
@@ -135,7 +161,7 @@ export function PageEtage({ idEtage, communs }) {
         onFermer={communs.fermer}
         onRefermer={communs.refermer}
         onRepere={communs.noterRepere}
-        cible={communs.cible}
+        cible={cibleCiv || communs.cible}
         voies={null}
         filtre={histoire ? filtre : null}
         lienPeriode={(idCat) => lienPeriode(etage.id, idCat)}
@@ -205,7 +231,7 @@ export function PagePeriode({ idEtage, idPeriode, communs }) {
   const etage = useMemo(() => etageBase && versionPage(etageBase), [etageBase]);
   const cat = etage?.categories.find((c) => c.id === idPeriode);
   const etagePeriode = useMemo(() => (etage && cat ? { ...etage, categories: [cat] } : null), [etage, cat]);
-  const { lieux, setLieux, voies, filtre } = useLieux(communs.cible, communs.parId);
+  const { lieux, setLieux, voies, filtre, civ, setCiv, cibleCiv } = useLieux(communs.cible, communs.parId);
   useTitreDocument(cat ? cat.nom : 'Page introuvable');
   if (!etagePeriode) return <Introuvable />;
 
@@ -232,7 +258,12 @@ export function PagePeriode({ idEtage, idPeriode, communs }) {
       )}
       <Etage
         mode="page"
-        outils={histoire ? <ChoixLieux choisis={lieux} onChanger={setLieux} /> : null}
+        outils={histoire ? (
+          <div className="histoire__outils">
+            {!civ && <ChoixLieux choisis={lieux} onChanger={setLieux} />}
+            <ChoixCivilisation choisie={civ} onChanger={setCiv} />
+          </div>
+        ) : null}
         sansMenu
         zoomInitial={2}
         titre={{ surTitre: `${etage.nom} · période`, nom: cat.nom, sousTitre: cat.periode || etage.sousTitre }}
@@ -245,7 +276,7 @@ export function PagePeriode({ idEtage, idPeriode, communs }) {
         onFermer={communs.fermer}
         onRefermer={communs.refermer}
         onRepere={communs.noterRepere}
-        cible={communs.cible}
+        cible={cibleCiv || communs.cible}
         voies={null}
         filtre={histoire ? filtre : null}
       />

@@ -81,7 +81,12 @@ export default function MentionsLegales() {
           </li>
         </ul>
         <p>
-          Ces deux sociétés sont situées aux États-Unis. Le transfert repose sur leurs engagements de protection des
+          La lecture à voix haute des récits de civilisations utilise la voix de votre navigateur. Selon le navigateur
+          et la voix choisie, le texte lu (jamais vos données) peut être traité par son éditeur (Google, Apple,
+          Microsoft…). Vous pouvez couper la voix avec le bouton « Voix ».
+        </p>
+        <p>
+          Vercel et Wikimedia sont situés aux États-Unis. Le transfert repose sur leurs engagements de protection des
           données (Data Privacy Framework UE–États-Unis et clauses contractuelles types). Base légale : l’intérêt
           légitime à faire fonctionner et illustrer le site (article 6.1.f du RGPD).
         </p>

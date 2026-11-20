@@ -5,13 +5,12 @@ import { BESTIAIRE } from '../data/bestiaire.js';
 import { ERES, COULEUR_PERIODE } from '../data/eres.js';
 import { LIEUX } from '../data/histoireMonde.js';
 
-// Histoire sur une seule ligne : chaque point prend la couleur de son lieu (le premier cité ;
-// la France passe avant l'Europe).
+// Histoire sur une seule ligne : chaque point prend la couleur de son lieu (le premier cité).
 const COULEUR_LIEU = Object.fromEntries(LIEUX.map((l) => [l.id, l.couleur]));
 const couleurLieu = (carte) => {
   const l = carte.lieux;
   if (!l || !l.length) return undefined;
-  return COULEUR_LIEU[l.includes('france') ? 'france' : l[0]];
+  return COULEUR_LIEU[l[0]];
 };
 
 // La ligne du temps d'un étage : plus large que l'écran, on la fait glisser de côté.
