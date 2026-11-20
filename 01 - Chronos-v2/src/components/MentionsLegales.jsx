@@ -1,4 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { SOURCES } from '../data/textes.js';
+import { PAR_ID } from '../data/index.js';
+
+// Les publications citées par les fiches complètes (sans doublon).
+const PUBLICATIONS = [...new Map(
+  Object.values(PAR_ID).filter((e) => e.source?.texte).map((e) => [e.source.texte, e.source])
+).values()];
 
 // ---------------------------------------------------------------------------
 // MENTIONS LÉGALES, CONFIDENTIALITÉ, CRÉDITS, ACCESSIBILITÉ (#/mentions-legales)
@@ -34,6 +41,7 @@ export default function MentionsLegales() {
         <a href="#legal-donnees" onClick={aller}>Données personnelles</a>
         <a href="#legal-cookies" onClick={aller}>Cookies et stockage</a>
         <a href="#legal-credits" onClick={aller}>Crédits et licences</a>
+        <a href="#legal-sources" onClick={aller}>Sources</a>
         <a href="#legal-contenus" onClick={aller}>Contenus</a>
         <a href="#legal-accessibilite" onClick={aller}>Accessibilité</a>
       </nav>
@@ -118,6 +126,35 @@ export default function MentionsLegales() {
         <p>
           Un ayant droit pense qu’un contenu est publié sans autorisation ? Écrivez à {EDITEUR.contact} : il sera retiré
           rapidement s’il y a lieu.
+        </p>
+      </section>
+
+      <section aria-labelledby="legal-sources">
+        <h2 id="legal-sources">Sources des contenus</h2>
+        <p>
+          Les textes du site sont rédigés à partir de sources publiques et scientifiques : organismes de recherche,
+          agences spatiales, musées nationaux, archives et organisations internationales. Chaque fiche indique les
+          siennes. En voici la liste complète.
+        </p>
+        <h3>Organismes et institutions</h3>
+        <ul>
+          {Object.values(SOURCES).map((src) => (
+            <li key={src.url}>
+              <a href={src.url} target="_blank" rel="noreferrer">{src.nom}</a>
+            </li>
+          ))}
+        </ul>
+        <h3>Publications scientifiques citées dans les fiches</h3>
+        <ul>
+          {PUBLICATIONS.map((src) => (
+            <li key={src.texte}>
+              {src.url ? <a href={src.url} target="_blank" rel="noreferrer">{src.texte}</a> : src.texte}
+            </li>
+          ))}
+        </ul>
+        <p>
+          Les classifications du vivant s’appuient aussi sur G. Lecointre et H. Le Guyader, « Classification
+          phylogénétique du vivant » (Belin, 4e éd., 2016) et sur le Tree of Life Web Project (tolweb.org).
         </p>
       </section>
 

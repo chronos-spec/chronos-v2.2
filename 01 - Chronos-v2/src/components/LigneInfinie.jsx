@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Carte from './Carte.jsx';
 import { ETAGES } from '../data/index.js';
 import { texteAge } from '../lib/ages.js';
+import { lienPeriode } from '../lib/route.js';
 
 // ---------------------------------------------------------------------------
 // « TOUT VOIR » : une seule ligne, du Big Bang (à gauche) à aujourd'hui (à droite).
@@ -157,7 +158,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   // Glisser la ligne à la souris ou au doigt.
   const glisse = useRef(null);
   const debut = (ev) => {
-    if (ev.target.closest('button')) return;
+    if (ev.target.closest('button, a')) return;
     cancelAnimationFrame(anim.current);
     glisse.current = { x: ev.clientX, c: centre };
     ev.currentTarget.setPointerCapture?.(ev.pointerId);
@@ -252,9 +253,10 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
               if (w < 140 || x2 < 0 || x1 > largeur) return null; // une période n'apparaît que si son nom tient
               const g = Math.max(0, x1);
               return (
-                <div key={`${et.id}-${c.id}`} aria-hidden="true" className="infinie__periode" data-etage={et.id} style={{ left: g, width: Math.min(largeur, x2) - g }}>
+                // Un clic sur une période ouvre sa page, dans l'étage correspondant.
+                <a key={`${et.id}-${c.id}`} href={lienPeriode(et.id, c.id)} className="infinie__periode" data-etage={et.id} style={{ left: g, width: Math.min(largeur, x2) - g }} title={`Ouvrir la page : ${c.nom}`}>
                   <span>{c.nom}</span>
-                </div>
+                </a>
               );
             })
         )}

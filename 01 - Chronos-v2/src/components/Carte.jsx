@@ -1,3 +1,4 @@
+import { TEXTES, SOURCES } from '../data/textes.js';
 import { WIKI_EVENEMENTS } from '../data/wiki.js';
 import ImageWiki from './ImageWiki.jsx';
 import { lienPeriode } from '../lib/route.js';
@@ -76,6 +77,22 @@ export default function Carte({ carte, etage, onFermer }) {
         <>
           <ImageWiki titre={WIKI_EVENEMENTS[carte.id]} alt={carte.titre} taille="carte" />
           {carte.resume && <p className="carte__texte">{carte.resume}</p>}
+          {TEXTES[carte.id] && (
+            <>
+              <p className="carte__texte">{TEXTES[carte.id][0]}</p>
+              <p className="carte__source">
+                Sources :{' '}
+                {TEXTES[carte.id][1].map((k, i) => (
+                  <span key={k}>
+                    {i > 0 && ' ; '}
+                    <a href={SOURCES[k].url} target="_blank" rel="noreferrer">
+                      {SOURCES[k].nom}<span className="sr-only"> (s’ouvre dans un nouvel onglet)</span>
+                    </a>
+                  </span>
+                ))}
+              </p>
+            </>
+          )}
         </>
       )}
 
