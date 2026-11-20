@@ -2178,3 +2178,9 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
   .entete__lien { padding-left: 10px; padding-right: 10px; }
   .entete__essai { display: none; }
 }
+.jeu__accueil p { margin: 12px 0; }
+.jeu__sous-titre { font-weight: 600; }
+.jeu__themes { display: flex; flex-direction: column; gap: 8px; }
+.jeu__themes button { width: 100%; text-align: left; padding: 10px 18px; }
+.jeu__nb { font-weight: 400; color: var(--texte-doux); font-size: 14px; }
+.jeu__lien { border: 0; background: none; padding: 0; color: #ffe3a8; text-decoration: underline; font: inherit; cursor: pointer; min-height: 0; }
