@@ -2256,3 +2256,4 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 .infinie__avance { position: absolute; left: 16px; right: 16px; bottom: 6px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); }
 .infinie__avance span { display: block; height: 100%; border-radius: 2px; background: #ffe3a8; }
 .infinie__btn--voyage { background: rgba(255, 227, 168, 0.25); border-color: #ffe3a8; box-shadow: 0 0 18px rgba(255, 227, 168, 0.45); }
+.infinie__tete { position: absolute; top: 0; bottom: 0; width: 2px; background: linear-gradient(rgba(255, 227, 168, 0), rgba(255, 227, 168, 0.7), rgba(255, 227, 168, 0)); box-shadow: 0 0 12px rgba(255, 227, 168, 0.6); pointer-events: none; }

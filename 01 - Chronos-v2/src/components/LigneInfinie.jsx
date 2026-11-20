@@ -3,6 +3,7 @@ import Carte from './Carte.jsx';
 import { ETAGES } from '../data/index.js';
 import { texteAge } from '../lib/ages.js';
 import { lienPeriode } from '../lib/route.js';
+import { demarrerMusique, pauseMusique, arreterMusique } from '../lib/musique.js';
 
 // ---------------------------------------------------------------------------
 // « TOUT VOIR » : une seule ligne, du Big Bang (à gauche) à aujourd'hui (à droite).
@@ -114,76 +115,97 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     [parId]
   );
 
-  // ---------- Le VOYAGE (bouton ▶) : on parcourt toute la frise, d'événement en événement ----------
-  // Le trajet ne dépend que d'une chose : l'âge regardé. Pour chaque âge, la vue montre une fenêtre
-  // d'environ 1,5 fois cet âge : on voit l'événement, ses voisins, et la ligne qui se resserre vers le présent.
-  const vueDeAge = (ans) => {
-    const fenetre = Math.max(ans * 1.5, 40);
-    const z = bornerZoom(AGE_UNIVERS / fenetre);
-    return { z, c: borner(xMonde(ans), z) };
-  };
-  // Les étapes : les grands événements (fiches complètes et principaux), du plus ancien au plus récent.
+  // ---------- Le VOYAGE (bouton ▶) : la frise défile toute seule, sans s'arrêter ----------
+  // Une « tête de lecture » avance d'événement en événement, du Big Bang à aujourd'hui.
+  // Chaque passage d'un événement au suivant prend un temps presque constant : là où les événements
+  // sont rares (des milliards d'années de vide), la tête de lecture file ; là où ils se pressent, elle ralentit.
+  // Le zoom suit la densité : on cadre toujours les quelques événements autour de la tête de lecture,
+  // donc on est très zoomé sur le Big Bang, on dézoome dans les grands vides, puis on rezoome sur l'Histoire.
   const etapes = useMemo(() => {
-    const liste = evenements.filter((e) => e.rang <= 2 && e.ans > 0).sort((a, b) => b.ans - a.ans);
+    // Tous les événements (sans les animaux), pour un défilé riche.
+    const liste = evenements.filter((e) => e.rang <= 3 && e.ans > 0).sort((a, b) => b.ans - a.ans);
     const res = [];
     liste.forEach((e) => {
-      const der = res[res.length - 1];
-      if (!der || der.ans / e.ans > 1.12) res.push(e); // on saute ceux trop proches (sinon ça saccade)
+      if (!res.length || res[res.length - 1].ans !== e.ans) res.push(e);
     });
     return res;
   }, [evenements]);
-  // Le programme : départ (vue entière), puis pour chaque étape un trajet puis un arrêt.
   const programme = useMemo(() => {
-    const segs = [];
-    let t = 0;
-    let a = AGE_UNIVERS;
-    segs.push({ t0: 0, t1: 1.5, a0: a, a1: a });
-    t = 1.5;
-    etapes.forEach((e) => {
-      const trajet = 0.6 + 1.2 * Math.abs(Math.log(a / e.ans));
-      segs.push({ t0: t, t1: t + trajet, a0: a, a1: e.ans, vers: e });
-      t += trajet;
-      segs.push({ t0: t, t1: t + 1.6, a0: e.ans, a1: e.ans, sur: e });
-      t += 1.6;
-      a = e.ans;
+    // On commence par 4 secondes sur le Big Bang, très zoomé.
+    const ages = [AGE_UNIVERS, AGE_UNIVERS, ...etapes.map((e) => e.ans), 1];
+    const temps = [0, 4];
+    for (let i = 2; i < ages.length; i++) {
+      const ecart = Math.min(4, Math.abs(Math.log(ages[i - 1] / ages[i])));
+      temps.push(temps[i - 1] + 0.55 + 0.9 * ecart); // ~0,5 s par événement, plus le temps de traverser les grands vides
+    }
+    // Fenêtre visée à chaque étape : l'écart entre les 3 événements d'avant et les 4 d'après.
+    const fenetres = ages.map((_, i) => {
+      const avant = ages[Math.max(0, i - 3)];
+      const apres = ages[Math.min(ages.length - 1, i + 4)];
+      const densite = Math.max(40, (avant - apres) * 1.3);
+      // Près du Big Bang, on reste zoomé : la fenêtre grandit avec la distance au début de l'univers.
+      const depuisDebut = Math.max(3e8, (AGE_UNIVERS - ages[i]) * 2.5);
+      return Math.min(AGE_UNIVERS, densite, depuisDebut);
     });
-    return { segs, duree: t };
+    return { ages, temps, fenetres, duree: temps[temps.length - 1] };
   }, [etapes]);
 
   const [voyage, setVoyage] = useState({ actif: false, vitesse: 1, t: 0 });
+  const [musique, setMusique] = useState(true);
   const [evtVoyage, setEvtVoyage] = useState(null);
   const voyageRef = useRef(voyage);
   voyageRef.current = voyage;
+  const logFenetre = useRef(Math.log(AGE_UNIVERS));
+  const TETE = 0.42; // la tête de lecture est à 42 % de la largeur de l'écran
+
   useEffect(() => {
     if (!voyage.actif) return undefined;
     let id;
     let avant = performance.now();
-    const pas = (maintenant) => {
+    const { ages, temps, fenetres, duree } = programme;
+    const image = (maintenant) => {
       const dt = Math.min(0.1, (maintenant - avant) / 1000);
       avant = maintenant;
       const v = voyageRef.current;
-      const t = Math.min(programme.duree, v.t + dt * v.vitesse);
-      const seg = programme.segs.find((s) => t <= s.t1) || programme.segs[programme.segs.length - 1];
-      const k = seg.t1 > seg.t0 ? (t - seg.t0) / (seg.t1 - seg.t0) : 1;
-      const doux = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
-      // Interpolation en échelle « ×10 » : le voyage paraît régulier, de milliards d'années à quelques décennies.
-      const ans = Math.exp(Math.log(seg.a0) + (Math.log(seg.a1) - Math.log(seg.a0)) * doux);
-      const vue = vueDeAge(ans);
-      setZoom(vue.z);
-      setCentre(vue.c);
-      setEvtVoyage(seg.sur || seg.vers || null);
-      if (t >= programme.duree) {
+      const t = Math.min(duree, v.t + dt * v.vitesse);
+      let i = 1;
+      while (i < temps.length - 1 && temps[i] < t) i++;
+      const k = (t - temps[i - 1]) / (temps[i] - temps[i - 1] || 1);
+      // Âge sous la tête de lecture (interpolé en échelle « ×10 », donc régulier à l'œil).
+      const ans = Math.exp(Math.log(ages[i - 1]) + (Math.log(ages[i]) - Math.log(ages[i - 1])) * k);
+      // Fenêtre visée, puis lissée pour que le zoom respire doucement.
+      const cible = Math.log(fenetres[i - 1] + (fenetres[i] - fenetres[i - 1]) * k);
+      logFenetre.current += (cible - logFenetre.current) * (1 - Math.exp(-dt * v.vitesse * 1.6));
+      const z = bornerZoom(AGE_UNIVERS / Math.exp(logFenetre.current));
+      setZoom(z);
+      setCentre(borner(xMonde(ans) + (0.5 - TETE) / z, z));
+      const passe = etapes[Math.max(0, i - 2)];
+      setEvtVoyage((e) => (e === passe ? e : passe));
+      if (t >= duree) {
         setVoyage((x) => ({ ...x, actif: false, t: 0 }));
+        arreterMusique();
         return;
       }
       voyageRef.current = { ...v, t };
       setVoyage((x) => ({ ...x, t }));
-      id = requestAnimationFrame(pas);
+      id = requestAnimationFrame(image);
     };
-    id = requestAnimationFrame(pas);
+    id = requestAnimationFrame(image);
     return () => cancelAnimationFrame(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voyage.actif, programme]);
+
+  // La musique suit le voyage (lecture, pause, arrêt, bouton musique).
+  useEffect(() => {
+    if (voyage.actif && musique) demarrerMusique();
+    else pauseMusique();
+  }, [voyage.actif, musique]);
+  useEffect(() => () => arreterMusique(), []);
+
+  const lancerVoyage = () => {
+    if (!voyage.actif && voyage.t === 0) logFenetre.current = Math.log(programme.fenetres[0]);
+    setVoyage((x) => ({ ...x, actif: !x.actif }));
+  };
   const arreterVoyage = () => setVoyage((x) => ({ ...x, actif: false }));
 
   // Découverte progressive : on n'ajoute un niveau de détail que s'il y a la place pour tout ce niveau.
@@ -285,12 +307,12 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         <button
           type="button"
           className="infinie__play"
-          onClick={() => setVoyage((x) => ({ ...x, actif: !x.actif, t: !x.actif && x.t >= programme.duree - 0.01 ? 0 : x.t }))}
+          onClick={lancerVoyage}
         >
           {voyage.actif ? '⏸ Pause' : voyage.t > 0 ? '▶ Reprendre le voyage' : '▶ Voyage du Big Bang à aujourd’hui'}
         </button>
         {voyage.t > 0 && (
-          <button type="button" className="infinie__arret" onClick={() => { setVoyage((x) => ({ ...x, actif: false, t: 0 })); setEvtVoyage(null); allerVers(1, 0.5); }}>
+          <button type="button" className="infinie__arret" onClick={() => { setVoyage((x) => ({ ...x, actif: false, t: 0 })); setEvtVoyage(null); arreterMusique(); allerVers(1, 0.5); }}>
             ⏹ Arrêter
           </button>
         )}
@@ -303,6 +325,9 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
             <option value={4}>Très rapide (×4)</option>
           </select>
         </label>
+        <button type="button" className="infinie__arret" aria-pressed={musique} onClick={() => setMusique((m) => !m)}>
+          {musique ? '🎵 Musique' : '🔇 Sans musique'}
+        </button>
         <span className="infinie__duree" aria-hidden="true">
           {(() => {
             const r = Math.ceil((programme.duree - voyage.t) / voyage.vitesse);
@@ -372,6 +397,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         )}
 
         <div className="infinie__axe" aria-hidden="true" />
+        {voyage.t > 0 && <div className="infinie__tete" style={{ left: `${TETE * 100}%` }} aria-hidden="true" />}
 
         {indice && <p className="infinie__indice">{indice}</p>}
 
