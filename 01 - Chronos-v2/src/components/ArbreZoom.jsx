@@ -68,7 +68,7 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
     const cible1 = {
       x: (b.x1 + b.x2) / 2,
       y: (b.y1 + b.y2) / 2,
-      s: borner(Math.min(w / (b.x2 - b.x1 || 1), h / (b.y2 - b.y1 || 1)) * 0.85),
+      s: borner(Math.min(w / (b.x2 - b.x1 || 1), h / (b.y2 - b.y1 || 1)) * 0.92),
     };
     cancelAnimationFrame(anim.current);
     if (instant || mouvementReduit()) {
@@ -125,7 +125,7 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
       const fit = Math.min(el.clientWidth / (b.x2 - b.x1), el.clientHeight / (b.y2 - b.y1)) * 0.92;
       const plusPetite = Math.min(...TOUS.filter((n) => n.type === 'espece').map((n) => n.r));
       // Zoom maximal : la plus petite pastille fait au plus ~90 px de rayon (au-delà, l'arbre « disparaît »).
-      limites.current = { min: fit * 0.6, max: 90 / plusPetite };
+      limites.current = { min: fit * 0.8, max: 220 / plusPetite };
       redessiner();
     };
     mesurer();
@@ -190,30 +190,14 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
     const vus = [];
 
     const rec = (n) => {
-      const b = n.boite;
-      if (b.x2 < vx1 || b.x1 > vx2 || b.y2 < vy1 || b.y1 > vy2) return;
-      if ((b.x2 - b.x1 + b.y2 - b.y1) * s < 1.5) return;
+      const R = n.r * s;
+      const X = ex(n.x);
+      const Y = ey(n.y);
+      // Hors de l'écran, ou trop petit pour être vu : on ne dessine pas (ni ses enfants).
+      if (X + R < 0 || X - R > w || Y + R < 0 || Y - R > h || R < 0.8) return;
       const choisi = n.id === sel;
-      // La branche (légèrement courbée)
-      // Épaisseur plafonnée à l'écran : en zoomant, une branche ne devient jamais un aplat qui cache tout.
-      const largeur = n.type === 'espece'
-        ? Math.min(4, Math.max(0.6, n.L * s * 0.02))
-        : Math.min(14, Math.max(1, n.L * s * 0.045));
-      ctx.strokeStyle = n.eteint ? eteint : `rgba(${vie}, ${choisi ? 1 : 0.75})`;
-      ctx.lineWidth = choisi ? largeur + 2 : largeur;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(ex(n.bx), ey(n.by));
-      const mx = (n.bx + n.x) / 2 + Math.cos(n.angle + Math.PI / 2) * n.L * 0.06;
-      const my = (n.by + n.y) / 2 + Math.sin(n.angle + Math.PI / 2) * n.L * 0.06;
-      ctx.quadraticCurveTo(ex(mx), ey(my), ex(n.x), ey(n.y));
-      ctx.stroke();
 
       if (n.type === 'espece') {
-        const R = n.r * s;
-        if (R < 1) return;
-        const X = ex(n.x);
-        const Y = ey(n.y);
         ctx.fillStyle = n.eteint ? eteint : `rgb(${vie})`;
         ctx.beginPath();
         ctx.arc(X, Y, R, 0, Math.PI * 2);
@@ -223,9 +207,9 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
           if (img) {
             ctx.save();
             ctx.beginPath();
-            ctx.arc(X, Y, R * 0.9, 0, Math.PI * 2);
+            ctx.arc(X, Y, R * 0.92, 0, Math.PI * 2);
             ctx.clip();
-            const k = Math.max((R * 1.8) / img.width, (R * 1.8) / img.height);
+            const k = Math.max((R * 1.84) / img.width, (R * 1.84) / img.height);
             ctx.drawImage(img, X - (img.width * k) / 2, Y - (img.height * k) / 2, img.width * k, img.height * k);
             ctx.restore();
           }
@@ -234,24 +218,38 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
           ctx.strokeStyle = texte;
           ctx.lineWidth = 3;
           ctx.beginPath();
-          ctx.arc(X, Y, R + 4, 0, Math.PI * 2);
+          ctx.arc(X, Y, R + 3, 0, Math.PI * 2);
           ctx.stroke();
         }
-        vus.push({ n, X, Y, R: Math.max(R, 12) });
-        if (R > 9) {
-          etiquettes.push({ texte: `${n.eteint ? '† ' : ''}${n.nom}`, X, Y: Y + R + 6, taille: Math.min(17, 11 + R / 8), eteint: n.eteint, haut: true });
+        vus.push({ n, X, Y, R });
+        if (R > 16) {
+          // Nom en blanc (liseré sombre) : lisible sur la pastille verte comme sur l'ambre ; le † reste.
+          etiquettes.push({ texte: `${n.eteint ? '† ' : ''}${n.nom}`, X, Y: Y + Math.min(R * 0.55, R - 10), taille: Math.min(18, 11 + R / 10), eteint: false, priorite: 1 });
         }
         return;
       }
+
+      // Un groupe : un disque très léger et un contour (ambre et pointillé s'il a disparu).
+      // Seuls les cercles plus petits que l'écran sont teintés : sinon les teintes s'additionnent en aplat.
+      ctx.beginPath();
+      ctx.arc(X, Y, R, 0, Math.PI * 2);
+      if (R < Math.min(w, h) * 0.6) {
+        ctx.fillStyle = n.eteint ? 'rgba(245, 158, 11, 0.08)' : `rgba(${vie}, 0.07)`;
+        ctx.fill();
+      }
+      ctx.setLineDash(n.eteint ? [6, 4] : []);
+      ctx.strokeStyle = n.eteint ? eteint : `rgba(${vie}, ${choisi ? 1 : 0.55})`;
+      ctx.lineWidth = choisi ? 3 : 1.4;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      vus.push({ n, X, Y, R });
       n.enfants.forEach(rec);
-      const longueur = n.L * s;
-      if (longueur > 70) {
-        const X = ex(n.x);
-        const Y = ey(n.y);
+      // Le nom du groupe, en haut de son cercle, tant que le cercle est de taille « lisible ».
+      if (R > 45 && R < Math.max(w, h) * 1.6) {
         etiquettes.push({
-          texte: `${n.eteint ? '† ' : ''}${n.nom}`, X, Y: Y - 8, taille: Math.min(22, 12 + longueur / 60), eteint: n.eteint, groupe: true, choisi,
+          texte: `${n.eteint ? '† ' : ''}${n.nom}`, X, Y: Y - R + 6, taille: Math.min(22, 12 + R / 40), eteint: n.eteint,
+          groupe: true, choisi, haut: true, priorite: 2,
         });
-        vus.push({ n, X, Y, R: 16 });
       }
     };
     rec(RACINE);
@@ -260,7 +258,7 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
     ctx.textAlign = 'center';
     ctx.lineJoin = 'round';
     // On n'écrit un nom que s'il ne chevauche pas un nom déjà écrit (les plus grands d'abord).
-    etiquettes.sort((a, b) => (b.choisi - a.choisi) || b.taille - a.taille);
+    etiquettes.sort((a, b) => (b.choisi - a.choisi) || (b.priorite - a.priorite) || b.taille - a.taille);
     const poses = [];
     etiquettes.forEach((e) => {
       ctx.font = `${e.groupe ? 600 : 500} ${e.taille}px Inter, sans-serif`;
@@ -294,14 +292,14 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
   const pointeurs = useRef(new Map());
   const geste = useRef(null);
   const toucher = (px, py) => {
-    // L'espèce ou le groupe le plus proche sous le doigt.
+    // Le plus petit cercle (le plus précis) qui contient le point touché.
     let meilleur = null;
     visibles.current.forEach((v) => {
-      const d = Math.hypot(v.X - px, v.Y - py);
-      if (d <= v.R + 6 && (!meilleur || d < meilleur.d)) meilleur = { ...v, d };
+      if (Math.hypot(v.X - px, v.Y - py) <= v.R && (!meilleur || v.R < meilleur.R)) meilleur = v;
     });
     return meilleur?.n || null;
   };
+
   const surBas = (e) => {
     toile.current.setPointerCapture(e.pointerId);
     const q = pos(e);
@@ -464,8 +462,8 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
           <p className="az__sur-titre">L’arbre du vivant</p>
           <h2 id={idTitre} className="az__titre">Zoomez dans l’arbre de la vie</h2>
           <p className="az__aide">
-            Des grands groupes jusqu’à chaque espèce : zoomez à la molette, en pinçant ou avec + et −, faites glisser pour
-            vous déplacer. <span className="az__eteint">† ambre</span> = espèce ou groupe disparu.
+            Chaque cercle est un groupe, qui contient ses sous-groupes et ses espèces. Touchez un cercle pour y plonger,
+            zoomez à la molette, en pinçant ou avec + et −. <span className="az__eteint">† ambre</span> = espèce ou groupe disparu.
           </p>
         </div>
         <div className="az__commandes" role="group" aria-label="Zoom de l’arbre">

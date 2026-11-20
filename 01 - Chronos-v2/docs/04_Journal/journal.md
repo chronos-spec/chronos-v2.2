@@ -17,8 +17,10 @@
 **Décisions prises**
 - **Retour du canvas, uniquement pour l'arbre du vivant façon OneZoom, toujours doublé d'une liste accessible qui lit les mêmes données.**
 
+- **Même jour, après essai** : la forme en branches (longues branches presque vides, arbre qui « disparaissait » au clic) est remplacée par des **cercles imbriqués** : chaque groupe est un cercle qui contient ses sous-groupes et ses espèces ; on plonge en touchant un cercle. Choix de Pierre, plutôt que d'intégrer le vrai OneZoom ou de copier son algorithme.
+
 **Questions ouvertes**
-- Ajuster la forme de l'arbre (angles, longueurs) après essai sur un vrai écran, avec les images chargées.
+- Juger les cercles imbriqués sur un vrai écran, avec les images chargées.
 - Comparer deux espèces (l'ancien bouton « Comparer avec ») : à remettre dans la fiche ?
 
 ## 16 novembre 2026 — Pages d'étage, pages de période, lieux et images
