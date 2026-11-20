@@ -2257,3 +2257,70 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 .infinie__avance span { display: block; height: 100%; border-radius: 2px; background: #ffe3a8; }
 .infinie__btn--voyage { background: rgba(255, 227, 168, 0.25); border-color: #ffe3a8; box-shadow: 0 0 18px rgba(255, 227, 168, 0.45); }
 .infinie__tete { position: absolute; top: 0; bottom: 0; width: 2px; background: linear-gradient(rgba(255, 227, 168, 0), rgba(255, 227, 168, 0.7), rgba(255, 227, 168, 0)); box-shadow: 0 0 12px rgba(255, 227, 168, 0.6); pointer-events: none; }
+
+/* ---------- L'arbre du vivant zoomable (façon OneZoom) ---------- */
+.az { display: flex; flex-direction: column; gap: 16px; }
+.az__tete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.az__sur-titre { margin: 0; font: 15px 'JetBrains Mono', monospace; color: rgb(var(--etage-rgb)); }
+.az__titre { margin: 4px 0 8px; font: 600 32px Fraunces, serif; }
+.az__aide { margin: 0; max-width: 70ch; font-size: 18px; line-height: 1.5; color: var(--texte-doux); }
+.az__eteint { color: var(--eteint); font-weight: 600; }
+.az__commandes { display: flex; gap: 8px; }
+.az__commandes button {
+  min-width: 48px; min-height: 48px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+  font: 600 18px Inter, sans-serif; color: var(--texte); background: rgba(var(--etage-rgb), 0.12);
+  border: 1px solid rgba(var(--etage-rgb), 0.5);
+}
+.az__commandes button:hover { background: rgba(var(--etage-rgb), 0.28); }
+.az__corps { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; }
+.az__scene {
+  position: relative; height: min(calc(calc(100vh / var(--zp, 1)) - 220px), 760px); min-height: 420px;
+  border-radius: 24px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 100%, rgba(var(--etage-rgb), 0.12), transparent 60%), linear-gradient(180deg, #05060f, #0b1030);
+  box-shadow: inset 0 0 0 1px rgba(var(--etage-rgb), 0.3);
+}
+.az__toile { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.az__toile:active { cursor: grabbing; }
+.az__fiche {
+  position: absolute; top: 16px; right: 16px; width: min(340px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto;
+  padding: 16px 20px; border-radius: 20px; background: rgba(12, 14, 32, 0.95); backdrop-filter: blur(10px);
+  box-shadow: 0 0 0 1px rgba(var(--etage-rgb), 0.5), 0 0 30px rgba(var(--etage-rgb), 0.25);
+}
+@media (prefers-reduced-motion: no-preference) { .az__fiche { animation: monte 300ms ease-out; } }
+.az__fermer { position: absolute; top: 8px; right: 8px; min-width: 44px; min-height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: var(--texte); font-size: 24px; cursor: pointer; z-index: 1; }
+.az__fiche-nom { margin: 12px 0 4px; font: 600 24px Fraunces, serif; }
+.az__statut { margin: 0; font: 600 15px 'JetBrains Mono', monospace; color: rgb(var(--etage-rgb)); }
+.az__fiche:has(.az__statut) .az__fiche-nom span { color: var(--eteint); }
+.az__chemin { margin: 8px 0; font-size: 15px; color: var(--texte-doux); line-height: 1.5; }
+.az__texte { margin: 8px 0; font-size: 18px; line-height: 1.5; }
+.az__date { margin: 4px 0 8px; font: 15px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.az__frise {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; margin-top: 4px; border-radius: 999px;
+  background: rgb(var(--etage-rgb)); color: #05110a; font-weight: 700; text-decoration: none;
+}
+.az__liste-boite {
+  display: flex; flex-direction: column; min-height: 0;
+  height: min(calc(calc(100vh / var(--zp, 1)) - 220px), 760px); padding: 12px; border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.az__liste-titre { margin: 0; font: 600 20px Fraunces, serif; }
+.az__liste-aide { margin: 4px 0 8px; font-size: 15px; color: var(--texte-doux); }
+.az__liste { list-style: none; margin: 0; padding: 0; overflow: auto; flex: 1; }
+.az__item {
+  display: flex; align-items: center; gap: 6px; min-height: 44px; padding-right: 8px; border-radius: 10px;
+  font-size: 16px; cursor: pointer; color: var(--texte);
+}
+.az__item:hover { background: rgba(var(--etage-rgb), 0.12); }
+.az__item:focus-visible { outline: 3px solid #ffe3a8; outline-offset: -3px; }
+.az__item--groupe { font-weight: 600; }
+.az__item--eteint { color: var(--eteint); }
+.az__item--choisi { background: rgba(var(--etage-rgb), 0.22); }
+.az__chevron { width: 16px; flex: none; color: var(--texte-doux); }
+.az__nb { font-weight: 400; color: var(--texte-doux); font-size: 14px; }
+.az__credits { margin: 0; font-size: 14px; color: var(--texte-doux); }
+@media (max-width: 900px) {
+  .az__corps { grid-template-columns: 1fr; }
+  .az__scene { height: 60vh; }
+  .az__liste-boite { height: 50vh; }
+}
+.az__statut--eteint { color: var(--eteint); }

@@ -10,6 +10,8 @@
 // Brusatte, « The Rise and Fall of the Dinosaurs » (2018) pour les archosaures.
 
 import { ARBRE_VIVANT } from './arbreVivant.js';
+import { ESPECES } from './especes.js';
+import { WIKI_ESPECES } from './wiki.js';
 
 const GROUPES_ANIMAUX = [
   { id: 'animaux', parent: 'eucaryotes', nom: 'Animaux', depuis: 6.0e8, texte: 'Des êtres faits de nombreuses cellules, qui se nourrissent d’autres êtres vivants.' },
@@ -112,6 +114,14 @@ const GROUPES_ANIMAUX = [
     texte: 'Les animaux à trompe.' },
   { id: 'primates', parent: 'placentaires', nom: 'Primates', depuis: 5.6e7,
     texte: 'Lémuriens, singes, grands singes… et les humains.' },
+  { id: 'hominides', parent: 'primates', nom: 'Grands singes (Hominidés)', depuis: 1.5e7,
+    texte: 'Orangs-outans, gorilles, chimpanzés… et la lignée humaine. Pas de queue, un grand cerveau.' },
+  { id: 'lignee-humaine', parent: 'hominides', nom: 'Lignée humaine (Homininés)', depuis: 7.0e6, debat: true,
+    texte: 'Tous les parents plus proches de nous que des chimpanzés. Les liens entre fossiles restent très discutés.' },
+  { id: 'australopitheques', parent: 'lignee-humaine', nom: 'Australopithèques', depuis: 4.2e6, eteint: true,
+    texte: 'Des homininés qui marchaient debout mais grimpaient encore, comme Lucy.' },
+  { id: 'homo', parent: 'lignee-humaine', nom: 'Genre Homo', depuis: 2.4e6,
+    texte: 'Les humains au sens large. Il n’en reste qu’une espèce : nous.' },
   { id: 'carnivores', parent: 'placentaires', nom: 'Carnivores', depuis: 5.5e7,
     texte: 'Félins, chiens, ours, phoques…' },
   { id: 'perissodactyles', parent: 'placentaires', nom: 'Périssodactyles', depuis: 5.6e7,
@@ -212,8 +222,24 @@ const PLACE_VIVANT = {
   'v-ornithorynque': 'mammiferes', 'v-kangourou': 'mammiferes',
   'v-baleine': 'cetaces', 'v-chauve-souris': 'placentaires', 'v-rongeurs': 'placentaires',
   'v-elephant': 'proboscidiens', 'v-felins': 'carnivores',
-  'v-lemurien': 'primates', 'v-gorille': 'primates', 'v-chimpanze': 'primates', 'v-humain': 'primates',
+  'v-lemurien': 'primates', 'v-gorille': 'hominides', 'v-chimpanze': 'hominides',
+  // v-humain : remplacé par l'espèce Homo sapiens des espèces humaines (même espèce, une seule feuille).
 };
+
+// Feuilles de arbreVivant.js qui sont en fait des groupes déjà présents ici : on les fusionne
+// (elles prêtent seulement leur image au groupe).
+const FUSIONS = {
+  'v-ammonites': 'ammonoides', 'v-trilobites': 'trilobites', 'v-pterosaures': 'pterosaures',
+  'v-ichtyosaures': 'ichthyosaures', 'v-sauropodes': 'sauropodomorphes', 'v-ornithischiens': 'ornithischiens',
+  'v-theropodes': 'theropodes',
+};
+
+// Les espèces humaines (especes.js) : rangées dans la lignée humaine.
+const PLACE_HUMAIN = {
+  sahelanthropus: 'lignee-humaine', orrorin: 'lignee-humaine', ardipithecus: 'lignee-humaine', paranthropus: 'lignee-humaine',
+  anamensis: 'australopitheques', afarensis: 'australopitheques', africanus: 'australopitheques',
+};
+const groupeHumain = (id) => PLACE_HUMAIN[id] || 'homo';
 
 const RACINES = [
   { id: 'vivant', nom: 'Le vivant', depuis: 3.7e9, debat: true,
@@ -224,6 +250,7 @@ const RACINES = [
 
 // Les groupes et espèces de arbreVivant.js hors animaux (bactéries, plantes, champignons…).
 const GROUPES_AUTRES = [];
+const WIKI_FUSIONS = {};
 const FEUILLES_VIVANT = [];
 function parcourir(noeud, parent) {
   if (noeud.id === 'v-animaux') {
@@ -231,6 +258,7 @@ function parcourir(noeud, parent) {
     const feuilles = (n) => (n.enfants ? n.enfants.flatMap(feuilles) : [n]);
     feuilles(noeud).forEach((f) => {
       if (PLACE_VIVANT[f.id]) FEUILLES_VIVANT.push({ ...f, groupe: PLACE_VIVANT[f.id] });
+      else if (FUSIONS[f.id]) WIKI_FUSIONS[FUSIONS[f.id]] = f.wiki;
     });
     return;
   }
@@ -243,7 +271,9 @@ function parcourir(noeud, parent) {
 }
 ARBRE_VIVANT.forEach((n) => parcourir(n, ['v-bacteries', 'v-archees'].includes(n.id) ? 'vivant' : 'eucaryotes'));
 
-export const GROUPES = [...RACINES, ...GROUPES_AUTRES, ...GROUPES_ANIMAUX];
+export const GROUPES = [...RACINES, ...GROUPES_AUTRES, ...GROUPES_ANIMAUX].map((g) =>
+  WIKI_FUSIONS[g.id] && !g.wiki ? { ...g, wiki: WIKI_FUSIONS[g.id] } : g
+);
 
 export const GROUPE_PAR_ID = Object.fromEntries(GROUPES.map((g) => [g.id, g]));
 
@@ -264,6 +294,13 @@ export function construireFeuilles(bestiaire, wikiAnimaux = {}) {
       }))
     ),
   ];
+  // Les espèces humaines (page Humains). Homo sapiens = nous : vivant.
+  ESPECES.forEach((e) => {
+    liste.push({
+      id: `h-${e.id}`, nom: e.surnom ? `${e.nom} (${e.surnom})` : e.nom, groupe: groupeHumain(e.id),
+      texte: e.texte, wiki: WIKI_ESPECES[e.id], eteint: e.fin > 0, vivant: !(e.fin > 0), humain: e.id, debut: e.debut,
+    });
+  });
   return liste;
 }
 

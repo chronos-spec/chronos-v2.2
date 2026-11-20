@@ -62,7 +62,7 @@ export function construireIndex(etages, parId) {
   // Les animaux du bestiaire sont déjà dans l'index (type « Animal »).
   const nomsDe = (idGroupe) => chemin(idGroupe).map((g) => GROUPE_PAR_ID[g].nom).join(' ');
   construireFeuilles(BESTIAIRE)
-    .filter((f) => f.id.startsWith('v-'))
+    .filter((f) => f.id.startsWith('v-') || f.id.startsWith('h-'))
     .forEach((f) => {
       ajouter({
         cle: `arbre-${f.id}`, type: 'Espèce', etage: 'vie', titre: f.nom,

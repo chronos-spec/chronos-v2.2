@@ -1,5 +1,26 @@
 # Journal de Chronos
 
+## 20 novembre 2026 — L'arbre du vivant zoomable (façon OneZoom)
+
+**Ce qui a été fait**
+- **Un seul arbre du vivant**, zoomable comme OneZoom : des grands groupes jusqu'à chaque espèce. Il remplace la liste déroulante de la page Vie.
+- **Une seule source de données** (`src/data/phylogenie.js`, mise en forme par `src/data/arbreZoom.js`). Elle réunit l'arbre du vivant, les 73 animaux du bestiaire et les 18 espèces humaines, soit 82 groupes et 148 espèces.
+- **Corrections pendant la fusion** :
+  - 7 « espèces » de l'ancien arbre qui étaient en fait des groupes (Ammonites, Trilobites, Ptérosaures, Ichtyosaures, Sauropodes, Ornithischiens, Théropodes) sont fusionnées avec leur groupe, qui reprend leur image.
+  - Les espèces humaines sont rangées dans de nouveaux groupes : Grands singes › Lignée humaine › Australopithèques / Genre Homo.
+  - Homo sapiens remplace le doublon « Humain ». Gorille et chimpanzé passent dans les Grands singes.
+- **Canvas** (zoom à la molette, au doigt, avec + et − ; déplacement) **doublé d'une liste en arbre** (`role="tree"`, flèches, Entrée). Quand on parcourt la liste, la caméra suit l'élément.
+- **Les disparus** sont marqués en ambre ET avec le symbole †.
+- **La fiche d'une espèce** a un lien « Voir sur la frise » vers sa période.
+- **La recherche** fait voler la caméra jusqu'à l'espèce trouvée.
+
+**Décisions prises**
+- **Retour du canvas, uniquement pour l'arbre du vivant façon OneZoom, toujours doublé d'une liste accessible qui lit les mêmes données.**
+
+**Questions ouvertes**
+- Ajuster la forme de l'arbre (angles, longueurs) après essai sur un vrai écran, avec les images chargées.
+- Comparer deux espèces (l'ancien bouton « Comparer avec ») : à remettre dans la fiche ?
+
 ## 16 novembre 2026 — Pages d'étage, pages de période, lieux et images
 
 **Ce qui a été fait**

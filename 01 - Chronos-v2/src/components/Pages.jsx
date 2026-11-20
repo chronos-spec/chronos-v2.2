@@ -4,7 +4,7 @@ import ChoixLieux from './ChoixLieux.jsx';
 import ChoixCivilisation from './ChoixCivilisation.jsx';
 import { CIVILISATION_PAR_ID } from '../data/civilisations.js';
 import ArbreDeroulant from './ArbreDeroulant.jsx';
-import ArbreParente from './ArbreParente.jsx';
+import ArbreZoom from './ArbreZoom.jsx';
 import { prendreDemandeArbre } from '../lib/arbreCible.js';
 import ArbreHumain from './ArbreHumain.jsx';
 import ImageWiki from './ImageWiki.jsx';
@@ -104,7 +104,7 @@ export function PageEtage({ idEtage, communs }) {
       if (!d) return;
       if (d.feuille) {
         setGroupeVise(null);
-        setChoixArbre(d.feuille);
+        setChoixArbre({ id: d.feuille, n: d.n });
       } else if (d.groupe) {
         setChoixArbre(null);
         setGroupeVise({ id: d.groupe, n: d.n });
@@ -116,15 +116,12 @@ export function PageEtage({ idEtage, communs }) {
     return () => window.removeEventListener('chronos-arbre', ecouter);
   }, [etage.id]);
   const ouvert = communs.carteOuverte?.startsWith('animal-') ? communs.carteOuverte.slice('animal-'.length) : null;
-  const idFeuilleArbre = ouvert || choixArbre;
-  const choisirDansArbre = (id) => {
-    setChoixArbre(id && id.startsWith('v-') ? id : null);
-    if (!id || id.startsWith('v-')) {
-      if (ouvert) communs.refermer();
-    } else if (communs.carteOuverte !== `animal-${id}`) {
-      communs.basculer(`animal-${id}`);
-    }
-  };
+  // Ce que l'arbre doit montrer (recherche) — un objet stable, recréé seulement quand la demande change.
+  const cibleArbre = useMemo(
+    () => (groupeVise ? { groupe: groupeVise.id, n: groupeVise.n } : choixArbre ? { feuille: choixArbre.id, n: choixArbre.n } : null),
+    [groupeVise, choixArbre]
+  );
+
   const [especeChoisie, setEspeceChoisie] = useState(null);
   useTitreDocument(etageBase ? etageBase.nom : 'Page introuvable');
 
@@ -169,13 +166,11 @@ export function PageEtage({ idEtage, communs }) {
 
       {etage.id === 'vie' && (
         <div className="page__suite">
-          {/* Un seul arbre : l'arbre du vivant, qui sert aussi d'arbre de parenté. */}
-          <ArbreParente
+          {/* L'arbre du vivant zoomable (façon OneZoom) : canvas + liste accessible, mêmes données. */}
+          <ArbreZoom
             idTitre="titre-arbre-vivant"
-            idFeuille={idFeuilleArbre}
-            groupeVise={groupeVise}
-            onChoisir={choisirDansArbre}
-            onFermer={() => choisirDansArbre(null)}
+            cible={cibleArbre}
+            idFeuille={ouvert}
           />
         </div>
       )}

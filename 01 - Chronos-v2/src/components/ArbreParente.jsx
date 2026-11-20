@@ -21,7 +21,7 @@ const GROUPES_COMPARABLES = ['dinosaures', 'oiseaux', 'pterosaures', 'mammiferes
   .filter((id) => GROUPE_PAR_ID[id]);
 const RACCOURCIS = [
   { valeur: 'g:dinosaures', libelle: 'les dinosaures' },
-  { valeur: 'f:v-humain', libelle: 'nous, les humains' },
+  { valeur: 'f:h-sapiens', libelle: 'nous, les humains' },
   { valeur: 'f:v-moineau', libelle: 'un oiseau' },
 ];
 const OUVERTS_DEPART = ['vivant', 'eucaryotes'];
