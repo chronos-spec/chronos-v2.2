@@ -12,6 +12,7 @@ import Spirale from './components/Spirale.jsx';
 import VueEnsemble from './components/VueEnsemble.jsx';
 import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
+import MentionsLegales from './components/MentionsLegales.jsx';
 
 // Quel étage pour une époque donnée ? (quand on fait glisser le point de l'année cosmique)
 function etagePourAns(ans) {
@@ -29,7 +30,7 @@ export default function App() {
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
   const spirale = route.page === 'etage' && route.etage === 'spirale';
   const [etageSpirale, setEtageSpirale] = useState('univers');
-  const pageSpeciale = !accueil && ['ensemble', 'recit'].includes(route.etage);
+  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales'].includes(route.etage);
   const etageActif = accueil ? etageVu : spirale ? etageSpirale : pageSpeciale ? (route.etage === 'ensemble' ? route.periode || null : null) : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
   // Accueil : tout replier pour ne voir que les titres des six étages.
@@ -219,6 +220,8 @@ export default function App() {
             <VueEnsemble focus={route.periode} />
           ) : route.etage === 'recit' ? (
             <Recit />
+          ) : route.etage === 'mentions-legales' ? (
+            <MentionsLegales />
           ) : spirale ? (
             <Spirale
               parId={PAR_ID}
@@ -233,6 +236,14 @@ export default function App() {
             <PagePeriode key={`${route.etage}/${route.periode}`} idEtage={route.etage} idPeriode={route.periode} communs={communs} />
           )}
         </main>
+      )}
+
+      {/* Pied de page présent partout (sauf sur le récit, plein écran) : mentions obligatoires. */}
+      {!(pageSpeciale && route.etage === 'recit') && (
+        <footer className="pied">
+          <p>Chronos · site personnel et gratuit · images : Wikipédia / Wikimedia Commons (licences libres)</p>
+          <a href="#/mentions-legales">Mentions légales, confidentialité et crédits</a>
+        </footer>
       )}
 
       {!pageSpeciale && <AnneeCosmique ans={etageActif ? reperes[etageActif] ?? null : 13.8e9} onGlisser={voyager} />}

@@ -2077,3 +2077,34 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) { .infinie__evt { animation: none; } }
 /* La ligne au tiers bas de la scène, pour équilibrer le vide au-dessus. */
 .infinie__scene { --axe: 38%; }
+
+/* ---------- Pied de page et mentions légales ---------- */
+.pied {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px;
+  padding: 24px 32px 32px; color: var(--texte-doux); font-size: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.pied p { margin: 0; }
+.pied a { color: var(--texte); text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+.legal { max-width: 72ch; margin: 0 auto; padding: 104px 32px 48px; font-size: 18px; line-height: 1.6; }
+.legal h1 { margin: 0; font: 600 44px Fraunces, serif; }
+.legal h1:focus, .legal h2:focus { outline: none; }
+.legal h2 { margin: 40px 0 8px; font: 600 26px Fraunces, serif; }
+.legal__maj { margin: 4px 0 24px; font: 15px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.legal__sommaire { display: flex; flex-wrap: wrap; gap: 8px; }
+.legal__sommaire a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2); text-decoration: none; font-size: 16px;
+}
+.legal a { color: var(--texte); }
+.legal ul { padding-left: 24px; }
+.legal li { margin-bottom: 8px; }
+.legal__retour { margin-top: 48px; }
+
+/* Les images des fiches, légèrement teintées de la couleur de l'étage (charte). */
+.image-wiki--carte { position: relative; }
+.image-wiki--carte:not(.image-wiki--vide)::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, transparent 55%, rgba(var(--etage-rgb), 0.22));
+  mix-blend-mode: multiply;
+}

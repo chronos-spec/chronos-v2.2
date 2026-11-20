@@ -1,3 +1,4 @@
+import { WIKI_EVENEMENTS } from '../data/wiki.js';
 import ImageWiki from './ImageWiki.jsx';
 import { lienPeriode } from '../lib/route.js';
 import { useEffect, useRef } from 'react';
@@ -41,9 +42,7 @@ export default function Carte({ carte, etage, onFermer }) {
 
       {complete ? (
         <>
-          <div className="carte__image" role="img" aria-label={`Image à venir : ${carte.image.description}`}>
-            {carte.image.type === 'photo' ? 'Photo' : 'Illustration'} · {carte.image.description}
-          </div>
+          <ImageWiki titre={WIKI_EVENEMENTS[carte.id]} alt={carte.image?.description || carte.titre} taille="carte" />
           <p className="carte__texte">{carte.texte}</p>
         </>
       ) : carte.type === 'animal' ? (
@@ -55,10 +54,11 @@ export default function Carte({ carte, etage, onFermer }) {
             <div><dt>Taille</dt><dd>{carte.taille}</dd></div>
             <div><dt>Période</dt><dd>{carte.nomPeriode}</dd></div>
           </dl>
-          <p className="carte__a-venir">Dates et tailles arrondies, d’après les fossiles connus. Image à venir.</p>
+          <p className="carte__a-venir">Dates et tailles arrondies, d’après les fossiles connus. Image : reconstitution ou fossile (Wikimedia Commons).</p>
         </>
       ) : periode ? (
         <>
+          <ImageWiki titre={WIKI_EVENEMENTS[carte.id]} alt={carte.titre} taille="carte" />
           {carte.resume && <p className="carte__texte">{sansDates(carte.resume)}</p>}
           {carte.points.length > 0 && (
             <>
@@ -74,8 +74,8 @@ export default function Carte({ carte, etage, onFermer }) {
         </>
       ) : (
         <>
+          <ImageWiki titre={WIKI_EVENEMENTS[carte.id]} alt={carte.titre} taille="carte" />
           {carte.resume && <p className="carte__texte">{carte.resume}</p>}
-          <p className="carte__a-venir">La fiche complète (image et source) arrive bientôt.</p>
         </>
       )}
 
