@@ -114,6 +114,78 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     [parId]
   );
 
+  // ---------- Le VOYAGE (bouton ▶) : on parcourt toute la frise, d'événement en événement ----------
+  // Le trajet ne dépend que d'une chose : l'âge regardé. Pour chaque âge, la vue montre une fenêtre
+  // d'environ 1,5 fois cet âge : on voit l'événement, ses voisins, et la ligne qui se resserre vers le présent.
+  const vueDeAge = (ans) => {
+    const fenetre = Math.max(ans * 1.5, 40);
+    const z = bornerZoom(AGE_UNIVERS / fenetre);
+    return { z, c: borner(xMonde(ans), z) };
+  };
+  // Les étapes : les grands événements (fiches complètes et principaux), du plus ancien au plus récent.
+  const etapes = useMemo(() => {
+    const liste = evenements.filter((e) => e.rang <= 2 && e.ans > 0).sort((a, b) => b.ans - a.ans);
+    const res = [];
+    liste.forEach((e) => {
+      const der = res[res.length - 1];
+      if (!der || der.ans / e.ans > 1.12) res.push(e); // on saute ceux trop proches (sinon ça saccade)
+    });
+    return res;
+  }, [evenements]);
+  // Le programme : départ (vue entière), puis pour chaque étape un trajet puis un arrêt.
+  const programme = useMemo(() => {
+    const segs = [];
+    let t = 0;
+    let a = AGE_UNIVERS;
+    segs.push({ t0: 0, t1: 1.5, a0: a, a1: a });
+    t = 1.5;
+    etapes.forEach((e) => {
+      const trajet = 0.6 + 1.2 * Math.abs(Math.log(a / e.ans));
+      segs.push({ t0: t, t1: t + trajet, a0: a, a1: e.ans, vers: e });
+      t += trajet;
+      segs.push({ t0: t, t1: t + 1.6, a0: e.ans, a1: e.ans, sur: e });
+      t += 1.6;
+      a = e.ans;
+    });
+    return { segs, duree: t };
+  }, [etapes]);
+
+  const [voyage, setVoyage] = useState({ actif: false, vitesse: 1, t: 0 });
+  const [evtVoyage, setEvtVoyage] = useState(null);
+  const voyageRef = useRef(voyage);
+  voyageRef.current = voyage;
+  useEffect(() => {
+    if (!voyage.actif) return undefined;
+    let id;
+    let avant = performance.now();
+    const pas = (maintenant) => {
+      const dt = Math.min(0.1, (maintenant - avant) / 1000);
+      avant = maintenant;
+      const v = voyageRef.current;
+      const t = Math.min(programme.duree, v.t + dt * v.vitesse);
+      const seg = programme.segs.find((s) => t <= s.t1) || programme.segs[programme.segs.length - 1];
+      const k = seg.t1 > seg.t0 ? (t - seg.t0) / (seg.t1 - seg.t0) : 1;
+      const doux = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      // Interpolation en échelle « ×10 » : le voyage paraît régulier, de milliards d'années à quelques décennies.
+      const ans = Math.exp(Math.log(seg.a0) + (Math.log(seg.a1) - Math.log(seg.a0)) * doux);
+      const vue = vueDeAge(ans);
+      setZoom(vue.z);
+      setCentre(vue.c);
+      setEvtVoyage(seg.sur || seg.vers || null);
+      if (t >= programme.duree) {
+        setVoyage((x) => ({ ...x, actif: false, t: 0 }));
+        return;
+      }
+      voyageRef.current = { ...v, t };
+      setVoyage((x) => ({ ...x, t }));
+      id = requestAnimationFrame(pas);
+    };
+    id = requestAnimationFrame(pas);
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voyage.actif, programme]);
+  const arreterVoyage = () => setVoyage((x) => ({ ...x, actif: false }));
+
   // Découverte progressive : on n'ajoute un niveau de détail que s'il y a la place pour tout ce niveau.
   const places = useMemo(() => {
     if (zoom < ZOOM_EVENEMENTS) return [];
@@ -160,6 +232,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   const debut = (ev) => {
     if (ev.target.closest('button, a')) return;
     cancelAnimationFrame(anim.current);
+    arreterVoyage();
     glisse.current = { x: ev.clientX, c: centre };
     ev.currentTarget.setPointerCapture?.(ev.pointerId);
   };
@@ -177,6 +250,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     const roue = (ev) => {
       ev.preventDefault();
       cancelAnimationFrame(anim.current);
+      arreterVoyage();
       const r = el.getBoundingClientRect();
       changerZoom(zoom * Math.exp(-ev.deltaY * 0.003), (ev.clientX - r.left) / r.width);
     };
@@ -207,10 +281,46 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         <a className="verre bouton-secondaire infinie__lien" href="#/ensemble/vie">La vie en tableau</a>
       </div>
 
+      <div className="infinie__voyage" role="group" aria-label="Voyage le long de la frise">
+        <button
+          type="button"
+          className="infinie__play"
+          onClick={() => setVoyage((x) => ({ ...x, actif: !x.actif, t: !x.actif && x.t >= programme.duree - 0.01 ? 0 : x.t }))}
+        >
+          {voyage.actif ? '⏸ Pause' : voyage.t > 0 ? '▶ Reprendre le voyage' : '▶ Voyage du Big Bang à aujourd’hui'}
+        </button>
+        {voyage.t > 0 && (
+          <button type="button" className="infinie__arret" onClick={() => { setVoyage((x) => ({ ...x, actif: false, t: 0 })); setEvtVoyage(null); allerVers(1, 0.5); }}>
+            ⏹ Arrêter
+          </button>
+        )}
+        <label className="infinie__vitesse">
+          Vitesse
+          <select value={voyage.vitesse} onChange={(e) => setVoyage((x) => ({ ...x, vitesse: Number(e.target.value) }))}>
+            <option value={0.5}>Lente (×0,5)</option>
+            <option value={1}>Normale</option>
+            <option value={2}>Rapide (×2)</option>
+            <option value={4}>Très rapide (×4)</option>
+          </select>
+        </label>
+        <span className="infinie__duree" aria-hidden="true">
+          {(() => {
+            const r = Math.ceil((programme.duree - voyage.t) / voyage.vitesse);
+            return `${voyage.t > 0 ? 'reste' : 'durée'} ${Math.floor(r / 60)} min ${String(r % 60).padStart(2, '0')} s`;
+          })()}
+        </span>
+        {evtVoyage && (
+          <p className="infinie__en-cours" aria-live="polite">
+            <span className="infinie__en-cours-date">{evtVoyage.dateCourte}</span> {evtVoyage.titre}
+          </p>
+        )}
+        <div className="infinie__avance" aria-hidden="true"><span style={{ width: `${(voyage.t / programme.duree) * 100}%` }} /></div>
+      </div>
+
       <nav className="infinie__sauts" aria-label="Aller directement à un étage">
         <button type="button" className="verre infinie__saut" onClick={() => allerVers(1, 0.5)}>Tout voir</button>
         {BANDES.map((b) => (
-          <button key={b.id} type="button" className="verre infinie__saut" data-etage={b.id} onClick={() => allerAEtage(b)}>
+          <button key={b.id} type="button" className="verre infinie__saut" data-etage={b.id} onClick={() => { arreterVoyage(); allerAEtage(b); }}>
             {etageDe(b.id).nom}
           </button>
         ))}
@@ -276,7 +386,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         <ol className="infinie__evts" aria-label="Événements visibles">
           {places.map(({ e, x, r }) => (
             <li key={e.id} className="infinie__evt" data-etage={e.etage} style={{ left: x, bottom: `calc(var(--axe) + ${24 + r * H_RANGEE}px)`, '--h': `${24 + r * H_RANGEE}px` }}>
-              <button type="button" className={carteOuverte === e.id ? 'infinie__btn infinie__btn--ouvert' : 'infinie__btn'} onClick={() => onBasculer(e.id)}>
+              <button type="button" className={`infinie__btn${carteOuverte === e.id ? ' infinie__btn--ouvert' : ''}${evtVoyage?.id === e.id ? ' infinie__btn--voyage' : ''}`} onClick={() => onBasculer(e.id)}>
                 <span className="infinie__nom">{e.titre}</span>
                 <span className="infinie__date">{e.dateCourte}</span>
               </button>

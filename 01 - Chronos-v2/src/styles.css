@@ -2240,3 +2240,19 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 .recit-civ__commandes button:disabled { opacity: 0.4; cursor: default; }
 .recit-civ__commandes .recit-civ__principal { background: #ffe3a8; color: #241a05; border: 0; min-width: 150px; }
 .recit-civ__aide { margin: 12px 0 0; text-align: center; font-size: 14px; color: var(--texte-doux); }
+
+/* « Tout voir » : le voyage automatique */
+.infinie__voyage { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 16px 16px; border-radius: 20px; background: rgba(255, 227, 168, 0.06); box-shadow: inset 0 0 0 1px rgba(255, 227, 168, 0.3); }
+.infinie__play {
+  min-height: 48px; padding: 0 24px; border: 0; border-radius: 999px; cursor: pointer;
+  background: #ffe3a8; color: #241a05; font: 700 17px Inter, sans-serif; box-shadow: 0 0 20px rgba(255, 227, 168, 0.3);
+}
+.infinie__arret { min-height: 44px; padding: 0 16px; border-radius: 999px; cursor: pointer; font: 600 15px Inter, sans-serif; background: transparent; color: var(--texte); border: 1px solid rgba(255, 255, 255, 0.25); }
+.infinie__vitesse { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 16px; }
+.infinie__vitesse select { min-height: 44px; padding: 0 12px; border-radius: 12px; font: 15px Inter, sans-serif; background: var(--fond-etiquette); color: var(--texte); border: 1px solid rgba(255, 255, 255, 0.25); }
+.infinie__duree { font: 14px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.infinie__en-cours { flex-basis: 100%; margin: 0; font: 600 20px Fraunces, serif; }
+.infinie__en-cours-date { font: 600 15px 'JetBrains Mono', monospace; color: #ffe3a8; margin-right: 8px; }
+.infinie__avance { position: absolute; left: 16px; right: 16px; bottom: 6px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); }
+.infinie__avance span { display: block; height: 100%; border-radius: 2px; background: #ffe3a8; }
+.infinie__btn--voyage { background: rgba(255, 227, 168, 0.25); border-color: #ffe3a8; box-shadow: 0 0 18px rgba(255, 227, 168, 0.45); }
