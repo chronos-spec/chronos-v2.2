@@ -63,7 +63,8 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
   const cadrer = useCallback((n, instant = false) => {
     const { w, h } = taille.current;
     let b = n.boite;
-    if (n.type === 'espece') b = { x1: n.x - n.r * 4, x2: n.x + n.r * 4, y1: n.y - n.r * 4, y2: n.y + n.r * 4 };
+    // Une espèce : on cadre tout son groupe (elle et ses voisines), jamais une pastille en plein écran.
+    if (n.type === 'espece' && n.parentNoeud) b = n.parentNoeud.boite;
     const cible1 = {
       x: (b.x1 + b.x2) / 2,
       y: (b.y1 + b.y2) / 2,
@@ -123,7 +124,8 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
       const b = RACINE.boite;
       const fit = Math.min(el.clientWidth / (b.x2 - b.x1), el.clientHeight / (b.y2 - b.y1)) * 0.92;
       const plusPetite = Math.min(...TOUS.filter((n) => n.type === 'espece').map((n) => n.r));
-      limites.current = { min: fit * 0.5, max: 160 / plusPetite };
+      // Zoom maximal : la plus petite pastille fait au plus ~90 px de rayon (au-delà, l'arbre « disparaît »).
+      limites.current = { min: fit * 0.6, max: 90 / plusPetite };
       redessiner();
     };
     mesurer();
@@ -193,7 +195,10 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
       if ((b.x2 - b.x1 + b.y2 - b.y1) * s < 1.5) return;
       const choisi = n.id === sel;
       // La branche (légèrement courbée)
-      const largeur = n.type === 'espece' ? Math.max(0.6, n.L * s * 0.02) : Math.max(0.8, n.L * s * 0.045);
+      // Épaisseur plafonnée à l'écran : en zoomant, une branche ne devient jamais un aplat qui cache tout.
+      const largeur = n.type === 'espece'
+        ? Math.min(4, Math.max(0.6, n.L * s * 0.02))
+        : Math.min(14, Math.max(1, n.L * s * 0.045));
       ctx.strokeStyle = n.eteint ? eteint : `rgba(${vie}, ${choisi ? 1 : 0.75})`;
       ctx.lineWidth = choisi ? largeur + 2 : largeur;
       ctx.lineCap = 'round';
@@ -278,6 +283,14 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
   }
 
   // ---------------- Souris, doigt, molette ----------------
+  // Position du pointeur dans le repère du canvas. Le zoom de la page (CSS zoom 67 % sur ordinateur)
+  // fausse offsetX : on recalcule à partir du rectangle réel affiché.
+  const pos = (e) => {
+    const el = toile.current;
+    const r = el.getBoundingClientRect();
+    const k = el.clientWidth / (r.width || 1);
+    return { x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k };
+  };
   const pointeurs = useRef(new Map());
   const geste = useRef(null);
   const toucher = (px, py) => {
@@ -291,15 +304,15 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
   };
   const surBas = (e) => {
     toile.current.setPointerCapture(e.pointerId);
-    pointeurs.current.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
+    const q = pos(e);
+    pointeurs.current.set(e.pointerId, q);
     cancelAnimationFrame(anim.current);
-    geste.current = { x: e.offsetX, y: e.offsetY, bouge: 0, ecart: null };
+    geste.current = { x: q.x, y: q.y, bouge: 0, ecart: null };
   };
   const surDeplacement = (e) => {
     const p = pointeurs.current.get(e.pointerId);
     if (!p) return;
-    const nx = e.offsetX;
-    const ny = e.offsetY;
+    const { x: nx, y: ny } = pos(e);
     if (pointeurs.current.size === 2) {
       // Pincement : zoom autour du milieu des deux doigts.
       const [a, b] = [...pointeurs.current.values()];
@@ -323,7 +336,9 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
     pointeurs.current.delete(e.pointerId);
     const g = geste.current;
     if (g && g.bouge < 6 && pointeurs.current.size === 0) {
-      const n = toucher(e.offsetX, e.offsetY);
+      const q = pos(e);
+      const n = toucher(q.x, q.y);
+      // Une espèce : on ouvre sa fiche et on cadre son groupe (on garde ses voisines à l'écran).
       if (n) choisir(n, { ouvrirFiche: n.type === 'espece' });
     }
   };
@@ -331,7 +346,9 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
     const el = toile.current;
     const roue = (e) => {
       e.preventDefault();
-      zoomer(Math.exp(-e.deltaY * 0.0018), e.offsetX, e.offsetY);
+      const q = pos(e);
+      const d = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY; // molette « à crans » ou pavé tactile
+      zoomer(Math.exp(-Math.max(-120, Math.min(120, d)) * 0.0025), q.x, q.y);
     };
     el.addEventListener('wheel', roue, { passive: false });
     return () => el.removeEventListener('wheel', roue);

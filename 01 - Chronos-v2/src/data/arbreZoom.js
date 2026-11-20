@@ -71,7 +71,8 @@ function placer(n, bx, by, angle, L) {
     const a = angle - ouverture / 2 + ouverture * part;
     // Longueur selon la part d'espèces : les grands groupes ont de longues branches,
     // et toutes les espèces finissent à peu près à la même taille (comme dans OneZoom).
-    let longueur = L * (0.3 + 0.42 * Math.sqrt(e.nbEspeces / n.nbEspeces));
+    // Un sous-arbre ne doit pas déborder sur ses voisins : sa taille est limitée par sa part d'éventail.
+    let longueur = L * Math.min(0.3 + 0.42 * Math.sqrt(e.nbEspeces / n.nbEspeces), k === 1 ? 1 : 0.8 * pas + 0.06);
     if (e.type === 'espece') longueur = Math.min(longueur, L * 0.34);
     placer(e, n.x, n.y, a, longueur);
     // Une pastille ne déborde pas sur sa voisine.
