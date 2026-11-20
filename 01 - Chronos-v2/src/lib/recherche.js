@@ -3,6 +3,8 @@ import { GROUPES_VIVANT } from '../data/vivant.js';
 import { ESPECES } from '../data/especes.js';
 import { xPourAns } from './echelle.js';
 import { texteAge } from './ages.js';
+import { BESTIAIRE } from '../data/bestiaire.js';
+import { GROUPES, construireFeuilles, chemin, GROUPE_PAR_ID } from '../data/phylogenie.js';
 
 export function construireIndex(etages, parId) {
   const nomEtage = Object.fromEntries(etages.map((e) => [e.id, e.nom]));
@@ -52,6 +54,29 @@ export function construireIndex(etages, parId) {
       cle: `espece-${e.id}`, type: 'Espèce humaine', etage: 'humains', titre: e.nom,
       details: `${e.surnom} · ${texteAge(e.debut)} → ${e.fin ? texteAge(e.fin) : 'aujourd’hui'}`,
       motsCles: `${e.lieu} ${e.texte}`, cible: { type: 'espece', id: e.id },
+    });
+  });
+
+  // L'arbre du vivant : toutes les espèces d'aujourd'hui (baleine, abeille, chêne…)
+  // et tous les groupes (mammifères, dinosaures, ptérosaures…).
+  // Les animaux du bestiaire sont déjà dans l'index (type « Animal »).
+  const nomsDe = (idGroupe) => chemin(idGroupe).map((g) => GROUPE_PAR_ID[g].nom).join(' ');
+  construireFeuilles(BESTIAIRE)
+    .filter((f) => f.id.startsWith('v-'))
+    .forEach((f) => {
+      ajouter({
+        cle: `arbre-${f.id}`, type: 'Espèce', etage: 'vie', titre: f.nom,
+        details: `${GROUPE_PAR_ID[f.groupe]?.nom || ''} · arbre du vivant`,
+        motsCles: `${f.texte || ''} ${nomsDe(f.groupe)}`,
+        arbre: { feuille: f.id },
+      });
+    });
+  GROUPES.forEach((g) => {
+    ajouter({
+      cle: `groupe-${g.id}`, type: 'Groupe du vivant', etage: 'vie', titre: g.nom,
+      details: g.depuis ? `depuis ${texteAge(g.depuis)} · arbre du vivant` : 'arbre du vivant',
+      motsCles: g.texte || '',
+      arbre: { groupe: g.id },
     });
   });
 

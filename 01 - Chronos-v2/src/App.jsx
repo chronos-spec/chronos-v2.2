@@ -13,6 +13,7 @@ import VueEnsemble from './components/VueEnsemble.jsx';
 import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
 import MentionsLegales from './components/MentionsLegales.jsx';
+import { demanderArbre } from './lib/arbreCible.js';
 
 // Quel étage pour une époque donnée ? (quand on fait glisser le point de l'année cosmique)
 function etagePourAns(ans) {
@@ -85,6 +86,12 @@ export default function App() {
   routeRef.current = route;
   const aller = useCallback((r) => {
     const rt = routeRef.current;
+    // Une espèce ou un groupe de l'arbre du vivant : on ouvre la page Vie, sur l'arbre.
+    if (r.arbre) {
+      demanderArbre(r.arbre);
+      if (!(rt.page === 'etage' && rt.etage === 'vie')) allerVers(lienEtage('vie'));
+      return;
+    }
     const fiche = r.carte ? PAR_ID[r.carte] : null;
     const surUnePage = rt.page !== 'accueil';
     // Ce qui n'existe que sur la page d'un étage (Histoire du monde, espèces humaines),

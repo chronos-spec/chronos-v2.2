@@ -3,6 +3,7 @@ import Etage from './Etage.jsx';
 import ChoixLieux from './ChoixLieux.jsx';
 import ArbreDeroulant from './ArbreDeroulant.jsx';
 import ArbreParente from './ArbreParente.jsx';
+import { prendreDemandeArbre } from '../lib/arbreCible.js';
 import ArbreHumain from './ArbreHumain.jsx';
 import ImageWiki from './ImageWiki.jsx';
 import { ETAGES, evenementsPage, idAnimal } from '../data/index.js';
@@ -74,6 +75,25 @@ export function PageEtage({ idEtage, communs }) {
   const { lieux, setLieux, voies, filtre } = useLieux(communs.cible, communs.parId);
   // L'arbre du vivant (étage Vie) : l'espèce choisie vient de la frise (animal ouvert) ou de l'arbre.
   const [choixArbre, setChoixArbre] = useState(null);
+  const [groupeVise, setGroupeVise] = useState(null);
+  // Demandes venues de la recherche (« baleine », « mammifères »…).
+  useEffect(() => {
+    if (etage.id !== 'vie') return undefined;
+    const traiter = (d) => {
+      if (!d) return;
+      if (d.feuille) {
+        setGroupeVise(null);
+        setChoixArbre(d.feuille);
+      } else if (d.groupe) {
+        setChoixArbre(null);
+        setGroupeVise({ id: d.groupe, n: d.n });
+      }
+    };
+    traiter(prendreDemandeArbre());
+    const ecouter = () => traiter(prendreDemandeArbre());
+    window.addEventListener('chronos-arbre', ecouter);
+    return () => window.removeEventListener('chronos-arbre', ecouter);
+  }, [etage.id]);
   const ouvert = communs.carteOuverte?.startsWith('animal-') ? communs.carteOuverte.slice('animal-'.length) : null;
   const idFeuilleArbre = ouvert || choixArbre;
   const choisirDansArbre = (id) => {
@@ -127,6 +147,7 @@ export function PageEtage({ idEtage, communs }) {
           <ArbreParente
             idTitre="titre-arbre-vivant"
             idFeuille={idFeuilleArbre}
+            groupeVise={groupeVise}
             onChoisir={choisirDansArbre}
             onFermer={() => choisirDansArbre(null)}
           />

@@ -38,7 +38,7 @@ function placeDe(valeur) {
 // Est-ce une espèce connue de l'arbre ? (sert à la frise pour savoir si elle peut ouvrir l'arbre)
 export const estDansArbre = (id) => !!FEUILLE_PAR_ID[id];
 
-export default function ArbreParente({ idFeuille: idControle, onChoisir, onFermer, idTitre = 'titre-parente' }) {
+export default function ArbreParente({ idFeuille: idControle, onChoisir, onFermer, idTitre = 'titre-parente', groupeVise = null }) {
   // L'espèce choisie : donnée par la page (clic sur la frise) ou choisie dans l'arbre.
   const [idLocal, setIdLocal] = useState(null);
   const idF = idControle !== undefined ? idControle : idLocal;
@@ -65,6 +65,20 @@ export default function ArbreParente({ idFeuille: idControle, onChoisir, onFerme
     const doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     titre.current?.scrollIntoView({ behavior: doux ? 'smooth' : 'auto', block: 'start' });
   }, [idF]);
+
+  // Un groupe demandé par la recherche : on ouvre tout son chemin et on l'amène à l'écran.
+  useEffect(() => {
+    if (!groupeVise) return;
+    setFermes(new Set());
+    setOuvertsEnPlus((o) => new Set([...o, ...chemin(groupeVise.id)]));
+    const t = setTimeout(() => {
+      const el = document.getElementById(`groupe-${groupeVise.id}`);
+      const doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el?.scrollIntoView({ behavior: doux ? 'smooth' : 'auto', block: 'center' });
+      el?.focus({ preventScroll: true });
+    }, 150);
+    return () => clearTimeout(t);
+  }, [groupeVise]);
 
   const autre = placeDe(comparer);
   const cheminA = useMemo(() => (groupe ? chemin(groupe) : []), [groupe]);
@@ -242,7 +256,7 @@ function Noeud({ id, ctx, niveau }) {
 
   return (
     <li role="treeitem" aria-expanded={nb ? ouvert : undefined} aria-level={niveau} className={classes.join(' ')}>
-      <button type="button" className="parente__groupe" onClick={() => nb && ctx.basculer(id)} disabled={!nb}>
+      <button type="button" id={`groupe-${id}`} className="parente__groupe" onClick={() => nb && ctx.basculer(id)} disabled={!nb}>
         <span className="parente__chevron" aria-hidden="true">{nb ? (ouvert ? '▾' : '▸') : '•'}</span>
         <span className="parente__nom">
           {g.nom}
