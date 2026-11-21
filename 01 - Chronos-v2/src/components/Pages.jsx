@@ -5,6 +5,7 @@ import ChoixCivilisation from './ChoixCivilisation.jsx';
 import { CIVILISATION_PAR_ID } from '../data/civilisations.js';
 import ArbreDeroulant from './ArbreDeroulant.jsx';
 import ArbreZoom from './ArbreZoom.jsx';
+import ArbreParente from './ArbreParente.jsx';
 import { prendreDemandeArbre } from '../lib/arbreCible.js';
 import ArbreHumain from './ArbreHumain.jsx';
 import ImageWiki from './ImageWiki.jsx';
@@ -117,6 +118,17 @@ export function PageEtage({ idEtage, communs }) {
   }, [etage.id]);
   const ouvert = communs.carteOuverte?.startsWith('animal-') ? communs.carteOuverte.slice('animal-'.length) : null;
   // Ce que l'arbre doit montrer (recherche) — un objet stable, recréé seulement quand la demande change.
+  // Arbre linéaire (sous les bulles) : sa propre sélection d'espèce.
+  const [choixLineaire, setChoixLineaire] = useState(null);
+  const choisirDansLineaire = (id) => {
+    setChoixLineaire(id && id.startsWith('v-') ? id : null);
+    if (!id || id.startsWith('v-')) {
+      if (ouvert) communs.refermer();
+    } else if (communs.carteOuverte !== `animal-${id}`) {
+      communs.basculer(`animal-${id}`);
+    }
+  };
+
   const cibleArbre = useMemo(
     () => (groupeVise ? { groupe: groupeVise.id, n: groupeVise.n } : choixArbre ? { feuille: choixArbre.id, n: choixArbre.n } : null),
     [groupeVise, choixArbre]
@@ -171,6 +183,14 @@ export function PageEtage({ idEtage, communs }) {
             idTitre="titre-arbre-vivant"
             cible={cibleArbre}
             idFeuille={ouvert}
+          />
+          {/* En dessous : l'arbre linéaire (déroulant), lu depuis les mêmes données. */}
+          <ArbreParente
+            idTitre="titre-arbre-lineaire"
+            idFeuille={ouvert || choixLineaire || (choixArbre && choixArbre.id)}
+            groupeVise={groupeVise}
+            onChoisir={choisirDansLineaire}
+            onFermer={() => choisirDansLineaire(null)}
           />
         </div>
       )}
