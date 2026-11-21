@@ -21,7 +21,7 @@ const AGE_UNIVERS = 13.8e9;
 const xMonde = (ans) => 1 - Math.max(0, ans) / AGE_UNIVERS; // 0 = Big Bang, 1 = aujourd'hui
 const ansDe = (xm) => (1 - xm) * AGE_UNIVERS;
 const ZOOM_MAX = AGE_UNIVERS / 20; // au plus près : environ 20 ans à l'écran
-const ZOOM_EVENEMENTS = 1.5; // en dessous : première vue, sans aucun événement
+const ZOOM_EVENEMENTS = 1; // dès la première vue, quelques grands événements (et leur date)
 
 const BANDES = [
   { id: 'univers', debut: 13.8e9, fin: 4.6e9 },
@@ -33,9 +33,10 @@ const BANDES = [
 ];
 
 // Importance : 1 = fiches complètes, 2 = événements principaux, 3 = les autres, 4 = animaux.
-const importance = (e) => (e.type === 'animal' ? 4 : e.texte ? 1 : e.principal ? 2 : 3);
+// Ordre de priorité pour l'affichage : quand la place manque, les plus importants passent d'abord.
+const importance = (e) => (e.type === 'animal' ? 5 : e.principal && e.texte ? 1 : e.principal ? 2 : e.texte ? 3 : 4);
 
-const H_RANGEE = 56;
+const H_RANGEE = 68; // hauteur d’une rangée d’étiquettes (titre + date), avec une marge
 const RANGEES_MAX = 3; // jamais plus de trois étiquettes l'une au-dessus de l'autre
 const PLACE_PAR_ETIQUETTE = 200; // au plus une étiquette pour 200 px de largeur
 
@@ -51,6 +52,14 @@ const arrondi2 = (n) => {
   if (n <= 0) return n;
   const p = 10 ** (Math.floor(Math.log10(n)) - 1);
   return Math.round(n / p) * p;
+};
+
+// Mesure la vraie largeur d'un texte (pour placer les étiquettes sans chevauchement).
+let pinceau = null;
+const mesurer = (texte, police) => {
+  if (!pinceau) pinceau = document.createElement('canvas').getContext('2d');
+  pinceau.font = police;
+  return pinceau.measureText(texte).width;
 };
 
 const mouvementReduit = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -232,7 +241,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     });
     const budget = Math.max(3, Math.floor(largeur / PLACE_PAR_ETIQUETTE) * 2);
     let niveau = 0;
-    for (let n = 1; n <= 4; n++) {
+    for (let n = 1; n <= 5; n++) {
       const compte = visibles.filter((e) => e.rang <= n).length;
       if (compte > budget && niveau > 0) break;
       niveau = n;
@@ -242,7 +251,8 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     for (const e of visibles) {
       if (e.rang > niveau) continue;
       const x = versEcran(e.xm);
-      const l = Math.min(260, e.titre.length * 8.2 + 28);
+      // Largeur réelle de l'étiquette (le titre ou la date, le plus long) : aucune ne doit en chevaucher une autre.
+      const l = Math.min(262, Math.max(mesurer(e.titre, '600 15px Inter'), mesurer(e.dateCourte || '', '12px "JetBrains Mono"')) + 34);
       const x1 = x - 12;
       const x2 = x1 + l;
       const r = rangees.findIndex((ra) => ra.every(([a, b]) => x2 + 16 < a || x1 > b + 16));
@@ -466,7 +476,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         )}
 
         <div className="infinie__axe" aria-hidden="true" />
-        {voyage.t > 0 && <div className="infinie__tete" style={{ left: `${TETE * 100}%` }} aria-hidden="true" />}
+        {voyage.t > 0 && <div className="infinie__lecture" style={{ left: `${TETE * 100}%` }} aria-hidden="true" />}
 
         {indice && <p className="infinie__indice">{indice}</p>}
 
