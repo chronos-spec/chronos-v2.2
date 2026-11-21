@@ -10,11 +10,25 @@ const voixDispo = typeof window !== 'undefined' && 'speechSynthesis' in window;
 // Durée d'une étape sans voix : environ 4 s + le temps de lecture du texte.
 const dureeLecture = (texte) => 4000 + texte.split(/\s+/).length * 280;
 
+// Voix du navigateur : on préfère les voix neuronales (« Natural », « Online », « Premium »),
+// bien plus naturelles, puis les bonnes voix classiques, puis n'importe quelle voix française.
 function voixFrancaise() {
-  const voix = window.speechSynthesis.getVoices();
-  return voix.find((v) => v.lang === 'fr-FR' && /Google|Amélie|Thomas|Audrey|Marie/i.test(v.name))
-    || voix.find((v) => v.lang?.startsWith('fr'));
+  const voix = window.speechSynthesis.getVoices().filter((v) => v.lang?.startsWith('fr'));
+  return voix.find((v) => /Natural|Online|Neural|Premium|Enhanced/i.test(v.name))
+    || voix.find((v) => /Google|Amélie|Thomas|Audrey|Marie|Denise|Henri/i.test(v.name))
+    || voix[0];
 }
+
+// Voix d'IA enregistrées (script scripts/generer-voix.mjs) : liste des civilisations prêtes.
+let manifeste = null;
+const chargerManifeste = () => {
+  if (!manifeste) {
+    manifeste = fetch('/voix/civ/manifeste.json')
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+  }
+  return manifeste;
+};
 
 export default function RecitCivilisation({ civ, onFermer }) {
   const boite = useRef(null);
@@ -22,6 +36,12 @@ export default function RecitCivilisation({ civ, onFermer }) {
   const [enPause, setEnPause] = useState(false);
   const [son, setSon] = useState(voixDispo);
   const etapes = civ.recit;
+  const [voixIA, setVoixIA] = useState(false); // des fichiers MP3 existent pour cette civilisation
+  useEffect(() => {
+    let vivant = true;
+    chargerManifeste().then((liste) => vivant && setVoixIA(liste.includes(civ.id)));
+    return () => { vivant = false; };
+  }, [civ.id]);
   const fini = etape >= etapes.length;
   const [date, titre, texte, wiki] = fini ? ['', 'Fin', '', null] : etapes[etape];
 
@@ -39,6 +59,17 @@ export default function RecitCivilisation({ civ, onFermer }) {
   // Avancer : à la fin de la voix, ou après un temps de lecture.
   useEffect(() => {
     if (fini || enPause) return undefined;
+    // 1) Voix d'IA enregistrée (MP3), si elle existe.
+    if (son && voixIA) {
+      const audio = new Audio(`/voix/civ/${civ.id}/${etape}.mp3`);
+      let fait = false;
+      const finir = (delai) => { if (!fait) { fait = true; setTimeout(suivante, delai); } };
+      audio.onended = () => finir(900);
+      audio.onerror = () => finir(dureeLecture(texte)); // fichier absent : on avance quand même
+      audio.play().catch(() => finir(dureeLecture(texte)));
+      return () => { fait = true; audio.pause(); };
+    }
+    // 2) Sinon, la voix du navigateur.
     if (son && voixDispo) {
       const synth = window.speechSynthesis;
       synth.cancel();
@@ -70,7 +101,7 @@ export default function RecitCivilisation({ civ, onFermer }) {
     }
     const t = setTimeout(suivante, dureeLecture(texte));
     return () => clearTimeout(t);
-  }, [etape, enPause, son, fini, titre, texte, suivante]);
+  }, [etape, enPause, son, voixIA, fini, titre, texte, suivante, civ.id]);
 
   const fermer = () => {
     if (voixDispo) window.speechSynthesis.cancel();
@@ -119,14 +150,14 @@ export default function RecitCivilisation({ civ, onFermer }) {
           <button type="button" className="recit-civ__principal" onClick={() => { setEtape(0); setEnPause(false); }}>↺ Revoir</button>
         )}
         <button type="button" onClick={suivante} disabled={fini}>Suivant →</button>
-        {voixDispo && (
+        {(voixDispo || voixIA) && (
           <button type="button" aria-pressed={son} onClick={() => setSon((s) => !s)}>
             {son ? '🔊 Voix' : '🔇 Sans voix'}
           </button>
         )}
       </div>
       <p className="recit-civ__aide">
-        Étape {Math.min(etape + 1, etapes.length)} sur {etapes.length}. La voix est celle de votre navigateur. Images : Wikimedia Commons.
+        Étape {Math.min(etape + 1, etapes.length)} sur {etapes.length}. {voixIA ? 'Voix de synthèse (IA).' : 'La voix est celle de votre navigateur.'} Images : Wikimedia Commons.
       </p>
     </dialog>
   );

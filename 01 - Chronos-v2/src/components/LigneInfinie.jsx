@@ -175,6 +175,9 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   }, [etapes]);
 
   const [voyage, setVoyage] = useState({ actif: false, t: 0 });
+  const [vitesse, setVitesse] = useState(1); // ×1, ×2 ou ×4 : accélère le défilement du format choisi
+  const vitesseRef = useRef(1);
+  vitesseRef.current = vitesse;
   const [musique, setMusique] = useState(true);
   const [evtVoyage, setEvtVoyage] = useState(null);
   const voyageRef = useRef(voyage);
@@ -201,7 +204,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     const image = (maintenant) => {
       const dt = Math.min(0.1, (maintenant - avant) / 1000);
       avant = maintenant;
-      const t = Math.min(duree, voyageRef.current.t + dt);
+      const t = Math.min(duree, voyageRef.current.t + dt * vitesseRef.current);
       const { i } = cameraA(t);
       const ici = i >= 0 ? etapes[i] : null;
       setEvtVoyage((e) => (e === ici ? e : ici));
@@ -313,6 +316,30 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
     ? 'Zoomez sur une période, ou choisissez un étage, pour faire apparaître les événements.'
     : places.length === 0 ? 'Aucun événement ici : déplacez-vous ou zoomez ailleurs.' : null;
 
+  // Toutes les périodes, du Big Bang à aujourd'hui, pour le curseur « Période ».
+  const periodes = useMemo(() => {
+    const res = [{ id: 'tout', nom: 'Tout, du Big Bang à aujourd’hui', debut: AGE_UNIVERS, fin: 0 }];
+    BANDES.forEach((b) => {
+      const et = ETAGES.find((x) => x.id === b.id);
+      res.push({ id: b.id, nom: `${et.nom} (tout l’étage)`, debut: b.debut, fin: b.fin, etage: b.id });
+      et.categories
+        .filter((c) => c.debut !== undefined && c.theme !== 'christianisme')
+        .map((c) => ({ id: `${b.id}-${c.id}`, nom: c.nom, debut: Math.min(c.debut, b.debut), fin: Math.max(c.fin ?? 0, b.fin), etage: b.id }))
+        .filter((c) => c.debut > c.fin)
+        .sort((a, z) => z.debut - a.debut)
+        .forEach((c) => res.push(c));
+    });
+    return res;
+  }, []);
+  const [periode, setPeriode] = useState(0);
+  const allerAPeriode = (i) => {
+    setPeriode(i);
+    const p = periodes[i];
+    arreterVoyage();
+    if (p.id === 'tout') { allerVers(1, 0.5); return; }
+    allerAEtage({ debut: p.debut, fin: p.fin });
+  };
+
   const ouverte = carteOuverte ? parId[carteOuverte] : null;
   const etageCarte = ouverte ? ETAGES.find((x) => x.id === ouverte.etage) : null;
   const zoomLog = Math.log(zoom) / Math.log(ZOOM_MAX); // 0 … 1 pour le curseur
@@ -342,7 +369,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
           </button>
         )}
         <label className="infinie__vitesse">
-          Vitesse
+          Format
           <select
             value={format}
             onChange={(e) => {
@@ -357,12 +384,20 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
             <option value="normale">Normale — 3 min 30, tous les événements</option>
           </select>
         </label>
+        <label className="infinie__vitesse">
+          Vitesse
+          <select value={vitesse} onChange={(e) => setVitesse(Number(e.target.value))}>
+            <option value={1}>×1</option>
+            <option value={2}>×2</option>
+            <option value={4}>×4</option>
+          </select>
+        </label>
         <button type="button" className="infinie__arret" aria-pressed={musique} onClick={() => setMusique((m) => !m)}>
           {musique ? '🎵 Musique' : '🔇 Sans musique'}
         </button>
         <span className="infinie__duree" aria-hidden="true">
           {(() => {
-            const r = Math.ceil(programme.duree - voyage.t);
+            const r = Math.ceil((programme.duree - voyage.t) / vitesse);
             return `${voyage.t > 0 ? 'reste' : 'durée'} ${Math.floor(r / 60)} min ${String(r % 60).padStart(2, '0')} s`;
           })()}
         </span>
@@ -527,6 +562,21 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
             aria-valuetext={`zoom ×${Math.round(zoom)}`}
           />
           <span className="infinie__bornes" aria-hidden="true">Détails</span>
+        </label>
+        <label className="infinie__curseur infinie__curseur--periode">
+          <span>Période</span>
+          <span className="infinie__bornes" aria-hidden="true">Big Bang</span>
+          <input
+            type="range"
+            min="0"
+            max={periodes.length - 1}
+            step="1"
+            value={periode}
+            onChange={(ev) => allerAPeriode(Number(ev.target.value))}
+            aria-valuetext={periodes[periode].nom}
+          />
+          <span className="infinie__bornes" aria-hidden="true">Aujourd’hui</span>
+          <output className="infinie__periode-nom" data-etage={periodes[periode].etage}>{periodes[periode].nom}</output>
         </label>
         <p className="infinie__aide">
           Faites glisser la ligne, ou zoomez à la molette. Touchez un événement pour ouvrir sa fiche.

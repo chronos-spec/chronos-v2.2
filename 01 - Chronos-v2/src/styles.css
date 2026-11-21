@@ -2379,3 +2379,7 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
   background: linear-gradient(90deg, rgba(var(--etage-rgb), 0.85), rgba(var(--etage-rgb), 0.35)); }
 .bande-voyage__point { top: -14px; left: -14px; width: 28px; height: 28px; border: 3px solid var(--ciel-haut); }
 .bande-voyage__ecart { top: 32px; }
+
+/* Curseur « Période » : sur toute la largeur, avec le nom de la période choisie. */
+.infinie__curseur--periode { grid-column: 1 / -1; grid-template-columns: 120px auto 1fr auto; }
+.infinie__periode-nom { grid-column: 3; font: 600 18px Fraunces, serif; color: rgb(var(--etage-rgb, 255, 227, 168)); }
