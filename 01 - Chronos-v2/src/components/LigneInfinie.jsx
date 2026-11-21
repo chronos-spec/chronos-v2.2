@@ -121,15 +121,19 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   // sont rares (des milliards d'années de vide), la tête de lecture file ; là où ils se pressent, elle ralentit.
   // Le zoom suit la densité : on cadre toujours les quelques événements autour de la tête de lecture,
   // donc on est très zoomé sur le Big Bang, on dézoome dans les grands vides, puis on rezoome sur l'Histoire.
+  // Deux formats de voyage, au même rythme de lecture (~0,75 s par événement) :
+  //  - rapide  : 1 min, seulement les grands événements (« principal ») ;
+  //  - normale : 3 min 30, tous les événements (sans les animaux).
+  const [format, setFormat] = useState('normale');
+  const DUREES = { rapide: 60, normale: 210 };
   const etapes = useMemo(() => {
-    // Tous les événements (sans les animaux), pour un défilé riche.
-    const liste = evenements.filter((e) => e.rang <= 3 && e.ans > 0).sort((a, b) => b.ans - a.ans);
+    const liste = evenements.filter((e) => e.rang <= 3 && e.ans > 0 && (format === 'normale' || e.principal)).sort((a, b) => b.ans - a.ans);
     const res = [];
     liste.forEach((e) => {
       if (!res.length || res[res.length - 1].ans !== e.ans) res.push(e);
     });
     return res;
-  }, [evenements]);
+  }, [evenements, format]);
   const programme = useMemo(() => {
     // On commence par 4 secondes sur le Big Bang, très zoomé.
     const ages = [AGE_UNIVERS, AGE_UNIVERS, ...etapes.map((e) => e.ans), 1];
@@ -147,7 +151,11 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
       const depuisDebut = Math.max(3e8, (AGE_UNIVERS - ages[i]) * 2.5);
       return Math.min(AGE_UNIVERS, densite, depuisDebut);
     });
-    return { ages, temps, fenetres, duree: temps[temps.length - 1] };
+    // On étire ou resserre le tout pour tomber pile sur la durée du format choisi.
+    const f = DUREES[format] / temps[temps.length - 1];
+    const tempsAjustes = temps.map((t) => t * f);
+    return { ages, temps: tempsAjustes, fenetres, duree: DUREES[format] };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [etapes]);
 
   const [voyage, setVoyage] = useState({ actif: false, vitesse: 1, t: 0 });
@@ -167,7 +175,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
       const dt = Math.min(0.1, (maintenant - avant) / 1000);
       avant = maintenant;
       const v = voyageRef.current;
-      const t = Math.min(duree, v.t + dt * v.vitesse);
+      const t = Math.min(duree, v.t + dt);
       let i = 1;
       while (i < temps.length - 1 && temps[i] < t) i++;
       const k = (t - temps[i - 1]) / (temps[i] - temps[i - 1] || 1);
@@ -175,7 +183,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
       const ans = Math.exp(Math.log(ages[i - 1]) + (Math.log(ages[i]) - Math.log(ages[i - 1])) * k);
       // Fenêtre visée, puis lissée pour que le zoom respire doucement.
       const cible = Math.log(fenetres[i - 1] + (fenetres[i] - fenetres[i - 1]) * k);
-      logFenetre.current += (cible - logFenetre.current) * (1 - Math.exp(-dt * v.vitesse * 1.6));
+      logFenetre.current += (cible - logFenetre.current) * (1 - Math.exp(-dt * 1.6));
       const z = bornerZoom(AGE_UNIVERS / Math.exp(logFenetre.current));
       setZoom(z);
       setCentre(borner(xMonde(ans) + (0.5 - TETE) / z, z));
@@ -318,11 +326,18 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         )}
         <label className="infinie__vitesse">
           Vitesse
-          <select value={voyage.vitesse} onChange={(e) => setVoyage((x) => ({ ...x, vitesse: Number(e.target.value) }))}>
-            <option value={0.5}>Lente (×0,5)</option>
-            <option value={1}>Normale</option>
-            <option value={2}>Rapide (×2)</option>
-            <option value={4}>Très rapide (×4)</option>
+          <select
+            value={format}
+            onChange={(e) => {
+              // Changer de format recommence le voyage au début (la liste d'événements change).
+              setFormat(e.target.value);
+              setVoyage((x) => ({ ...x, actif: false, t: 0 }));
+              setEvtVoyage(null);
+              arreterMusique();
+            }}
+          >
+            <option value="rapide">Rapide — 1 min, les grands événements</option>
+            <option value="normale">Normale — 3 min 30, tous les événements</option>
           </select>
         </label>
         <button type="button" className="infinie__arret" aria-pressed={musique} onClick={() => setMusique((m) => !m)}>
@@ -330,7 +345,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         </button>
         <span className="infinie__duree" aria-hidden="true">
           {(() => {
-            const r = Math.ceil((programme.duree - voyage.t) / voyage.vitesse);
+            const r = Math.ceil(programme.duree - voyage.t);
             return `${voyage.t > 0 ? 'reste' : 'durée'} ${Math.floor(r / 60)} min ${String(r % 60).padStart(2, '0')} s`;
           })()}
         </span>
