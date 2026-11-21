@@ -144,9 +144,24 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   }, [evenements, format]);
   const programme = useMemo(() => {
     const duree = DUREES[format];
-    // Le même temps pour chaque événement ; on finit en laissant le dernier un instant à l'écran.
-    const pas = (duree - INTRO) / Math.max(1, etapes.length);
-    return { duree, pas };
+    // 1) Les PLACES sur la bande : l'écart entre deux événements grandit avec le temps écoulé
+    //    (échelle « ×10 » : passer de 1 milliard à 100 millions d'années prend la même place
+    //    que passer de 1 000 à 100 ans), avec un écart minimum pour que les cartes ne se chevauchent pas.
+    const xs = [0];
+    for (let i = 1; i < etapes.length; i++) {
+      const ratio = Math.log(etapes[i - 1].ans / Math.max(1, etapes[i].ans));
+      // + une part proportionnelle à la vraie durée, pour que les immenses vides cosmiques se sentent.
+      const part = Math.sqrt((etapes[i - 1].ans - etapes[i].ans) / AGE_UNIVERS);
+      xs.push(xs[i - 1] + Math.min(2600, 300 + 520 * ratio + 1600 * part));
+    }
+    // 2) Le TEMPS de chaque trajet : un temps fixe de lecture + un peu plus pour les longs trajets.
+    //    La caméra freine sur chaque événement et file au milieu des vides.
+    const brut = xs.slice(1).map((x, i) => 1 + (x - xs[i]) / 900);
+    const total = brut.reduce((a, b) => a + b, 0) || 1;
+    const f = (duree - INTRO - 2) / total;
+    const ts = [INTRO];
+    brut.forEach((b, i) => ts.push(ts[i] + b * f));
+    return { duree, xs, ts };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [etapes]);
 
@@ -156,10 +171,18 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   const voyageRef = useRef(voyage);
   voyageRef.current = voyage;
   const TETE = 0.42; // la « caméra » regarde à 42 % de la largeur de l'écran
-  const ESPACE = 340; // distance entre deux événements sur la bande, en pixels
 
-  // Rang (fractionnaire) de l'événement sous la caméra à l'instant t.
-  const rangA = (t) => (t - INTRO) / programme.pas;
+  // Position de la caméra sur la bande (en pixels) à l'instant t, et l'événement le plus proche.
+  const cameraA = (t) => {
+    const { xs, ts } = programme;
+    if (t <= ts[0]) return { x: xs[0] - (ts[0] - t) * 120, i: -1 };
+    let i = 1;
+    while (i < ts.length - 1 && ts[i] < t) i++;
+    if (t >= ts[ts.length - 1]) return { x: xs[xs.length - 1], i: xs.length - 1 };
+    const k = (t - ts[i - 1]) / (ts[i] - ts[i - 1]);
+    const e = (1 - Math.cos(Math.PI * k)) / 2; // lent au départ et à l'arrivée, rapide au milieu
+    return { x: xs[i - 1] + (xs[i] - xs[i - 1]) * e, i: k < 0.5 ? i - 1 : i };
+  };
 
   useEffect(() => {
     if (!voyage.actif) return undefined;
@@ -170,8 +193,8 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
       const dt = Math.min(0.1, (maintenant - avant) / 1000);
       avant = maintenant;
       const t = Math.min(duree, voyageRef.current.t + dt);
-      const i = Math.min(etapes.length - 1, Math.max(0, Math.round(rangA(t))));
-      const ici = rangA(t) > -0.5 ? etapes[i] : null;
+      const { i } = cameraA(t);
+      const ici = i >= 0 ? etapes[i] : null;
       setEvtVoyage((e) => (e === ici ? e : ici));
       if (t >= duree) {
         setVoyage((x) => ({ ...x, actif: false, t: 0 }));
@@ -361,13 +384,15 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
         {voyage.t > 0 && (() => {
           // La bande du voyage, par-dessus la frise. Mouvement continu, ou pas à pas si l'appareil
           // demande moins d'animations.
-          const brut = rangA(voyage.t);
-          const rang = mouvementReduit() ? Math.max(0, Math.round(brut)) : brut;
-          const decalage = largeur * TETE - rang * ESPACE;
-          const premier = Math.max(0, Math.floor(-decalage / ESPACE) - 1);
-          const dernier = Math.min(etapes.length - 1, Math.ceil((largeur - decalage) / ESPACE) + 1);
+          const cam = cameraA(voyage.t);
+          const { xs } = programme;
+          const xCam = mouvementReduit() ? xs[Math.max(0, cam.i)] : cam.x;
+          const decalage = largeur * TETE - xCam;
           const visibles = [];
-          for (let k = premier; k <= dernier; k++) visibles.push(k);
+          for (let k = 0; k < etapes.length; k++) {
+            const x = xs[k] + decalage;
+            if (x > -2600 && x < largeur + 300) visibles.push(k);
+          }
           return (
             <div className="bande-voyage" onPointerDown={(ev) => ev.stopPropagation()}>
               <div className="bande-voyage__camera" style={{ left: `${TETE * 100}%` }} aria-hidden="true" />
@@ -375,10 +400,11 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
                 {visibles.map((k) => {
                   const e = etapes[k];
                   const suivant = etapes[k + 1];
-                  const actif = Math.abs(rang - k) < 0.5;
+                  const actif = cam.i === k;
+                  const largeurPas = suivant ? xs[k + 1] - xs[k] : 0;
                   return (
-                    <div key={e.id} className="bande-voyage__pas" data-etage={e.etage} style={{ left: k * ESPACE }}>
-                      <div className="bande-voyage__trait" style={{ width: ESPACE }} aria-hidden="true" />
+                    <div key={e.id} className="bande-voyage__pas" data-etage={e.etage} style={{ left: xs[k] }}>
+                      <div className="bande-voyage__trait" style={{ width: largeurPas }} aria-hidden="true" />
                       <span className="bande-voyage__point" aria-hidden="true" />
                       <button
                         type="button"
@@ -390,7 +416,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
                         <span className="bande-voyage__titre">{e.titre}</span>
                       </button>
                       {suivant && (
-                        <span className="bande-voyage__ecart" aria-hidden="true">
+                        <span className="bande-voyage__ecart" style={{ left: largeurPas / 2 }} aria-hidden="true">
                           {texteAge(arrondi2(e.ans - suivant.ans))} plus tard
                         </span>
                       )}
@@ -398,7 +424,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
                   );
                 })}
               </div>
-              <p className="bande-voyage__note">Bande du voyage : les événements sont espacés également, pas à l’échelle.</p>
+              <p className="bande-voyage__note">Bande du voyage : échelle compressée — plus l’écart entre deux événements est grand, plus le trajet est long.</p>
             </div>
           );
         })()}

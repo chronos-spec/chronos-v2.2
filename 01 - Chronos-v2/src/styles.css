@@ -2359,7 +2359,7 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 .bande-voyage__date { display: block; font: 500 16px 'JetBrains Mono', monospace; color: var(--etage-fonce); }
 .bande-voyage__titre { display: block; font: 600 20px/1.3 Fraunces, serif; margin-top: 4px; }
 .bande-voyage__ecart {
-  position: absolute; top: 16px; left: calc(340px / 2); transform: translateX(-50%);
+  position: absolute; top: 16px; transform: translateX(-50%);
   white-space: nowrap; font: 500 16px 'JetBrains Mono', monospace; color: var(--texte-doux);
 }
 .bande-voyage__note {
