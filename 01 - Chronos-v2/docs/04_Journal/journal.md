@@ -1,5 +1,23 @@
 # Journal de Chronos
 
+## 21 novembre 2026 — Le jeu devient une chasse aux badges cachés
+
+**Décision**
+- Le jeu pousse à explorer le site à la main : **45 badges cachés** partout (récits des civilisations, récit animé, voyage « Tout voir », zoom, arbre du vivant, fiches, spirale, recherche, quiz, secrets).
+- Chaque badge a une **devinette** ; un bouton « Révéler » donne la consigne exacte. Un **trophée** par famille complète (6 familles).
+- Le panneau Jeu a deux onglets : **Quiz** et **Ma collection**. Une petite annonce « Badge débloqué ! » apparaît en bas de l'écran (lue par les lecteurs d'écran, sans bloquer la navigation).
+- Tout reste dans le navigateur (aucun compte, rien d'envoyé).
+
+**Comment c'est fait**
+- `src/data/badges.js` : la liste des badges (ajouter un badge = une ligne).
+- `src/lib/badges.js` : chaque page envoie un signal (`signaler('espece', 'v-baleine')`…), le fichier décide si un badge est gagné.
+
+**Aussi aujourd'hui**
+- « Tout voir » : voyage en bande qui défile sans zoom (écarts selon le temps écoulé, la caméra file dans les vides), formats Rapide 1 min / Normale 3 min 30, vitesse ×1/×2/×4, curseur « Période », événements datés dès la première vue sans chevauchement.
+- Page Vie : l'arbre linéaire revient sous l'arbre en bulles.
+- Récits des civilisations : voix d'IA enregistrée possible (script `scripts/generer-voix.mjs`, ElevenLabs ou OpenAI, clé à fournir), sinon meilleure voix du navigateur.
+- Plan de la vidéo du Récit : `docs/05_Prototype/video-recit.md`.
+
 ## 20 novembre 2026 — L'arbre du vivant zoomable (façon OneZoom)
 
 **Ce qui a été fait**

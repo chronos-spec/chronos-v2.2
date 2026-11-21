@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ImageWiki from './ImageWiki.jsx';
+import { signaler } from '../lib/badges.js';
 
 // Le récit d'une civilisation : un diaporama qui avance tout seul (2 à 3 minutes),
 // lu à voix haute par le navigateur si le son est activé (synthèse vocale, sans rien envoyer).
@@ -44,6 +45,9 @@ export default function RecitCivilisation({ civ, onFermer }) {
   }, [civ.id]);
   const fini = etape >= etapes.length;
   const [date, titre, texte, wiki] = fini ? ['', 'Fin', '', null] : etapes[etape];
+
+  // Badge : récit écouté jusqu'au bout.
+  useEffect(() => { if (fini) signaler('recit-civ', civ.id); }, [fini, civ.id]);
 
   const suivante = useCallback(() => setEtape((e) => Math.min(etapes.length, e + 1)), [etapes.length]);
 

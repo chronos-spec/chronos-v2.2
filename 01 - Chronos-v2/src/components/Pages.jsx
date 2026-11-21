@@ -19,6 +19,7 @@ import { ESPECES, GROUPES_HUMAINS } from '../data/especes.js';
 import { WIKI_ANIMAUX, WIKI_ESPECES } from '../data/wiki.js';
 import { lienEtage, lienPeriode } from '../lib/route.js';
 import { texteAge, plageAges } from '../lib/ages.js';
+import { signaler } from '../lib/badges.js';
 
 // L'étage tel qu'il apparaît sur sa page : l'Histoire y reçoit ses événements « monde »
 // et des bornes communes, pour que toutes les lignes de lieux soient à la même échelle.
@@ -47,6 +48,7 @@ function useLieux(cible, parId) {
   const [cibleCiv, setCibleCiv] = useState(null);
   const setCiv = (id) => {
     setCivBrut(id);
+    if (id) signaler('civ-filtre', id); // badge « Cartographe »
     if (!id) return setCibleCiv(null);
     const premier = CIVILISATION_PAR_ID[id].evenements
       .map((e) => parId[e])

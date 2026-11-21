@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Carte from './Carte.jsx';
 import { ETAGES } from '../data/index.js';
 import { texteAge } from '../lib/ages.js';
+import { signaler } from '../lib/badges.js';
 
 // ---------------------------------------------------------------------------
 // LA SPIRALE DU TEMPS (page d'essai : #/spirale)
@@ -471,7 +472,7 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
                 aria-expanded={carteOuverte === e.id}
                 aria-controls={carteOuverte === e.id ? `carte-${e.id}` : undefined}
                 className={carteOuverte === e.id ? 'point point--ouvert spirale__bouton' : 'point spirale__bouton'}
-                onClick={() => onBasculer(e.id)}
+                onClick={() => { signaler('spirale'); onBasculer(e.id); }}
               >
                 <span className="point__repere">
                   {carteOuverte === e.id && (
@@ -485,7 +486,7 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
                 </span>
               </button>
               {etiquette && (
-                <button type="button" className="spirale__etiquette" style={{ left: etiquette.dx, top: etiquette.dy }} aria-label={`Ouvrir la fiche : ${e.titre}`} onClick={() => onBasculer(e.id)}>
+                <button type="button" className="spirale__etiquette" style={{ left: etiquette.dx, top: etiquette.dy }} aria-label={`Ouvrir la fiche : ${e.titre}`} onClick={() => { signaler('spirale'); onBasculer(e.id); }}>
                   <span className="point__titre">{e.titre}</span>
                 </button>
               )}

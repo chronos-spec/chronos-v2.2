@@ -2383,3 +2383,45 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 /* Curseur « Période » : sur toute la largeur, avec le nom de la période choisie. */
 .infinie__curseur--periode { grid-column: 1 / -1; grid-template-columns: 120px auto 1fr auto; }
 .infinie__periode-nom { grid-column: 3; font: 600 18px Fraunces, serif; color: rgb(var(--etage-rgb, 255, 227, 168)); }
+
+/* ---------- Badges cachés : onglets du Jeu, collection, annonce ---------- */
+.jeu__onglets { display: flex; gap: 8px; margin: 8px 0 16px; }
+.jeu__onglet {
+  flex: 1; min-height: 44px; border-radius: 999px; border: 1px solid var(--verre-bord);
+  background: transparent; color: var(--texte); font: 600 16px Inter, sans-serif; cursor: pointer;
+}
+.jeu__onglet[aria-pressed='true'] { background: rgba(255, 227, 168, 0.16); border-color: rgba(255, 227, 168, 0.6); }
+.jeu__onglet:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.collection__resume { margin: 0 0 8px; }
+.collection__famille { margin-top: 24px; }
+.collection__titre { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font: 600 18px Fraunces, serif; }
+.collection__compte { margin-left: auto; font: 14px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.collection__trophee { margin: 0 0 8px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 227, 168, 0.14); font-weight: 600; }
+.collection__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.collection__badge {
+  display: flex; gap: 12px; align-items: flex-start; padding: 8px 12px; border-radius: 16px;
+  border: 1px dashed var(--verre-bord); color: var(--texte-doux);
+}
+.collection__badge--gagne { border-style: solid; border-color: rgba(255, 227, 168, 0.5); color: var(--texte); background: rgba(255, 227, 168, 0.06); }
+.collection__icone {
+  flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06); font-size: 22px;
+}
+.collection__badge--gagne .collection__icone { background: rgba(255, 227, 168, 0.2); box-shadow: 0 0 12px rgba(255, 227, 168, 0.35); }
+.collection__texte { display: flex; flex-direction: column; gap: 2px; }
+.collection__nom { font-weight: 600; color: var(--texte); }
+.collection__detail { font-size: 16px; }
+.annonce-badge__zone { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 80; pointer-events: none; }
+.annonce-badge {
+  pointer-events: auto; display: flex; align-items: center; gap: 16px; padding: 12px 12px 12px 20px; border-radius: 24px;
+  background: rgba(14, 16, 34, 0.96); color: var(--texte);
+  box-shadow: 0 0 0 1px rgba(255, 227, 168, 0.6), 0 0 32px rgba(255, 227, 168, 0.35), 0 12px 32px var(--ombre-profonde);
+  animation: annonce-badge 320ms ease-out both;
+}
+.annonce-badge__icone { font-size: 32px; }
+.annonce-badge__titre { display: block; font: 500 14px 'JetBrains Mono', monospace; color: #ffe3a8; }
+.annonce-badge__nom { display: block; font: 600 20px Fraunces, serif; }
+.annonce-badge__fermer { min-width: 44px; min-height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--texte); font-size: 24px; cursor: pointer; }
+.annonce-badge__fermer:focus-visible { outline: 3px solid var(--focus); }
+@keyframes annonce-badge { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .annonce-badge { animation: none; } }

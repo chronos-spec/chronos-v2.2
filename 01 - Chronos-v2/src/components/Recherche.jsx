@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { signaler } from '../lib/badges.js';
 
 // La loupe de recherche (en haut à gauche) : trouver un événement, une période, un groupe du vivant,
 // une espèce humaine ou un étage. Une vraie boîte de dialogue : Échap la ferme, le focus revient à la loupe.
@@ -51,6 +52,7 @@ export default function Recherche({ index, onAller }) {
 
   const choisir = (r) => {
     fermer();
+    signaler('recherche', r.id || 'oui'); // badge « Curieux »
     onAller(r);
   };
 

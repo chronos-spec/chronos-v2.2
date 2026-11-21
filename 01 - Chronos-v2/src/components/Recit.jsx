@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { texteAge } from '../lib/ages.js';
+import { signaler } from '../lib/badges.js';
 
 // Le récit : l'histoire de l'univers en une minute environ.
 // Une animation dessinée en code (canvas), sans vidéo, avec un sous-titre par scène
@@ -86,7 +87,7 @@ export default function Recit() {
       tRef.current = Math.min(DUREE, tRef.current + dt);
       dessinerA(tRef.current);
       setT(tRef.current);
-      if (tRef.current >= DUREE) setEtat('fini');
+      if (tRef.current >= DUREE) { setEtat('fini'); signaler('recit'); }
       else id = requestAnimationFrame(image);
     };
     id = requestAnimationFrame(image);

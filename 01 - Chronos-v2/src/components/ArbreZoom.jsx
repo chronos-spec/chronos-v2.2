@@ -5,6 +5,7 @@ import { imageDe } from '../lib/images.js';
 import { lienEtage, lienPeriode } from '../lib/route.js';
 import { texteAge } from '../lib/ages.js';
 import ImageWiki from './ImageWiki.jsx';
+import { signaler } from '../lib/badges.js';
 
 // ---------------------------------------------------------------------------
 // L'ARBRE DU VIVANT ZOOMABLE (façon OneZoom)
@@ -366,6 +367,12 @@ export default function ArbreZoom({ cible = null, idFeuille = null, idTitre = 't
     ouvrirChemin(n);
     if (n.type === 'groupe') setOuverts((o) => new Set(o).add(n.id));
     if (ouvrirFiche) setFiche(n.id);
+    // Badges : espèce ouverte (et si elle est disparue), groupe exploré.
+    if (n.type === 'groupe') signaler('groupe', n.id);
+    else if (ouvrirFiche) {
+      signaler('espece', n.id.replace(/^f:/, ''));
+      if (n.eteint) signaler('espece-eteinte', n.id);
+    }
     if (voler) cadrer(n);
     redessiner();
   };

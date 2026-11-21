@@ -14,6 +14,8 @@ import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
 import MentionsLegales from './components/MentionsLegales.jsx';
 import { demanderArbre } from './lib/arbreCible.js';
+import { signaler, noterVisite } from './lib/badges.js';
+import AnnonceBadge from './components/AnnonceBadge.jsx';
 
 // Quel étage pour une époque donnée ? (quand on fait glisser le point de l'année cosmique)
 function etagePourAns(ans) {
@@ -47,6 +49,18 @@ export default function App() {
       if (route.ancre) requestAnimationFrame(() => document.getElementById(route.ancre)?.scrollIntoView({ block: 'start' }));
     }
   }, [route.page, route.etage, route.periode, accueil, route.ancre]);
+
+  // Badges : pages visitées, fiches ouvertes, une visite par jour.
+  useEffect(() => { noterVisite(); }, []);
+  useEffect(() => {
+    if (route.etage === 'ensemble' && route.page === 'periode') signaler('page', 'vue-ensemble');
+    else if (route.etage) signaler('page', route.etage);
+  }, [route.etage, route.page]);
+  useEffect(() => {
+    if (!carteOuverte || !PAR_ID[carteOuverte]) return;
+    signaler('carte', carteOuverte);
+    signaler('carte-etage', PAR_ID[carteOuverte].etage);
+  }, [carteOuverte]);
 
   // Quel étage est à l'écran ? (on observe chaque section)
   useEffect(() => {
@@ -252,6 +266,8 @@ export default function App() {
           <a href="#/mentions-legales">Mentions légales, confidentialité et crédits</a>
         </footer>
       )}
+      {/* L'annonce « Badge débloqué ! » (visible sur toutes les pages) */}
+      <AnnonceBadge />
 
       {!pageSpeciale && <AnneeCosmique ans={etageActif ? reperes[etageActif] ?? null : 13.8e9} onGlisser={voyager} />}
     </div>

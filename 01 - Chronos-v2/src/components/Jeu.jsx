@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { QUESTIONS, THEMES } from '../data/questionsJeu.js';
+import Collection from './Collection.jsx';
+import { signaler } from '../lib/badges.js';
 
 // ---------------------------------------------------------------------------
 // LE JEU « Explorateur du temps » : des questions dont les réponses se trouvent sur le site.
@@ -75,6 +77,7 @@ export default function Jeu() {
   const [ouvert, setOuvert] = useState(false);
   const [etat, setEtat] = useState(lire); // reponses : { indexQuestion: indexChoix }
   const [choix, setChoix] = useState(null);
+  const [onglet, setOnglet] = useState('quiz'); // « quiz » ou « collection » (badges cachés)
   const panneau = useRef(null);
   const bouton = useRef(null);
 
@@ -116,6 +119,12 @@ export default function Jeu() {
     : 0;
   const nbRepondues = partie ? Object.keys(partie.reponses).length : 0;
 
+  // Badges du quiz : on note le score à la fin d'une partie.
+  useEffect(() => {
+    if (fini) signaler('quiz', String(score));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fini]);
+
   const commencer = (theme) => {
     setChoix(null);
     setEtat(nouvellePartie(theme, partie?.vues || lireVues()));
@@ -156,7 +165,18 @@ export default function Jeu() {
             </button>
           </div>
 
-          {!partie ? (
+          <div className="jeu__onglets" role="group" aria-label="Partie du jeu">
+            <button type="button" className="jeu__onglet" aria-pressed={onglet === 'quiz'} onClick={() => setOnglet('quiz')}>
+              Quiz
+            </button>
+            <button type="button" className="jeu__onglet" aria-pressed={onglet === 'collection'} onClick={() => setOnglet('collection')}>
+              <span aria-hidden="true">🏅</span> Ma collection
+            </button>
+          </div>
+
+          {onglet === 'collection' ? (
+            <Collection />
+          ) : !partie ? (
             <div className="jeu__accueil">
               <p>
                 {PAR_PARTIE} questions tirées au hasard parmi {QUESTIONS.length}. Les réponses sont toutes sur le site :

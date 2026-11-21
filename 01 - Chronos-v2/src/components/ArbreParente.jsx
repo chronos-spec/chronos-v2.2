@@ -4,6 +4,7 @@ import { WIKI_ANIMAUX } from '../data/wiki.js';
 import { GROUPE_PAR_ID, ENFANTS, construireFeuilles, chemin, ancetreCommun } from '../data/phylogenie.js';
 import { texteAge } from '../lib/ages.js';
 import ImageWiki from './ImageWiki.jsx';
+import { signaler } from '../lib/badges.js';
 
 // L'arbre du vivant et l'arbre de parenté, réunis en un seul.
 // - Sans espèce choisie : on explore librement (on ouvre les groupes, on touche une espèce).
@@ -47,6 +48,7 @@ export default function ArbreParente({ idFeuille: idControle, onChoisir, onFerme
   const groupe = feuille?.groupe;
 
   const [comparer, setComparer] = useState('');
+  useEffect(() => { if (comparer) signaler('comparer'); }, [comparer]); // badge « Air de famille »
   const [ouvertsEnPlus, setOuvertsEnPlus] = useState(() => new Set(OUVERTS_DEPART));
   const [fermes, setFermes] = useState(() => new Set());
   const titre = useRef(null);

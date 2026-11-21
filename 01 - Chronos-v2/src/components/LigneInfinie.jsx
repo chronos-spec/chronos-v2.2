@@ -4,6 +4,7 @@ import { ETAGES } from '../data/index.js';
 import { texteAge } from '../lib/ages.js';
 import { lienPeriode } from '../lib/route.js';
 import { demarrerMusique, pauseMusique, arreterMusique } from '../lib/musique.js';
+import { signaler } from '../lib/badges.js';
 
 // ---------------------------------------------------------------------------
 // « TOUT VOIR » : une seule ligne, du Big Bang (à gauche) à aujourd'hui (à droite).
@@ -209,6 +210,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
       const ici = i >= 0 ? etapes[i] : null;
       setEvtVoyage((e) => (e === ici ? e : ici));
       if (t >= duree) {
+        signaler('voyage', `${format}-x${vitesseRef.current}`); // badges des voyages
         setVoyage((x) => ({ ...x, actif: false, t: 0 }));
         setEvtVoyage(null);
         arreterMusique();
@@ -334,11 +336,15 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   const [periode, setPeriode] = useState(0);
   const allerAPeriode = (i) => {
     setPeriode(i);
+    signaler('periode', periodes[i].id); // badge « Arpenteur »
     const p = periodes[i];
     arreterVoyage();
     if (p.id === 'tout') { allerVers(1, 0.5); return; }
     allerAEtage({ debut: p.debut, fin: p.fin });
   };
+
+  // Badge « Œil de lynx » : moins de 100 ans à l'écran.
+  useEffect(() => { if (AGE_UNIVERS / zoom < 100) signaler('zoom-fin'); }, [zoom]);
 
   const ouverte = carteOuverte ? parId[carteOuverte] : null;
   const etageCarte = ouverte ? ETAGES.find((x) => x.id === ouverte.etage) : null;
