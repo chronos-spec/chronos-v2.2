@@ -233,6 +233,10 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   useEffect(() => () => arreterMusique(), []);
 
   const lancerVoyage = () => {
+    // Sur téléphone, la frise est sous les commandes : on la fait monter à l'écran.
+    if (!voyage.actif && window.innerWidth < 960) {
+      boite.current?.scrollIntoView({ behavior: mouvementReduit() ? 'auto' : 'smooth', block: 'center' });
+    }
     setVoyage((x) => ({ ...x, actif: !x.actif }));
   };
   const arreterVoyage = () => setVoyage((x) => ({ ...x, actif: false }));
@@ -438,7 +442,8 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
           const cam = cameraA(voyage.t);
           const { xs } = programme;
           const xCam = mouvementReduit() ? xs[Math.max(0, cam.i)] : cam.x;
-          const decalage = largeur * TETE - xCam;
+          const tete = largeur < 600 ? 0.5 : TETE; // téléphone : la caméra au centre
+          const decalage = largeur * tete - xCam;
           const visibles = [];
           for (let k = 0; k < etapes.length; k++) {
             const x = xs[k] + decalage;
@@ -446,7 +451,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
           }
           return (
             <div className="bande-voyage" onPointerDown={(ev) => ev.stopPropagation()}>
-              <div className="bande-voyage__camera" style={{ left: `${TETE * 100}%` }} aria-hidden="true" />
+              <div className="bande-voyage__camera" style={{ left: `${tete * 100}%` }} aria-hidden="true" />
               <div className="bande-voyage__piste" style={{ transform: `translateX(${decalage}px)` }}>
                 {visibles.map((k) => {
                   const e = etapes[k];
