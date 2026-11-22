@@ -2451,3 +2451,86 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 .planisphere__reperes button:focus-visible, .planisphere__curseur input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .planisphere__note { max-width: 72ch; font-size: 16px; line-height: 1.5; color: var(--texte-doux); }
 @media (prefers-reduced-motion: reduce) { .planisphere__terres { animation: none; } }
+
+/* =====================================================================
+   VERSION TÉLÉPHONE (moins de 960 px) — même site, mise en page adaptée.
+   ===================================================================== */
+.menu-mobile__bouton { display: none; }
+@media (max-width: 959px) {
+  /* En-tête : loupe, nom, Menu, Jeu. Le zoom de page est inutile (on pince l'écran). */
+  .entete { gap: 8px; padding: 8px 12px; flex-wrap: nowrap; }
+  .entete__zoom, .entete__pastille { display: none; }
+  .entete__marque { font-size: 22px; }
+  .entete__gauche { flex: 1; min-width: 0; }
+  .menu-mobile__bouton {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px;
+    border-radius: 999px; border: 1px solid var(--verre-bord); background: var(--entete-fond);
+    color: var(--texte); font: 600 16px Inter, sans-serif; cursor: pointer;
+  }
+  .menu-mobile__bouton:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .menu-mobile__icone { display: grid; gap: 3px; width: 16px; }
+  .menu-mobile__icone span { display: block; height: 2px; border-radius: 1px; background: currentColor; }
+  .jeu__bouton { padding-left: 12px; padding-right: 12px; }
+
+  .menu-mobile {
+    position: fixed; inset: 64px 0 0 0; z-index: 60; overflow: auto; padding: 16px 20px 40px;
+    background: rgba(8, 10, 24, 0.98); color: var(--texte);
+    animation: menu-mobile 240ms ease-out both;
+  }
+  @keyframes menu-mobile { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  .menu-mobile__titre { margin: 16px 0 8px; font: 14px 'JetBrains Mono', monospace; color: var(--texte-doux); text-transform: uppercase; letter-spacing: 0.06em; }
+  .menu-mobile ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .menu-mobile__etages { grid-template-columns: 1fr 1fr; }
+  .menu-mobile a {
+    display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 16px; border-radius: 16px;
+    color: var(--texte); text-decoration: none; font-size: 18px; border: 1px solid var(--verre-bord);
+  }
+  .menu-mobile__etages a { border-color: rgba(var(--etage-rgb), 0.55); background: rgba(var(--etage-rgb), 0.12); font-weight: 600; }
+  .menu-mobile a[aria-current='page'] { box-shadow: 0 0 0 2px rgb(var(--etage-rgb)); }
+  .menu-mobile a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .menu-mobile__num { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: rgb(var(--etage-rgb)); color: var(--fond); font: 600 14px 'JetBrains Mono', monospace; }
+  .menu-mobile__outils a { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .menu-mobile__nom { font-weight: 600; }
+  .menu-mobile__detail { font-size: 16px; color: var(--texte-doux); }
+  .menu-mobile__fermer { width: 100%; min-height: 48px; margin-top: 24px; border-radius: 999px; border: 1px solid var(--verre-bord); background: transparent; color: var(--texte); font: 600 16px Inter, sans-serif; }
+
+  /* Accueil : le grand titre tient dans l'écran. */
+  .accueil__titre { font-size: calc(clamp(48px, 17vw, 96px) / var(--zp, 1)); }
+  .accueil { padding-left: 16px; padding-right: 16px; }
+
+  /* Annonce de badge : large et lisible. */
+  .annonce-badge { width: min(92vw, 420px); }
+  .annonce-badge__zone { width: min(92vw, 420px); bottom: 16px; }
+
+  /* Jeu : plein écran sous l'en-tête. */
+  .jeu { top: 64px; right: 0; left: 0; width: auto; max-height: calc(100svh - 64px); border-radius: 0 0 24px 24px; }
+
+  /* Tout voir : commandes en colonne, rien ne déborde. */
+  .infinie { padding-left: 12px; padding-right: 12px; }
+  .infinie__voyage { flex-wrap: wrap; }
+  .infinie__vitesse { flex-wrap: wrap; max-width: 100%; }
+  .infinie__vitesse select { max-width: 100%; min-height: 44px; }
+  .infinie__curseurs { grid-template-columns: 1fr; }
+  .infinie__curseur, .infinie__curseur--periode { grid-template-columns: 1fr; gap: 4px; }
+  .infinie__curseur .infinie__bornes { display: none; }
+  .infinie__periode-nom { grid-column: auto; }
+  .bande-voyage__carte { width: 200px; }
+  .bande-voyage__note { right: 16px; font-size: 14px; }
+
+  /* Vue d'ensemble : le tableau devient une liste (l'ère en bandeau, puis ses périodes). */
+  .ensemble__entete { display: none; }
+  .ensemble__bloc { grid-template-columns: 1fr; }
+  .ensemble__ere { width: auto; }
+  .ensemble__ligne { grid-template-columns: 1fr; gap: 4px; }
+
+  /* Planisphère : marges réduites, curseur pleine largeur. */
+  .planisphere { padding: 88px 16px 48px; }
+  .planisphere__tete h1 { font-size: 30px; }
+  .planisphere__carte { padding: 8px; }
+  .planisphere__curseur { grid-template-columns: 1fr; }
+  .planisphere__curseur > span[aria-hidden] { display: none; }
+}
+@media (max-width: 959px) {
+  /* L'onglet « 1 an » descend en bas à droite, loin du texte. */
+  .cosmique__montrer { top: auto; bottom: 96px; }
+}

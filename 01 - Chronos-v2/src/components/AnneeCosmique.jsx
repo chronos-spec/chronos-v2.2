@@ -7,7 +7,10 @@ const AGE_UNIVERS = 13.8e9;
 
 function lireMasquee() {
   try {
-    return localStorage.getItem('chronos-annee-masquee') === '1';
+    const garde = localStorage.getItem('chronos-annee-masquee');
+    // Sur téléphone, on la range par défaut : elle cacherait le texte (un onglet « 1 an » la ramène).
+    if (garde === null) return window.innerWidth < 700;
+    return garde === '1';
   } catch {
     return false;
   }
