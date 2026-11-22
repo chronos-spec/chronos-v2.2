@@ -37,7 +37,7 @@ export default function VueEnsemble({ focus }) {
   const titre = useRef(null);
 
   useEffect(() => {
-    document.title = etage ? `Vue d’ensemble · ${etage.nom} · Chronos` : 'Vue d’ensemble · Chronos';
+    document.title = etage ? `Vue d’ensemble · ${etage.nom} · Odysseum` : 'Vue d’ensemble · Odysseum';
     titre.current?.focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }, [etage]);

@@ -496,7 +496,7 @@ export default function Spirale({ parId, carteOuverte, onBasculer, onFermer, onE
       </div>
 
       <div className="spirale__legende verre">
-        <p className="spirale__marque">Chronos</p>
+        <p className="spirale__marque">Odysseum</p>
         <p className="spirale__regle">Un tour vers l’extérieur = 10 fois plus de temps</p>
         <ul className="spirale__etages">
           {ETAGES.map((x, i) => (

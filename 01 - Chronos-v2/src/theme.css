@@ -10,6 +10,12 @@
 */
 
 :root {
+  /* Planisphère : océans et terres */
+  --carte-ocean: #0b2a4a;
+  --carte-ocean-clair: #1d5a8a;
+  --carte-terre: #6e7f3c;
+  --carte-terre-claire: #c9b27a;
+  --carte-grille: rgba(255, 255, 255, 0.12);
   /* Le ciel */
   --ciel-haut: #05060F;
   --ciel-milieu: #0B0E1A;

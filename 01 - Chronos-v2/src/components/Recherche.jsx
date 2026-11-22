@@ -90,7 +90,7 @@ export default function Recherche({ index, onAller }) {
       <dialog ref={dialogue} className="recherche" aria-labelledby="titre-recherche">
         <div className="recherche__boite">
           <div className="recherche__haut">
-            <h2 id="titre-recherche" className="sr-only">Rechercher dans Chronos</h2>
+            <h2 id="titre-recherche" className="sr-only">Rechercher dans Odysseum</h2>
             <label className="recherche__champ">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                 <circle cx="10.5" cy="10.5" r="6.5" />

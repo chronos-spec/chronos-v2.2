@@ -49,8 +49,8 @@ export const QUESTIONS = [
   Q('univers', 'Dans « Tout voir », à la vraie échelle, à quoi ressemble toute l’Histoire écrite ?', ['Un trait au bord droit', 'La moitié de la ligne', 'Un quart de la ligne', 'Toute la ligne'], '5 000 ans sur 13,8 milliards : invisible sans zoomer.', TOUT),
   Q('univers', 'Que conservent les cratères de la Lune ?', ['La trace d’une pluie de météorites ancienne', 'La trace d’anciens volcans d’eau', 'Les pas des astronautes seulement', 'D’anciens océans'], 'La jeune Terre et la Lune ont été bombardées il y a environ 4 milliards d’années.'),
   Q('univers', 'Quel télescope observe aujourd’hui les toutes premières galaxies ?', ['James Webb', 'Galilée', 'Hubble de 1990 seulement', 'Spoutnik'], 'Le télescope James Webb, lancé fin 2021.'),
-  Q('univers', 'Que veut dire « Tout voir » sur Chronos ?', ['Toute l’histoire à la vraie échelle, du Big Bang à aujourd’hui', 'Un résumé de l’Histoire de France', 'Une vidéo', 'La liste des animaux'], 'Une seule ligne, avec deux curseurs : se déplacer et zoomer.', TOUT),
-  Q('univers', 'Combien d’étages compte Chronos ?', ['6', '4', '10', '3'], 'Univers, Terre, Vie, Humains, Histoire, Aujourd’hui.', { texte: 'La barre du haut', lien: '#' }),
+  Q('univers', 'Que veut dire « Tout voir » sur Odysseum ?', ['Toute l’histoire à la vraie échelle, du Big Bang à aujourd’hui', 'Un résumé de l’Histoire de France', 'Une vidéo', 'La liste des animaux'], 'Une seule ligne, avec deux curseurs : se déplacer et zoomer.', TOUT),
+  Q('univers', 'Combien d’étages compte Odysseum ?', ['6', '4', '10', '3'], 'Univers, Terre, Vie, Humains, Histoire, Aujourd’hui.', { texte: 'La barre du haut', lien: '#' }),
   Q('univers', 'Quel est le dernier des six étages ?', ['Aujourd’hui', 'Histoire', 'Humains', 'Futur'], 'L’étage Aujourd’hui commence en 1945.', { texte: 'La barre du haut', lien: '#' }),
   Q('univers', 'L’Archéen se termine il y a…', ['2,5 milliards d’années', '252 millions d’années', '66 millions d’années', '10 000 ans'], 'Le Protérozoïque qui suit verra l’oxygène s’installer.'),
 

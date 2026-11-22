@@ -60,7 +60,7 @@ export default function Recit() {
   const reduit = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
-    document.title = 'Le récit · Chronos';
+    document.title = 'Le récit · Odysseum';
   }, []);
 
   // Dessin d'une image (au temps t), adapté à la taille de l'écran.

@@ -2425,3 +2425,29 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 .annonce-badge__fermer:focus-visible { outline: 3px solid var(--focus); }
 @keyframes annonce-badge { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .annonce-badge { animation: none; } }
+
+/* ---------- Planisphère (bêta) ---------- */
+.planisphere { max-width: 1200px; margin: 0 auto; padding: 112px 24px 64px; color: var(--texte); }
+.planisphere__tete h1 { font: 600 40px/1.2 Fraunces, serif; margin: 0 0 8px; }
+.planisphere__beta { display: inline-block; margin: 0 0 8px; padding: 2px 12px; border-radius: 999px; border: 1px solid var(--verre-bord); font: 14px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.planisphere__intro { max-width: 68ch; font-size: 18px; line-height: 1.5; color: var(--texte-doux); }
+.planisphere__carte { position: relative; margin: 24px 0 16px; padding: 16px; border-radius: 24px; background: rgba(255,255,255,0.03); box-shadow: 0 0 0 1px var(--verre-bord); }
+.planisphere__carte svg { display: block; width: 100%; height: auto; }
+.planisphere__grille { fill: none; stroke: var(--carte-grille); stroke-width: 0.6; }
+.planisphere__bord { fill: none; stroke: var(--verre-bord); stroke-width: 1.2; }
+.planisphere__terres { stroke: var(--carte-terre-claire); stroke-width: 0.6; stroke-linejoin: round; animation: planisphere-apparait 400ms ease both; }
+@keyframes planisphere-apparait { from { opacity: 0; } to { opacity: 1; } }
+.planisphere__etat { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); margin: 0; padding: 12px 20px; border-radius: 16px; background: rgba(14,16,34,0.9); font-size: 18px; }
+.planisphere__etat--erreur { max-width: 420px; text-align: center; }
+.planisphere__legende { display: grid; gap: 4px; margin-top: 16px; max-width: 72ch; }
+.planisphere__date { font: 600 24px Fraunces, serif; }
+.planisphere__periode { font: 16px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.planisphere__texte { font-size: 18px; line-height: 1.5; }
+.planisphere__curseur { display: grid; grid-template-columns: auto auto 1fr auto; gap: 16px; align-items: center; font-size: 16px; }
+.planisphere__curseur input { width: 100%; min-height: 44px; accent-color: var(--carte-terre-claire); }
+.planisphere__reperes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 16px 0; }
+.planisphere__reperes button { min-width: 64px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--verre-bord); background: transparent; color: var(--texte); font: 14px 'JetBrains Mono', monospace; cursor: pointer; }
+.planisphere__reperes button[aria-pressed='true'] { background: rgba(201,178,122,0.22); border-color: var(--carte-terre-claire); }
+.planisphere__reperes button:focus-visible, .planisphere__curseur input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.planisphere__note { max-width: 72ch; font-size: 16px; line-height: 1.5; color: var(--texte-doux); }
+@media (prefers-reduced-motion: reduce) { .planisphere__terres { animation: none; } }

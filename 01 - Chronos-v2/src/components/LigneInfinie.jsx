@@ -72,7 +72,7 @@ export default function LigneInfinie({ parId, carteOuverte, onBasculer, onFermer
   const [centre, setCentre] = useState(0.5); // position du milieu de l'écran, de 0 à 1
 
   useEffect(() => {
-    document.title = 'Tout voir · Chronos';
+    document.title = 'Tout voir · Odysseum';
     const mesurer = () => setLargeur(boite.current?.clientWidth || 1200);
     mesurer();
     window.addEventListener('resize', mesurer);

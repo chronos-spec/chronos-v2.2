@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { ETAGES, PAR_ID } from './data/index.js';
 import Ciel from './components/Ciel.jsx';
 import Entete from './components/Entete.jsx';
@@ -10,6 +10,8 @@ import { xPourAns } from './lib/echelle.js';
 import { PageEtage, PagePeriode } from './components/Pages.jsx';
 import Spirale from './components/Spirale.jsx';
 import VueEnsemble from './components/VueEnsemble.jsx';
+// Le planisphère (et sa carte du monde) n'est chargé que si on ouvre sa page.
+const Planisphere = lazy(() => import('./components/Planisphere.jsx'));
 import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
 import MentionsLegales from './components/MentionsLegales.jsx';
@@ -33,7 +35,7 @@ export default function App() {
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
   const spirale = route.page === 'etage' && route.etage === 'spirale';
   const [etageSpirale, setEtageSpirale] = useState('univers');
-  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales'].includes(route.etage);
+  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte'].includes(route.etage);
   const etageActif = accueil ? etageVu : spirale ? etageSpirale : pageSpeciale ? (route.etage === 'ensemble' ? route.periode || null : null) : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
   // Accueil : tout replier pour ne voir que les titres des six étages.
@@ -45,7 +47,7 @@ export default function App() {
     setCarteOuverte(carteApresNavigation.current);
     carteApresNavigation.current = null;
     if (accueil) {
-      document.title = 'Chronos';
+      document.title = 'Odysseum';
       if (route.ancre) requestAnimationFrame(() => document.getElementById(route.ancre)?.scrollIntoView({ block: 'start' }));
     }
   }, [route.page, route.etage, route.periode, accueil, route.ancre]);
@@ -197,7 +199,7 @@ export default function App() {
         <main className={replie ? 'accueil-replie' : undefined}>
           <section className="accueil" data-section="accueil" aria-labelledby="titre-accueil">
             <p className="accueil__sur-titre">Une frise de toute l'histoire</p>
-            <h1 id="titre-accueil" className="accueil__titre">Chronos</h1>
+            <h1 id="titre-accueil" className="accueil__titre">Odysseum</h1>
             <p className="accueil__texte">
               Du Big Bang à aujourd'hui, en six étages.
               <br />
@@ -239,6 +241,10 @@ export default function App() {
             <LigneInfinie parId={PAR_ID} carteOuverte={carteOuverte} onBasculer={basculer} onFermer={fermer} />
           ) : route.etage === 'ensemble' ? (
             <VueEnsemble focus={route.periode} />
+          ) : route.etage === 'carte' ? (
+            <Suspense fallback={<p className="planisphere__etat">Chargement du planisphère…</p>}>
+              <Planisphere />
+            </Suspense>
           ) : route.etage === 'recit' ? (
             <Recit />
           ) : route.etage === 'mentions-legales' ? (
@@ -262,7 +268,7 @@ export default function App() {
       {/* Pied de page présent partout (sauf sur le récit, plein écran) : mentions obligatoires. */}
       {!(pageSpeciale && route.etage === 'recit') && (
         <footer className="pied">
-          <p>Chronos · site personnel et gratuit · images : Wikipédia / Wikimedia Commons (licences libres)</p>
+          <p>Odysseum · site personnel et gratuit · images : Wikipédia / Wikimedia Commons (licences libres)</p>
           <a href="#/mentions-legales">Mentions légales, confidentialité et crédits</a>
         </footer>
       )}

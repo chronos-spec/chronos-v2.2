@@ -20,7 +20,7 @@ export const FAMILLES = {
   civilisations: { nom: 'Civilisations', trophee: 'Historien du monde', icone: '🏛️' },
   voyages: { nom: 'Voyages dans le temps', trophee: 'Maître du temps', icone: '⏳' },
   vivant: { nom: 'Arbre du vivant', trophee: 'Naturaliste', icone: '🌿' },
-  frise: { nom: 'La frise', trophee: 'Explorateur de Chronos', icone: '🧭' },
+  frise: { nom: 'La frise', trophee: 'Explorateur d’Odysseum', icone: '🧭' },
   quiz: { nom: 'Quiz', trophee: 'Esprit vif', icone: '🎓' },
   secrets: { nom: 'Secrets', trophee: 'Fin limier', icone: '🗝️' },
 };
@@ -224,7 +224,7 @@ export const BADGES = [
   {
     id: 'sec-fidele', nom: 'Fidèle', icone: '📅', famille: 'secrets',
     indice: 'Le temps passe… reviens le voir.',
-    consigne: 'Reviens sur Chronos 3 jours différents.',
+    consigne: 'Reviens sur Odysseum 3 jours différents.',
     test: (e) => nb(e, 'jour') >= 3,
   },
   {

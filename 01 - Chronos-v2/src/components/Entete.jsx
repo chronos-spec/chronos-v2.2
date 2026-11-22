@@ -13,7 +13,7 @@ export default function Entete({ etages, etageActif, index: indexRecherche, onAl
     <header className="entete">
       <div className="entete__gauche">
         <Recherche index={indexRecherche} onAller={onAller} />
-        <a className="entete__marque" href="#titre-accueil">Chronos</a>
+        <a className="entete__marque" href="#titre-accueil">Odysseum</a>
       </div>
 
       {/* Ordinateur : les 6 étages, pour sauter de l'un à l'autre */}
@@ -38,6 +38,9 @@ export default function Entete({ etages, etageActif, index: indexRecherche, onAl
         </a>
         <a href="#/recit" className="entete__lien entete__lien--outil" aria-current={!accueil && window.location.hash === '#/recit' ? 'page' : undefined}>
           Récit
+        </a>
+        <a href="#/carte" className="entete__lien entete__lien--outil" aria-current={!accueil && window.location.hash === '#/carte' ? 'page' : undefined}>
+          Planisphère <span className="entete__essai">bêta</span>
         </a>
         <a href="#/spirale" className="entete__lien entete__lien--spirale" aria-current={!accueil && window.location.hash === '#/spirale' ? 'page' : undefined}>
           Spirale <span className="entete__essai">essai</span>

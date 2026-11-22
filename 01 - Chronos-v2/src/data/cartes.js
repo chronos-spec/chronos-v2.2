@@ -170,7 +170,7 @@ export const CARTES = [
     id: 'webb', etage: 'aujourdhui', titre: 'Le télescope James Webb',
     date: 'lancé le 25 décembre 2021', dateCourte: '2021',
     ans: 5, cosmique: 'à un centième de seconde de minuit',
-    texte: "Le plus grand télescope jamais envoyé dans l'espace observe le ciel à 1,5 million de kilomètres de la Terre. Il voit des galaxies nées peu après le Big Bang. L'histoire de Chronos fait une boucle : aujourd'hui, nous regardons nos origines.",
+    texte: "Le plus grand télescope jamais envoyé dans l'espace observe le ciel à 1,5 million de kilomètres de la Terre. Il voit des galaxies nées peu après le Big Bang. L'histoire d’Odysseum fait une boucle : aujourd'hui, nous regardons nos origines.",
     image: { type: 'photo', description: 'Le télescope ou sa première image (NASA / ESA / CSA)' },
     source: { texte: 'NASA et ESA, « James Webb Space Telescope »' },
   },

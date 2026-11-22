@@ -25,7 +25,7 @@ const MISE_A_JOUR = '20 novembre 2026';
 export default function MentionsLegales() {
   const titre = useRef(null);
   useEffect(() => {
-    document.title = 'Mentions légales · Chronos';
+    document.title = 'Mentions légales · Odysseum';
     window.scrollTo(0, 0);
     titre.current?.focus({ preventScroll: true });
   }, []);
@@ -49,7 +49,7 @@ export default function MentionsLegales() {
       <section aria-labelledby="legal-editeur">
         <h2 id="legal-editeur">Éditeur du site</h2>
         <p>
-          Chronos est un site personnel, non commercial et gratuit, publié par {EDITEUR.nom}, à titre de particulier.
+          Odysseum est un site personnel, non commercial et gratuit, publié par {EDITEUR.nom}, à titre de particulier.
         </p>
         <p>Directeur de la publication : {EDITEUR.nom}.</p>
         <p>Contact : {EDITEUR.contact}</p>
@@ -66,7 +66,7 @@ export default function MentionsLegales() {
       <section aria-labelledby="legal-donnees">
         <h2 id="legal-donnees">Données personnelles</h2>
         <p>
-          Chronos ne demande aucun compte, aucun formulaire, aucune adresse e-mail. Il n’y a ni publicité, ni outil
+          Odysseum ne demande aucun compte, aucun formulaire, aucune adresse e-mail. Il n’y a ni publicité, ni outil
           de mesure d’audience, ni bouton de réseau social.
         </p>
         <p>Deux services reçoivent toutefois, comme pour tout site web, des données techniques de connexion :</p>
@@ -99,7 +99,7 @@ export default function MentionsLegales() {
       <section aria-labelledby="legal-cookies">
         <h2 id="legal-cookies">Cookies et stockage</h2>
         <p>
-          Chronos ne dépose aucun cookie. Il garde seulement, dans votre navigateur, quelques réglages que vous avez choisis
+          Odysseum ne dépose aucun cookie. Il garde seulement, dans votre navigateur, quelques réglages que vous avez choisis
           (le zoom de la page, l’affichage ou non de « l’année cosmique ») et vos réponses au jeu. Ces réglages ne quittent jamais votre
           appareil et ne servent pas à vous suivre : ils ne demandent donc pas de consentement. Vous pouvez les effacer
           en vidant les données du site dans votre navigateur.
@@ -166,7 +166,7 @@ export default function MentionsLegales() {
       <section aria-labelledby="legal-contenus">
         <h2 id="legal-contenus">Contenus</h2>
         <p>
-          Chronos est un site de vulgarisation. Les dates sont vérifiées et arrondies ; quand elles sont approximatives
+          Odysseum est un site de vulgarisation. Les dates sont vérifiées et arrondies ; quand elles sont approximatives
           ou débattues par les chercheurs, la fiche l’indique. Les connaissances évoluent : une erreur repérée peut être
           signalée à {EDITEUR.contact}.
         </p>
@@ -182,7 +182,7 @@ export default function MentionsLegales() {
       <section aria-labelledby="legal-accessibilite">
         <h2 id="legal-accessibilite">Accessibilité</h2>
         <p>
-          Chronos vise le niveau AA des règles d’accessibilité WCAG 2.1 : navigation complète au clavier, textes
+          Odysseum vise le niveau AA des règles d’accessibilité WCAG 2.1 : navigation complète au clavier, textes
           alternatifs, contrastes renforcés, animations coupées si votre appareil demande moins de mouvement. Le site est
           encore en construction et n’a pas fait l’objet d’un audit officiel. Une difficulté ? Écrivez à {EDITEUR.contact}.
         </p>

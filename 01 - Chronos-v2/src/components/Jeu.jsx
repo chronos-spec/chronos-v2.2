@@ -197,7 +197,7 @@ export default function Jeu() {
               <p className="jeu__score">{score} / {total}</p>
               <p>
                 {score === total
-                  ? 'Parfait ! Tu connais Chronos sur le bout des doigts.'
+                  ? 'Parfait ! Tu connais Odysseum sur le bout des doigts.'
                   : score >= total * 0.75
                     ? 'Excellent explorateur !'
                     : score >= total / 2

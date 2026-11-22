@@ -72,10 +72,10 @@ function useTitreDocument(titre) {
     window.scrollTo(0, 0);
   }, [titre]);
   useEffect(() => {
-    document.title = `${titre} · Chronos`;
+    document.title = `${titre} · Odysseum`;
     requestAnimationFrame(() => document.querySelector('main h1')?.focus({ preventScroll: true }));
     return () => {
-      document.title = 'Chronos';
+      document.title = 'Odysseum';
     };
   }, [titre]);
 }
@@ -153,7 +153,7 @@ export function PageEtage({ idEtage, communs }) {
 
   return (
     <div className="page" data-etage={etage.id}>
-      <Fil elements={[{ nom: 'Chronos', lien: `#${etage.id}` }, { nom: etage.nom }]} />
+      <Fil elements={[{ nom: 'Odysseum', lien: `#${etage.id}` }, { nom: etage.nom }]} />
       <Etage
         mode="page"
         arbreSousFrise={etage.id !== 'vie'}
@@ -267,7 +267,7 @@ export function PagePeriode({ idEtage, idPeriode, communs }) {
 
   return (
     <div className="page" data-etage={etage.id}>
-      <Fil elements={[{ nom: 'Chronos', lien: `#${etage.id}` }, { nom: etage.nom, lien: lienEtage(etage.id) }, { nom: cat.nom }]} />
+      <Fil elements={[{ nom: 'Odysseum', lien: `#${etage.id}` }, { nom: etage.nom, lien: lienEtage(etage.id) }, { nom: cat.nom }]} />
       {ere && (
         <p className="page__ere" style={{ '--ere': ere.couleur }}>
           {ere.nom} <span className="ere__detail">· {ere.detail}</span>
