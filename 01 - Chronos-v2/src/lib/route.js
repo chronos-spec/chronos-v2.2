@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 //   (rien)            → la page d'accueil (les six étages à la suite)
 //   #/vie             → la page de l'étage Vie
 //   #/vie/jurassique  → la page de la période « Jurassique »
+//   #/methodes        → « Comment on le sait ? » : les méthodes de datation expliquées
 // Les ancres simples (#vie, #titre-accueil) restent sur la page d'accueil.
 
 export function lireRoute(hash = window.location.hash) {
