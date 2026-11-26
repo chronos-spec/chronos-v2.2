@@ -2576,3 +2576,43 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 /* Trois onglets dans le panneau Jeu : ils passent à la ligne sur petit écran. */
 .jeu__onglets { flex-wrap: wrap; }
 .jeu__onglet { padding: 0 8px; }
+/* ---------- « Pendant ce temps… » (dans la carte ouverte) ---------- */
+.pendant { display: grid; gap: 8px; }
+.pendant__bouton {
+  align-self: flex-start;
+  justify-self: start;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 2px solid var(--etage-fonce);
+  border-radius: 999px;
+  background: var(--carte-haut);
+  color: var(--etage-encre);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pendant__bouton:hover { background: var(--etage-pale); }
+.pendant__bouton:focus-visible, .pendant__lien:focus-visible, .pendant__titre:focus-visible {
+  outline: 3px solid var(--focus-carte);
+  outline-offset: 2px;
+}
+.pendant__titre { margin: 8px 0 0; font-weight: 600; color: var(--carte-texte); }
+.pendant__liste { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.pendant__lien {
+  display: grid;
+  gap: 0;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 16px;
+  background: var(--carte-bouton);
+  color: var(--carte-texte);
+  text-decoration: none;
+}
+.pendant__lien:hover .pendant__nom { text-decoration: underline; }
+.pendant__nom { font-weight: 600; color: var(--etage-encre); }
+.pendant__infos { display: flex; flex-wrap: wrap; gap: 0 16px; color: var(--carte-texte-doux); }
+.pendant__date { font-family: 'JetBrains Mono', monospace; }
+.pendant__note { margin: 8px 0 0; color: var(--carte-texte-doux); }
+@media (prefers-reduced-motion: no-preference) {
+  .pendant__lien { transition: background 200ms ease; }
+}
