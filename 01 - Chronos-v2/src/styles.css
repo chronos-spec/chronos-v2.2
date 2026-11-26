@@ -2534,3 +2534,41 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
   /* L'onglet « 1 an » descend en bas à droite, loin du texte. */
   .cosmique__montrer { top: auto; bottom: 96px; }
 }
+
+/* ---------- Volet « Comment on le sait ? » (CommentOnLeSait.jsx) et page #/methodes ---------- */
+.preuve { border-radius: 16px; background: var(--carte-bouton); color: var(--carte-texte); }
+.preuve__titre {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  min-height: 48px; padding: 8px 16px; border-radius: 16px; cursor: pointer;
+  font: 600 18px Inter, sans-serif; list-style: none;
+}
+.preuve__titre::-webkit-details-marker { display: none; }
+.preuve__titre::before { content: '▸'; margin-right: 8px; color: var(--etage-fonce); }
+.preuve[open] > .preuve__titre::before { content: '▾'; }
+.preuve__titre > span:first-child { margin-right: auto; }
+.preuve__titre:focus-visible { outline: 3px solid var(--focus-carte); outline-offset: 2px; }
+.preuve__contenu { display: flex; flex-direction: column; gap: 16px; padding: 0 16px 16px; }
+.preuve__liste { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.preuve__liste dt { font-weight: 600; color: var(--etage-encre); }
+.preuve__liste dd { margin: 0; }
+.preuve__explication { margin: 0; }
+.preuve__lien {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  color: var(--etage-encre); font-weight: 600; text-underline-offset: 3px;
+}
+.preuve__lien:focus-visible { outline: 3px solid var(--focus-carte); outline-offset: 2px; border-radius: 8px; }
+.preuve__certitude {
+  display: inline-flex; align-items: center; gap: 8px; padding: 2px 12px; border-radius: 999px;
+  font: 600 16px Inter, sans-serif; background: var(--carte-haut); color: var(--certitude-texte);
+  border: 1.5px solid var(--certitude-bord);
+}
+/* La forme du bord change aussi : l'info ne passe jamais par la seule couleur. */
+.preuve__certitude--approximatif { border-style: dotted; }
+.preuve__certitude--debattu { border-style: dashed; }
+.preuve__certitude--recit { border-style: double; border-width: 3px; }
+.methodes__certitudes { list-style: none; padding-left: 0; }
+.methodes__certitudes li { margin-bottom: 16px; }
+.methodes .preuve__certitude { margin-right: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .preuve[open] > .preuve__contenu { animation: monte 240ms ease-out; }
+}

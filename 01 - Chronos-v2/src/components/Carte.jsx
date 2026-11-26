@@ -4,6 +4,8 @@ import ImageWiki from './ImageWiki.jsx';
 import { lienPeriode } from '../lib/route.js';
 import { useEffect, useRef } from 'react';
 import { dateCosmique } from '../lib/calendrier.js';
+import CommentOnLeSait from './CommentOnLeSait.jsx';
+import { preuveDe } from '../data/preuves.js';
 
 const ETIQUETTES = { bible: 'Selon la Bible', histoire: 'Fait historique' };
 
@@ -12,6 +14,7 @@ export default function Carte({ carte, etage, onFermer }) {
   const complete = Boolean(carte.texte);
   const periode = carte.type === 'periode';
   const cosmique = carte.cosmique || dateCosmique(carte.ans);
+  const preuve = preuveDe(carte); // null si la fiche n'a pas encore de preuve renseignée
 
   // À l'ouverture, le focus va sur le titre : le lecteur d'écran lit la carte.
   useEffect(() => {
@@ -102,7 +105,12 @@ export default function Carte({ carte, etage, onFermer }) {
         </p>
       )}
 
-      {complete && (
+      {/* Volet « Comment on le sait ? » : la source des fiches complètes y est rangée. */}
+      {preuve && (
+        <CommentOnLeSait preuve={preuve} source={complete ? carte.source : null} sourcesPlusHaut={Boolean(TEXTES[carte.id])} />
+      )}
+
+      {complete && !preuve && (
         <p className="carte__source">
           Source :{' '}
           {carte.source.url ? (
