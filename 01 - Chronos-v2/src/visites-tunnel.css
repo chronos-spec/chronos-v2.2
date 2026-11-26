@@ -1,0 +1,240 @@
+/* ---------- Le tunnel du temps (visites guidées, VisiteTunnel.jsx) ----------
+   Couleurs : uniquement les variables de theme.css. Espacements en multiples de 8 px.
+   Le mouvement est coupé avec « Effets doux » (.tunnel--calme) ou prefers-reduced-motion. */
+
+/* Pendant la visite, l'en-tête et le pied du site s'effacent : on est dans le tunnel. */
+.app:has(.tunnel) .entete,
+.app:has(.tunnel) .pied { display: none; }
+
+.tunnel {
+  position: relative;
+  /* --zp : le zoom de page du site (voir lib/zoomPage.js), sinon le tunnel ne remplit pas l'écran */
+  min-height: calc(100vh / var(--zp, 1));
+  min-height: calc(100dvh / var(--zp, 1));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 24px 24px;
+  color: var(--texte);
+  font-size: 18px;
+  line-height: 1.5;
+  background: var(--ciel-haut);
+}
+.tunnel__fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(var(--etage-rgb), 0.22) 0%, transparent 60%),
+    linear-gradient(to bottom, var(--ciel-haut), var(--ciel-milieu) 50%, var(--ciel-bas));
+  transition: background 800ms ease;
+}
+.tunnel__etoiles { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* :where() garde cette règle « faible », pour que la carte puisse se placer librement. */
+.tunnel > :where(:not(.tunnel__fond):not(.tunnel__etoiles)) { position: relative; z-index: 1; }
+
+/* En-tête : retour, titre, réglages */
+.tunnel__entete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.tunnel__retour { min-height: 44px; display: inline-flex; align-items: center; color: var(--texte); font-weight: 600; }
+.tunnel__titre { margin: 0; font: 600 clamp(22px, 3vw, 32px)/1.2 Fraunces, serif; }
+.tunnel__reglages { display: flex; flex-wrap: wrap; gap: 8px; }
+.tunnel__reglage {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--verre-bord);
+  background: var(--verre);
+  color: var(--texte);
+  font: 600 16px Inter, sans-serif;
+  cursor: pointer;
+}
+.tunnel__reglage[aria-pressed='true'] { border-color: var(--etage); box-shadow: inset 0 0 0 2px var(--etage); }
+.tunnel a:focus-visible,
+.tunnel button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* La scène en profondeur */
+.tunnel__scene {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  perspective: 900px;
+}
+.tunnel__panneau {
+  grid-area: 1 / 1;
+  width: min(560px, 100%);
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--carte);
+  color: var(--carte-texte);
+  box-shadow: 0 0 0 1px rgba(var(--etage-rgb), 0.5), 0 0 48px rgba(var(--etage-rgb), 0.35), 0 24px 64px var(--ombre-profonde);
+}
+.tunnel__panneau .image-wiki { border-radius: 0; }
+.tunnel__panneau-texte { padding: 16px 24px 24px; }
+.tunnel__etiquettes { margin: 0 0 8px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.tunnel__etage {
+  display: inline-flex; align-items: center; min-height: 32px; padding: 0 16px;
+  border-radius: 999px; background: var(--etage-pale); color: var(--etage-encre);
+  font: 600 16px Inter, sans-serif;
+}
+.tunnel__date { font: 500 18px 'JetBrains Mono', monospace; color: var(--etage-encre); }
+.tunnel__fiche { margin: 0; font: 600 clamp(24px, 3vw, 32px)/1.25 Fraunces, serif; }
+
+/* L'étape arrive du fond ; l'ancienne nous dépasse et disparaît. */
+.tunnel__panneau--arrive { animation: tunnel-arrive 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.tunnel__panneau--part { animation: tunnel-part 800ms ease-in both; pointer-events: none; }
+@keyframes tunnel-arrive {
+  from { transform: translateZ(-1600px) rotateX(8deg); opacity: 0; filter: blur(8px); }
+  60% { opacity: 1; filter: blur(0); }
+  to { transform: none; opacity: 1; filter: none; }
+}
+@keyframes tunnel-part {
+  from { transform: none; opacity: 1; }
+  to { transform: translateZ(700px); opacity: 0; filter: blur(6px); }
+}
+
+/* Bulle « Pendant ce temps… » */
+.tunnel__bulle {
+  grid-area: 1 / 1;
+  align-self: start;
+  justify-self: end;
+  max-width: 280px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--verre);
+  border: 1px solid rgba(var(--etage-rgb), 0.6);
+  backdrop-filter: blur(8px);
+  animation: tunnel-bulle 400ms ease-out both;
+}
+.tunnel__bulle p { margin: 0; }
+.tunnel__bulle-titre { font-weight: 600; color: var(--etage); }
+.tunnel__bulle-nom { font: 600 18px/1.3 Fraunces, serif; }
+.tunnel__bulle-info { color: var(--texte-doux); font-size: 16px; }
+@keyframes tunnel-bulle { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+/* Sous-titres : grands, toujours lisibles sur le ciel */
+.tunnel__sous-titre {
+  margin: 0 auto;
+  max-width: 68ch;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: var(--fond-etiquette);
+  font-size: clamp(18px, 2.2vw, 24px);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* La ligne du temps qui avance */
+.tunnel__frise { display: grid; gap: 8px; padding: 0 8px; }
+.tunnel__compteur { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; align-items: baseline; }
+.tunnel__compteur-ans { font: 600 clamp(22px, 3vw, 32px) 'JetBrains Mono', monospace; color: var(--etage); }
+.tunnel__compteur-cosmique { font: 18px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.tunnel__axe { position: relative; height: 24px; }
+.tunnel__axe::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px;
+  border-radius: 4px; background: var(--verre-bord);
+}
+.tunnel__axe-plein {
+  position: absolute; left: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 4px;
+  background: linear-gradient(to right, rgba(var(--etage-rgb), 0.3), var(--etage));
+}
+.tunnel__repere {
+  position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px;
+  border-radius: 50%; border: 2px solid var(--texte-doux); background: var(--ciel-haut);
+}
+.tunnel__repere--vu { border-color: var(--etage); background: var(--etage); }
+.tunnel__repere--actif { border-color: var(--etage); }
+.tunnel__curseur {
+  position: absolute; top: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px;
+  border-radius: 50%; background: var(--etoile);
+  box-shadow: 0 0 0 4px rgba(var(--etage-rgb), 0.5), 0 0 24px rgba(var(--etage-rgb), 0.9);
+}
+.tunnel__bornes { display: flex; justify-content: space-between; font: 16px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+
+/* La carte du monde (visite Sapiens) */
+.tunnel__carte { margin: 0 auto; width: min(480px, 100%); }
+.tunnel__carte svg { width: 100%; height: auto; display: block; }
+.tunnel__carte-mer { fill: rgba(var(--etage-rgb), 0.08); stroke: var(--verre-bord); }
+.tunnel__carte-terre { fill: rgba(255, 255, 255, 0.14); }
+.tunnel__carte-route {
+  fill: none; stroke: var(--etage); stroke-width: 3; stroke-linecap: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1600ms ease-in-out;
+}
+.tunnel__carte-route--tracee { stroke-dashoffset: 0; }
+.tunnel__carte-route--calme { transition: none; }
+.tunnel__carte-point { fill: var(--etage); }
+.tunnel__carte-ici { fill: var(--etoile); stroke: var(--etage); stroke-width: 3; }
+.tunnel__carte figcaption { text-align: center; font-weight: 600; }
+.tunnel__carte-note { font-weight: 400; color: var(--texte-doux); }
+
+/* Commandes */
+.tunnel__commandes { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.tunnel .bouton-principal,
+.tunnel .bouton-secondaire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  font: 600 18px Inter, sans-serif;
+}
+.tunnel__info,
+.tunnel__aide { margin: 0; text-align: center; color: var(--texte-doux); }
+
+/* Le mini-défi */
+.tunnel__defi {
+  margin: auto;
+  width: min(640px, 100%);
+  display: grid;
+  gap: 16px;
+  padding: 32px 24px;
+  border-radius: 24px;
+  background: var(--verre);
+  border: 1px solid rgba(var(--etage-rgb), 0.6);
+  backdrop-filter: blur(8px);
+  animation: tunnel-bulle 400ms ease-out both;
+}
+.tunnel__defi-titre { margin: 0; font: 600 clamp(24px, 3vw, 32px)/1.25 Fraunces, serif; }
+.tunnel__defi-titre:focus { outline: none; }
+.tunnel__defi-consigne { margin: 0; color: var(--texte-doux); }
+.tunnel__defi-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: defi; }
+.tunnel__defi-carte {
+  counter-increment: defi;
+  display: flex; align-items: center; gap: 16px;
+  padding: 8px 16px; border-radius: 16px;
+  background: var(--carte); color: var(--carte-texte);
+  border-left: 8px solid var(--etage-fonce);
+}
+.tunnel__defi-carte::before { content: counter(defi); font: 600 22px 'JetBrains Mono', monospace; color: var(--etage-encre); }
+.tunnel__defi-nom { flex: 1; display: grid; font-weight: 600; }
+.tunnel__defi-verdict { font-weight: 400; color: var(--carte-texte-doux); }
+.tunnel__defi-fleches { display: flex; gap: 8px; }
+.tunnel__defi-fleches button {
+  width: 48px; height: 48px; border-radius: 12px;
+  border: 1px solid var(--etage-fonce); background: var(--carte-bouton); color: var(--carte-texte);
+  font-size: 22px; cursor: pointer;
+}
+.tunnel__defi-fleches button:disabled { opacity: 0.4; cursor: not-allowed; }
+.tunnel__defi-carte button:focus-visible { outline-color: var(--focus-carte); }
+.tunnel__defi-resultat { margin: 0 0 16px; font: 600 22px Fraunces, serif; text-align: center; }
+
+/* La liste des visites : une mosaïque d'images */
+.visites__mosaique { display: flex; gap: 8px; margin-bottom: 16px; }
+.visites__mosaique .image-wiki--mini { width: 72px; height: 72px; border-radius: 16px; }
+
+@media (min-width: 1280px) {
+  /* Sur grand écran, la carte se met à gauche de la scène, à mi-hauteur, pour garder le tunnel au centre. */
+  .tunnel .tunnel__carte { position: absolute; left: 24px; top: 50%; transform: translateY(-60%); width: 360px; z-index: 2; }
+}
+
+/* Effets doux : plus de vol ni de flou, les étapes apparaissent simplement. */
+.tunnel--calme .tunnel__panneau--arrive { animation: tunnel-fondu 300ms ease-out both; }
+.tunnel--calme .tunnel__bulle,
+.tunnel--calme .tunnel__defi { animation: none; }
+.tunnel--calme .tunnel__fond { transition: none; }
+@keyframes tunnel-fondu { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .tunnel__panneau--arrive { animation: none; }
+  .tunnel__carte-route { transition: none; }
+}

@@ -1,5 +1,22 @@
 # Journal de Chronos
 
+## 26 novembre 2026 (soir) — Le tunnel du temps (visites guidées)
+
+**Ce qui a été fait**
+- Les visites guidées deviennent un **tunnel du temps** en plein écran : un ciel étoilé qui file vers nous, plus vite quand le saut dans le temps est grand ; chaque étape (image, étage, date, titre) arrive du fond de l'écran, l'ancienne nous dépasse.
+- **La ligne du temps avance pour de vrai** en bas : le curseur glisse d'une étape à l'autre (échelle logarithmique), le compteur d'années défile, l'année cosmique suit.
+- **Bulle « Pendant ce temps… »** qui apparaît pendant chaque étape (si une coïncidence est justifiée).
+- **Carte du monde animée** pour « Le grand voyage de Sapiens » : la route se trace d'Éthiopie au Proche-Orient, en passant par l'Australie, Chauvet et la Béringie (lieux indicatifs, nommés par les fiches).
+- **Musique d'ambiance** (celle du site, jouée par le navigateur), coupée au départ.
+- **Mini-défi final** : remettre 3 étapes de la visite dans l'ordre. Nouveau badge « Voyageur du tunnel » (49 badges).
+- Mosaïque d'images sur la liste des visites.
+
+**Décisions prises**
+- Bouton **« Effets doux »** (et automatique si l'appareil demande moins d'animations) : plus de vol ni de flou, les étapes apparaissent simplement. Sous-titres toujours affichés, ← → et Échap au clavier.
+
+**Questions ouvertes**
+- Vérifier sur un vrai écran l'effet du tunnel avec les images chargées, et le confort des étoiles en mouvement.
+
 ## 26 novembre 2026 — Sept nouvelles fonctions (branche `integration`)
 
 **Ce qui a été fait**
