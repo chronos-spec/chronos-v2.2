@@ -1,0 +1,46 @@
+/* TA VIE SUR LA FRISE (#/ma-vie). Couleurs : uniquement les variables de theme.css. */
+.ma-vie { max-width: 72ch; margin: 0 auto; padding: 104px 24px 48px; font: 18px/1.5 Inter, sans-serif; color: var(--texte); }
+.ma-vie h1 { margin: 0 0 16px; font: 600 40px/1.2 Fraunces, serif; }
+.ma-vie h1:focus { outline: none; }
+.ma-vie h2 { margin: 40px 0 16px; font: 600 26px/1.3 Fraunces, serif; }
+.ma-vie__intro { margin: 0 0 24px; color: var(--texte-doux); }
+
+.ma-vie__formulaire { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; padding: 24px; border-radius: 16px; }
+.ma-vie__champ { display: flex; flex-direction: column; gap: 8px; flex: 1 1 200px; }
+.ma-vie__champ label { font-weight: 600; }
+.ma-vie__facultatif { font-weight: 400; color: var(--texte-doux); }
+.ma-vie__champ input {
+  min-height: 48px; padding: 8px 16px; border-radius: 12px; font: 18px 'JetBrains Mono', monospace;
+  background: var(--carte); color: var(--carte-texte); border: 2px solid var(--poignee);
+}
+.ma-vie__champ input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.ma-vie__ou { margin: 0 0 12px; color: var(--texte-doux); }
+.ma-vie__erreur { flex-basis: 100%; margin: 0; font-weight: 600; color: var(--texte); }
+
+.ma-vie__chiffre { padding: 24px; border-radius: 16px; border: 1px solid var(--verre-bord); }
+.ma-vie__chiffre p { margin: 0 0 16px; }
+.ma-vie__chiffre p:last-child { margin-bottom: 0; }
+.ma-vie__secondes {
+  font: 600 48px/1.2 'JetBrains Mono', monospace; color: var(--etage);
+  text-shadow: 0 0 24px rgba(var(--etage-rgb), 0.5);
+}
+
+.ma-vie__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ma-vie__liste li {
+  display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 16px; border-radius: 12px;
+  background: var(--carte); color: var(--carte-texte);
+}
+.ma-vie__date { font: 600 18px 'JetBrains Mono', monospace; color: var(--etage-fonce); min-width: 8ch; }
+
+.ma-vie__partage { margin-top: 40px; }
+.ma-vie__note, .ma-vie__message { margin: 8px 0 0; color: var(--texte-doux); }
+.ma-vie__message { color: var(--texte); overflow-wrap: anywhere; }
+.ma-vie .bouton-principal { min-height: 48px; }
+
+@media (min-width: 720px) {
+  .ma-vie h1 { font-size: 48px; }
+  .ma-vie__secondes { font-size: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ma-vie * { transition: none !important; animation: none !important; }
+}

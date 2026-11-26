@@ -43,6 +43,9 @@ export default function Entete({ etages, etageActif, index: indexRecherche, onAl
         <a href="#/carte" className="entete__lien entete__lien--outil" aria-current={!accueil && window.location.hash === '#/carte' ? 'page' : undefined}>
           Planisphère <span className="entete__essai">bêta</span>
         </a>
+        <a href="#/ma-vie" className="entete__lien entete__lien--outil" aria-current={!accueil && window.location.hash.startsWith('#/ma-vie') ? 'page' : undefined}>
+          Ma vie
+        </a>
         <a href="#/spirale" className="entete__lien entete__lien--spirale" aria-current={!accueil && window.location.hash === '#/spirale' ? 'page' : undefined}>
           Spirale <span className="entete__essai">essai</span>
         </a>
