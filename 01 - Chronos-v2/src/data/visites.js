@@ -2,6 +2,8 @@
 // Une étape = une fiche qui existe déjà sur la frise (son identifiant dans PAR_ID)
 // + un court texte de narration (lu à voix haute et affiché en sous-titre).
 // Les dates citées reprennent exactement celles des fiches (cartes.js, evenements.js, archives.js).
+// Visite « Sapiens » : `lieu` place l'étape sur la carte du monde animée (lieu indicatif,
+// celui que nomment la fiche ou la narration ; `puis` = un second point pour un trajet).
 // Règle : ne rien inventer ici. Un fait nouveau doit d'abord entrer dans une fiche.
 
 export const VISITES = [
@@ -27,16 +29,17 @@ export const VISITES = [
     titre: 'Le grand voyage de Sapiens',
     accroche: 'De l’Afrique au monde entier : comment notre espèce a peuplé la Terre.',
     etage: 'humains',
+    carte: true, // la route se trace sur une carte du monde pendant la visite
     etapes: [
-      { fiche: 'homo', narration: 'Il y a 2,8 millions d’années, en Éthiopie, vivait l’un des premiers membres de notre genre, Homo. On le connaît grâce à une simple mâchoire. Ces premiers humains marchaient debout.' },
+      { lieu: { nom: 'Éthiopie', lon: 40.9, lat: 11.3 }, fiche: 'homo', narration: 'Il y a 2,8 millions d’années, en Éthiopie, vivait l’un des premiers membres de notre genre, Homo. On le connaît grâce à une simple mâchoire. Ces premiers humains marchaient debout.' },
       { fiche: 'feu', narration: 'Maîtriser le feu a tout changé : se chauffer, se protéger des bêtes, cuire les aliments. En Europe, son usage régulier date d’environ 400 000 ans.' },
-      { fiche: 'sapiens', narration: 'Il y a environ 300 000 ans apparaissent les plus anciens Homo sapiens connus. Leurs fossiles ont été trouvés au Maroc, à Djebel Irhoud. Ils avaient déjà un visage comme le nôtre.' },
+      { lieu: { nom: 'Maroc (Djebel Irhoud)', lon: -8.9, lat: 31.9 }, fiche: 'sapiens', narration: 'Il y a environ 300 000 ans apparaissent les plus anciens Homo sapiens connus. Leurs fossiles ont été trouvés au Maroc, à Djebel Irhoud. Ils avaient déjà un visage comme le nôtre.' },
       { fiche: 'a-parures', narration: 'Vers 100 000 ans, des coquillages percés et de l’ocre rouge apparaissent. On se décore, on se distingue : la pensée symbolique est là.' },
-      { fiche: 'afrique', narration: 'Vers 60 000 ans, c’est le grand départ. Des groupes de Sapiens quittent l’Afrique et commencent à se répandre sur les autres continents.' },
-      { fiche: 'a-australie', narration: 'Il y a environ 50 000 ans, des humains atteignent l’Australie. Pour y arriver, il a fallu traverser la mer, en bateau ou en radeau.' },
-      { fiche: 'chauvet', narration: 'Vers 36 000 ans, en Ardèche, des artistes peignent des lions, des chevaux et des rhinocéros sur les parois de la grotte Chauvet. Ce sont parmi les plus anciennes peintures connues au monde.' },
-      { fiche: 'a-ameriques', narration: 'Il y a au moins 16 000 ans, des chasseurs venus d’Asie gagnent l’Amérique par la Béringie. Des empreintes de pas pourraient faire remonter cette arrivée à plus de 20 000 ans : la date est encore débattue.' },
-      { fiche: 'agriculture', narration: 'Vers 11 500 ans, certains groupes commencent à cultiver des plantes et à rester au même endroit. Ce sont les premiers agriculteurs. Le voyage de Sapiens continue… jusqu’à nous.' },
+      { lieu: { nom: 'Corne de l’Afrique (sortie probable)', lon: 43.3, lat: 12.6 }, fiche: 'afrique', narration: 'Vers 60 000 ans, c’est le grand départ. Des groupes de Sapiens quittent l’Afrique et commencent à se répandre sur les autres continents.' },
+      { lieu: { nom: 'Australie', lon: 133, lat: -25 }, fiche: 'a-australie', narration: 'Il y a environ 50 000 ans, des humains atteignent l’Australie. Pour y arriver, il a fallu traverser la mer, en bateau ou en radeau.' },
+      { lieu: { nom: 'Ardèche, France', lon: 4.4, lat: 44.4 }, fiche: 'chauvet', narration: 'Vers 36 000 ans, en Ardèche, des artistes peignent des lions, des chevaux et des rhinocéros sur les parois de la grotte Chauvet. Ce sont parmi les plus anciennes peintures connues au monde.' },
+      { lieu: { nom: 'Béringie, puis Amérique', lon: -168, lat: 65, puis: { lon: -100, lat: 40 } }, fiche: 'a-ameriques', narration: 'Il y a au moins 16 000 ans, des chasseurs venus d’Asie gagnent l’Amérique par la Béringie. Des empreintes de pas pourraient faire remonter cette arrivée à plus de 20 000 ans : la date est encore débattue.' },
+      { lieu: { nom: 'Proche-Orient (Croissant fertile)', lon: 40, lat: 36 }, fiche: 'agriculture', narration: 'Vers 11 500 ans, certains groupes commencent à cultiver des plantes et à rester au même endroit. Ce sont les premiers agriculteurs. Le voyage de Sapiens continue… jusqu’à nous.' },
     ],
   },
   {

@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Les 48 BADGES CACHÉS. Pour en ajouter un : une ligne de plus ici, rien d'autre à toucher
+// Les 49 BADGES CACHÉS. Pour en ajouter un : une ligne de plus ici, rien d'autre à toucher
 // (sauf s'il faut un nouveau signal dans une page).
 //   id      : identifiant unique
 //   nom     : le nom du badge
@@ -11,7 +11,7 @@
 // Signaux utilisés : recit-civ (civilisation écoutée jusqu'au bout), civ-filtre, recit (récit animé fini),
 // voyage (voyage « Tout voir » fini, ex. 'rapide-x4'), zoom-fin, periode, espece, espece-eteinte,
 // groupe, comparer, carte, carte-etage, spirale, recherche, page, quiz, jour,
-// ordre (« Remets dans l'ordre », ex. 'expert-7-7'), defi (date du défi du jour joué).
+// ordre (« Remets dans l'ordre », ex. 'expert-7-7'), defi (date du défi du jour joué), visite-defi (mini-défi d'une visite guidée, ex. 'sapiens-reussi').
 // ---------------------------------------------------------------------------
 const vu = (e, t, v) => (e.vus[t] || []).includes(v);
 const nb = (e, t) => (e.vus[t] || []).length;
@@ -222,6 +222,12 @@ export const BADGES = [
   },
 
   // ---------- Remets dans l'ordre (3) ----------
+  {
+    id: 'visite-defi', nom: 'Voyageur du tunnel', icone: '🌌', famille: 'quiz',
+    indice: 'Au bout du tunnel du temps, trois étapes attendent d’être rangées.',
+    consigne: 'Termine une visite guidée et réussis son mini-défi.',
+    test: (e) => (e.vus['visite-defi'] || []).some((v) => v.endsWith('-reussi')),
+  },
   {
     id: 'ordre-fini', nom: 'Horloger', icone: '🕰️', famille: 'quiz',
     indice: 'Dans le panneau Jeu, des cartes attendent d’être rangées.',

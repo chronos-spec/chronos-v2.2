@@ -3,7 +3,7 @@ import { BADGES, FAMILLES } from '../data/badges.js';
 import { etatBadges, ecouterMaj, effacerBadges } from '../lib/badges.js';
 
 // ---------------------------------------------------------------------------
-// « Ma collection » (dans le panneau Jeu) : les 48 badges cachés.
+// « Ma collection » (dans le panneau Jeu) : les 49 badges cachés.
 // Gagnés : en couleur, avec leur nom. Pas encore : grisés, avec une devinette,
 // et un bouton « Révéler » pour lire la consigne exacte.
 // Un trophée par famille quand tous ses badges sont gagnés.
