@@ -4,6 +4,7 @@ import ImageWiki from './ImageWiki.jsx';
 import { lienPeriode } from '../lib/route.js';
 import { useEffect, useRef } from 'react';
 import { dateCosmique } from '../lib/calendrier.js';
+import PendantCeTemps from './PendantCeTemps.jsx';
 
 const ETIQUETTES = { bible: 'Selon la Bible', histoire: 'Fait historique' };
 
@@ -95,6 +96,8 @@ export default function Carte({ carte, etage, onFermer }) {
           )}
         </>
       )}
+
+      <PendantCeTemps carte={carte} />
 
       {cosmique && (
         <p className="carte__repere">

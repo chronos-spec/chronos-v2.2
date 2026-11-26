@@ -137,6 +137,16 @@ export default function App() {
     }
   }, []);
 
+  // « Pendant ce temps… » (sur une carte) demande d'ouvrir une autre carte : même chemin que la recherche.
+  useEffect(() => {
+    const ouvrir = (ev) => {
+      const r = index.find((x) => x.cle === ev.detail?.cle);
+      if (r) aller(r);
+    };
+    window.addEventListener('chronos-ouvrir', ouvrir);
+    return () => window.removeEventListener('chronos-ouvrir', ouvrir);
+  }, [index, aller]);
+
   // Faire glisser le point de l'année cosmique : on voyage jusqu'à l'époque choisie.
   const voyager = useCallback((ans) => {
     const rt = routeRef.current;
