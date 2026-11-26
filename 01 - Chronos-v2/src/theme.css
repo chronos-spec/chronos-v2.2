@@ -120,6 +120,8 @@
 :root {
   --certitude-texte: #1E2130;
   --certitude-bord: #4E5468;
+}
+
 /* Vue 3D des monuments (pont vers Historivision) */
 :root {
   --vue3d-fond: #E9E4D8;

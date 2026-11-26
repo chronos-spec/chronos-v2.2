@@ -14,6 +14,10 @@ const OUTILS = [
   { lien: '#/recit', nom: 'Récit', detail: 'L’histoire du monde en une minute' },
   { lien: '#/carte', nom: 'Planisphère', detail: 'Les continents à travers le temps (bêta)' },
   { lien: '#/ma-vie', nom: 'Ta vie sur la frise', detail: 'Ta vie dans l’année cosmique' },
+  { lien: '#/visites', nom: 'Visites guidées', detail: 'Se laisser raconter l’histoire' },
+  { lien: '#/classe', nom: 'Mode Classe', detail: 'Parcours et fiches pour les enseignants' },
+  { lien: '#/methodes', nom: 'Comment on le sait ?', detail: 'Les méthodes de datation' },
+  { lien: '#/historivision', nom: 'Historivision', detail: 'Les monuments en 3D (bientôt)' },
   { lien: '#/spirale', nom: 'Spirale', detail: 'Le temps enroulé (essai)' },
 ];
 

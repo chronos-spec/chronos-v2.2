@@ -2615,6 +2615,8 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
 .pendant__note { margin: 8px 0 0; color: var(--carte-texte-doux); }
 @media (prefers-reduced-motion: no-preference) {
   .pendant__lien { transition: background 200ms ease; }
+}
+
 /* ---------- Volet « Comment on le sait ? » (CommentOnLeSait.jsx) et page #/methodes ---------- */
 .preuve { border-radius: 16px; background: var(--carte-bouton); color: var(--carte-texte); }
 .preuve__titre {

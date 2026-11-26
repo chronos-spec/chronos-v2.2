@@ -265,6 +265,7 @@ export default function App() {
           ) : route.etage === 'classe' ? (
             <Suspense fallback={<p className="planisphere__etat">Chargement du Mode Classe…</p>}>
               <ModeClasse idParcours={route.periode || null} />
+            </Suspense>
           ) : route.etage === 'ma-vie' ? (
             <Suspense fallback={null}>
               <MaVie naissance={route.periode || ''} />
@@ -300,6 +301,8 @@ export default function App() {
         <footer className="pied">
           <p>Odysseum · site personnel et gratuit · images : Wikipédia / Wikimedia Commons (licences libres)</p>
           <a href="#/mentions-legales">Mentions légales, confidentialité et crédits</a>
+          {' · '}<a href="#/methodes">Comment on le sait ?</a>
+          {' · '}<a href="#/historivision">Historivision</a>
         </footer>
       )}
       {/* L'annonce « Badge débloqué ! » (visible sur toutes les pages) */}
