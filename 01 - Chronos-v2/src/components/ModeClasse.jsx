@@ -3,6 +3,10 @@ import { createPortal } from 'react-dom';
 import { PAR_ID } from '../data/index.js';
 import { PARCOURS } from '../data/parcours.js';
 import { lienPeriode } from '../lib/route.js';
+import { WIKI_EVENEMENTS } from '../data/wiki.js';
+import { ETAGES } from '../data/etages.js';
+import { dateCosmique } from '../lib/calendrier.js';
+import ImageWiki from './ImageWiki.jsx';
 import '../classe.css';
 
 // ---------- Le « Mode Classe » ----------
@@ -16,6 +20,11 @@ const CLE_TABLEAU = 'odysseum-mode-tableau';
 const lienEvenement = (e) => lienPeriode(e.etage, e.categorie);
 // Le texte d'un événement : la fiche complète si elle existe, sinon son résumé.
 const texteDe = (e) => e.texte || e.resume || null;
+
+// Le nom de l'étage, écrit en toutes lettres (l'information ne passe jamais par la seule couleur).
+const NOM_ETAGE = Object.fromEntries(ETAGES.map((e) => [e.id, e.nom]));
+// Les étapes d'un parcours qui ont une image (pour la mosaïque de la liste).
+const imagesDe = (p) => p.etapes.filter((id) => WIKI_EVENEMENTS[id]).slice(0, 3);
 
 function lireTableau() {
   try { return localStorage.getItem(CLE_TABLEAU) === 'oui'; } catch { return false; }
@@ -118,6 +127,13 @@ function Liste({ outils }) {
       <ul className="classe__liste">
         {PARCOURS.map((p) => (
           <li key={p.id} className="classe__parcours" data-etage={p.etage}>
+            {imagesDe(p).length > 0 && (
+              <div className="classe__mosaique" aria-hidden="true">
+                {imagesDe(p).map((id) => (
+                  <ImageWiki key={id} titre={WIKI_EVENEMENTS[id]} alt="" taille="mini" />
+                ))}
+              </div>
+            )}
             <p className="classe__niveau">{p.niveau}</p>
             <h2 className="classe__titre2">
               <a href={`#/classe/${p.id}`}>{p.titre}</a>
@@ -188,11 +204,10 @@ function Parcours({ parcours, tableau, outils }) {
         // Le mode tableau : une étape à la fois, en très grand.
         <section className="classe__projection" aria-labelledby="titre-etape" aria-live="polite">
           <p className="classe__compteur">Étape {n + 1} sur {etapes.length}</p>
+          <Progression etapes={etapes} n={n} onChoisir={setN} />
           <article className="classe__etape classe__etape--grande" data-etage={etape.etage}>
-            <p className="classe__date">{etape.dateCourte || etape.date}</p>
-            <h2 id="titre-etape" className="classe__titre2">{etape.titre}</h2>
-            {texteDe(etape) && <p className="classe__texte">{texteDe(etape)}</p>}
-            <a className="classe__lien" href={lienEvenement(etape)}>Voir sur la frise</a>
+            <ContenuEtape etape={etape} titreId="titre-etape" Titre="h2" classeTitre="classe__titre2" />
+            <QuestionsFlash key={etape.id} questions={parcours.questions.filter((q) => q.etape === etape.id)} />
           </article>
           <div className="classe__defilement">
             <button type="button" className="classe__bouton classe__bouton--gros" disabled={n === 0} onClick={() => setN(n - 1)}>
@@ -208,12 +223,8 @@ function Parcours({ parcours, tableau, outils }) {
         <ol className="classe__etapes">
           {etapes.map((e) => (
             <li key={e.id} className="classe__etape" data-etage={e.etage}>
-              <p className="classe__date">{e.dateCourte || e.date}</p>
-              <h2 className="classe__titre3">{e.titre}</h2>
-              {texteDe(e) && <p className="classe__texte">{texteDe(e)}</p>}
-              <a className="classe__lien" href={lienEvenement(e)}>
-                Voir sur la frise<span className="sr-only"> : {e.titre}</span>
-              </a>
+              <ContenuEtape etape={e} Titre="h2" classeTitre="classe__titre3" />
+              <QuestionsFlash questions={parcours.questions.filter((q) => q.etape === e.id)} />
             </li>
           ))}
         </ol>
@@ -225,6 +236,85 @@ function Parcours({ parcours, tableau, outils }) {
 
       {impression && createPortal(<Feuille parcours={parcours} sorte={impression} />, document.body)}
     </>
+  );
+}
+
+// ---------- Le contenu d'une étape : image, étage, dates, texte, lien ----------
+function ContenuEtape({ etape, titreId, Titre, classeTitre }) {
+  const image = WIKI_EVENEMENTS[etape.id];
+  const cosmique = typeof etape.ans === 'number' ? dateCosmique(etape.ans) : null;
+  return (
+    <div className={`classe__contenu${image ? ' classe__contenu--image' : ''}`}>
+      {image && (
+        <div className="classe__image">
+          <ImageWiki titre={image} alt={etape.image?.description || etape.titre} taille="carte" />
+        </div>
+      )}
+      <div className="classe__corps">
+        <p className="classe__etiquettes">
+          {NOM_ETAGE[etape.etage] && <span className="classe__etage">{NOM_ETAGE[etape.etage]}</span>}
+          <span className="classe__date">{etape.dateCourte || etape.date}</span>
+        </p>
+        <Titre id={titreId} className={classeTitre}>{etape.titre}</Titre>
+        {texteDe(etape) && <p className="classe__texte">{texteDe(etape)}</p>}
+        {cosmique && (
+          <p className="classe__cosmique">
+            Si l’univers tenait en un an : <span className="classe__cosmique-date">{cosmique}</span>
+          </p>
+        )}
+        <a className="classe__lien" href={lienEvenement(etape)}>
+          Voir sur la frise<span className="sr-only"> : {etape.titre}</span>
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Questions flash : la classe cherche, puis on révèle la réponse ----------
+function QuestionsFlash({ questions }) {
+  const [vues, setVues] = useState({});
+  if (!questions.length) return null;
+  return (
+    <div className="classe__flash">
+      {questions.map((q, i) => (
+        <div key={i} className="classe__flash-q">
+          <p className="classe__flash-titre"><span aria-hidden="true">💡 </span>Question flash</p>
+          <p className="classe__texte">{q.q}</p>
+          <button
+            type="button"
+            className="classe__bouton classe__bouton--clair"
+            aria-expanded={!!vues[i]}
+            onClick={() => setVues((v) => ({ ...v, [i]: !v[i] }))}
+          >
+            {vues[i] ? 'Cacher la réponse' : 'Montrer la réponse'}
+          </button>
+          {vues[i] && <p className="classe__flash-r" role="status">{q.r}</p>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------- La frise de progression du mode tableau : un point par étape, cliquable ----------
+function Progression({ etapes, n, onChoisir }) {
+  return (
+    <nav className="classe__progression" aria-label="Étapes du parcours">
+      <ol>
+        {etapes.map((e, i) => (
+          <li key={e.id} data-etage={e.etage}>
+            <button
+              type="button"
+              className={`classe__point${i < n ? ' classe__point--vu' : ''}`}
+              aria-current={i === n ? 'step' : undefined}
+              onClick={() => onChoisir(i)}
+            >
+              <span aria-hidden="true">{i + 1}</span>
+              <span className="sr-only">Étape {i + 1} : {e.titre}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
   );
 }
 
