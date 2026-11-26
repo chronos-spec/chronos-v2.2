@@ -12,9 +12,16 @@ import Spirale from './components/Spirale.jsx';
 import VueEnsemble from './components/VueEnsemble.jsx';
 // Le planisphère (et sa carte du monde) n'est chargé que si on ouvre sa page.
 const Planisphere = lazy(() => import('./components/Planisphere.jsx'));
+// Le Mode Classe (enseignants) n'est chargé que si on ouvre sa page.
+const ModeClasse = lazy(() => import('./components/ModeClasse.jsx'));
+// « Ta vie sur la frise » (#/ma-vie) : chargée seulement si on ouvre la page.
+const MaVie = lazy(() => import('./components/MaVie.jsx'));
 import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
+import Visites from './components/Visites.jsx';
 import MentionsLegales from './components/MentionsLegales.jsx';
+import Methodes from './components/Methodes.jsx';
+import Historivision from './components/Historivision.jsx';
 import { demanderArbre } from './lib/arbreCible.js';
 import { signaler, noterVisite } from './lib/badges.js';
 import AnnonceBadge from './components/AnnonceBadge.jsx';
@@ -35,7 +42,7 @@ export default function App() {
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
   const spirale = route.page === 'etage' && route.etage === 'spirale';
   const [etageSpirale, setEtageSpirale] = useState('univers');
-  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte'].includes(route.etage);
+  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte', 'visites', 'classe', 'ma-vie', 'methodes', 'historivision'].includes(route.etage);
   const etageActif = accueil ? etageVu : spirale ? etageSpirale : pageSpeciale ? (route.etage === 'ensemble' ? route.periode || null : null) : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
   // Accueil : tout replier pour ne voir que les titres des six étages.
@@ -136,6 +143,16 @@ export default function App() {
       setTimeout(() => document.getElementById(`titre-${r.etage}`)?.focus({ preventScroll: true }), 50);
     }
   }, []);
+
+  // « Pendant ce temps… » (sur une carte) demande d'ouvrir une autre carte : même chemin que la recherche.
+  useEffect(() => {
+    const ouvrir = (ev) => {
+      const r = index.find((x) => x.cle === ev.detail?.cle);
+      if (r) aller(r);
+    };
+    window.addEventListener('chronos-ouvrir', ouvrir);
+    return () => window.removeEventListener('chronos-ouvrir', ouvrir);
+  }, [index, aller]);
 
   // Faire glisser le point de l'année cosmique : on voyage jusqu'à l'époque choisie.
   const voyager = useCallback((ans) => {
@@ -245,10 +262,24 @@ export default function App() {
             <Suspense fallback={<p className="planisphere__etat">Chargement du planisphère…</p>}>
               <Planisphere />
             </Suspense>
+          ) : route.etage === 'classe' ? (
+            <Suspense fallback={<p className="planisphere__etat">Chargement du Mode Classe…</p>}>
+              <ModeClasse idParcours={route.periode || null} />
+            </Suspense>
+          ) : route.etage === 'ma-vie' ? (
+            <Suspense fallback={null}>
+              <MaVie naissance={route.periode || ''} />
+            </Suspense>
           ) : route.etage === 'recit' ? (
             <Recit />
+          ) : route.etage === 'visites' ? (
+            <Visites idVisite={route.periode} />
           ) : route.etage === 'mentions-legales' ? (
             <MentionsLegales />
+          ) : route.etage === 'methodes' ? (
+            <Methodes />
+          ) : route.etage === 'historivision' ? (
+            <Historivision />
           ) : spirale ? (
             <Spirale
               parId={PAR_ID}
@@ -270,6 +301,8 @@ export default function App() {
         <footer className="pied">
           <p>Odysseum · site personnel et gratuit · images : Wikipédia / Wikimedia Commons (licences libres)</p>
           <a href="#/mentions-legales">Mentions légales, confidentialité et crédits</a>
+          {' · '}<a href="#/methodes">Comment on le sait ?</a>
+          {' · '}<a href="#/historivision">Historivision</a>
         </footer>
       )}
       {/* L'annonce « Badge débloqué ! » (visible sur toutes les pages) */}

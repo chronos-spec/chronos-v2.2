@@ -4,6 +4,10 @@ import ImageWiki from './ImageWiki.jsx';
 import { lienPeriode } from '../lib/route.js';
 import { useEffect, useRef } from 'react';
 import { dateCosmique } from '../lib/calendrier.js';
+import PendantCeTemps from './PendantCeTemps.jsx';
+import CommentOnLeSait from './CommentOnLeSait.jsx';
+import { preuveDe } from '../data/preuves.js';
+import Vue3D from './Vue3D.jsx';
 
 const ETIQUETTES = { bible: 'Selon la Bible', histoire: 'Fait historique' };
 
@@ -12,6 +16,7 @@ export default function Carte({ carte, etage, onFermer }) {
   const complete = Boolean(carte.texte);
   const periode = carte.type === 'periode';
   const cosmique = carte.cosmique || dateCosmique(carte.ans);
+  const preuve = preuveDe(carte); // null si la fiche n'a pas encore de preuve renseignée
 
   // À l'ouverture, le focus va sur le titre : le lecteur d'écran lit la carte.
   useEffect(() => {
@@ -96,13 +101,22 @@ export default function Carte({ carte, etage, onFermer }) {
         </>
       )}
 
+      <PendantCeTemps carte={carte} />
+      {/* Monuments : bouton « Voir en 3D » (seulement si un modèle 3D existe) */}
+      <Vue3D idCarte={carte.id} titre={carte.titre} />
+
       {cosmique && (
         <p className="carte__repere">
           Si l'univers tenait en un an : <span className="carte__repere-date">{cosmique}</span>
         </p>
       )}
 
-      {complete && (
+      {/* Volet « Comment on le sait ? » : la source des fiches complètes y est rangée. */}
+      {preuve && (
+        <CommentOnLeSait preuve={preuve} source={complete ? carte.source : null} sourcesPlusHaut={Boolean(TEXTES[carte.id])} />
+      )}
+
+      {complete && !preuve && (
         <p className="carte__source">
           Source :{' '}
           {carte.source.url ? (

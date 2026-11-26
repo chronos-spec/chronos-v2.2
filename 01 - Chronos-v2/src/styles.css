@@ -2534,3 +2534,153 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
   /* L'onglet « 1 an » descend en bas à droite, loin du texte. */
   .cosmique__montrer { top: auto; bottom: 96px; }
 }
+
+/* ---------- Jeu « Remets dans l'ordre » (onglet du panneau Jeu) ---------- */
+.ordre { font-size: 18px; line-height: 1.5; }
+.ordre p { margin: 8px 0; }
+.ordre__titre { margin: 16px 0 8px; font: 600 20px Fraunces, serif; }
+.ordre__titre:focus { outline: none; }
+.ordre__aide { color: var(--texte-doux); }
+.ordre__large { width: 100%; }
+.ordre__liste { list-style: none; margin: 8px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ordre__carte {
+  display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 16px;
+  border: 1px solid var(--verre-bord); background: var(--jeu-carte-fond);
+}
+.ordre__carte--bon { border-color: var(--jeu-bon); background: var(--jeu-bon-fond); }
+.ordre__carte--faux { border-color: var(--jeu-faux); background: var(--jeu-faux-fond); }
+.ordre__rang { flex: none; width: 24px; text-align: center; font: 600 16px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.ordre__carte .image-wiki { flex: none; width: 56px; height: 56px; border-radius: 12px; overflow: hidden; }
+.ordre__carte .image-wiki img { width: 100%; height: 100%; object-fit: cover; }
+.ordre__texte { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ordre__nom { font-weight: 600; }
+.ordre__date { font: 16px 'JetBrains Mono', monospace; }
+.ordre__marque { font-family: Inter, sans-serif; font-weight: 600; }
+.ordre__fleches { flex: none; display: flex; flex-direction: column; gap: 8px; }
+.ordre__fleche {
+  min-width: 44px; min-height: 44px; border-radius: 12px; border: 1px solid var(--verre-bord);
+  background: transparent; color: var(--texte); font-size: 20px; cursor: pointer;
+  transition: background 200ms ease;
+}
+.ordre__fleche:hover:not(:disabled) { background: var(--jeu-carte-fond); border-color: var(--jeu-accent); }
+.ordre__fleche:disabled { opacity: 0.3; cursor: default; }
+.ordre__fleche:focus-visible, .ordre .jeu__principal:focus-visible, .ordre .jeu__secondaire:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 2px;
+}
+.ordre__partage { margin: 8px 0; }
+.ordre__resultat {
+  margin: 8px 0; padding: 16px; border-radius: 12px; background: var(--jeu-carte-fond);
+  font: 16px 'JetBrains Mono', monospace; white-space: pre-wrap; word-break: break-word;
+}
+@media (prefers-reduced-motion: reduce) { .ordre__fleche { transition: none; } }
+/* Trois onglets dans le panneau Jeu : ils passent à la ligne sur petit écran. */
+.jeu__onglets { flex-wrap: wrap; }
+.jeu__onglet { padding: 0 8px; }
+/* ---------- « Pendant ce temps… » (dans la carte ouverte) ---------- */
+.pendant { display: grid; gap: 8px; }
+.pendant__bouton {
+  align-self: flex-start;
+  justify-self: start;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 2px solid var(--etage-fonce);
+  border-radius: 999px;
+  background: var(--carte-haut);
+  color: var(--etage-encre);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pendant__bouton:hover { background: var(--etage-pale); }
+.pendant__bouton:focus-visible, .pendant__lien:focus-visible, .pendant__titre:focus-visible {
+  outline: 3px solid var(--focus-carte);
+  outline-offset: 2px;
+}
+.pendant__titre { margin: 8px 0 0; font-weight: 600; color: var(--carte-texte); }
+.pendant__liste { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.pendant__lien {
+  display: grid;
+  gap: 0;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 16px;
+  background: var(--carte-bouton);
+  color: var(--carte-texte);
+  text-decoration: none;
+}
+.pendant__lien:hover .pendant__nom { text-decoration: underline; }
+.pendant__nom { font-weight: 600; color: var(--etage-encre); }
+.pendant__infos { display: flex; flex-wrap: wrap; gap: 0 16px; color: var(--carte-texte-doux); }
+.pendant__date { font-family: 'JetBrains Mono', monospace; }
+.pendant__note { margin: 8px 0 0; color: var(--carte-texte-doux); }
+@media (prefers-reduced-motion: no-preference) {
+  .pendant__lien { transition: background 200ms ease; }
+}
+
+/* ---------- Volet « Comment on le sait ? » (CommentOnLeSait.jsx) et page #/methodes ---------- */
+.preuve { border-radius: 16px; background: var(--carte-bouton); color: var(--carte-texte); }
+.preuve__titre {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  min-height: 48px; padding: 8px 16px; border-radius: 16px; cursor: pointer;
+  font: 600 18px Inter, sans-serif; list-style: none;
+}
+.preuve__titre::-webkit-details-marker { display: none; }
+.preuve__titre::before { content: '▸'; margin-right: 8px; color: var(--etage-fonce); }
+.preuve[open] > .preuve__titre::before { content: '▾'; }
+.preuve__titre > span:first-child { margin-right: auto; }
+.preuve__titre:focus-visible { outline: 3px solid var(--focus-carte); outline-offset: 2px; }
+.preuve__contenu { display: flex; flex-direction: column; gap: 16px; padding: 0 16px 16px; }
+.preuve__liste { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.preuve__liste dt { font-weight: 600; color: var(--etage-encre); }
+.preuve__liste dd { margin: 0; }
+.preuve__explication { margin: 0; }
+.preuve__lien {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  color: var(--etage-encre); font-weight: 600; text-underline-offset: 3px;
+}
+.preuve__lien:focus-visible { outline: 3px solid var(--focus-carte); outline-offset: 2px; border-radius: 8px; }
+.preuve__certitude {
+  display: inline-flex; align-items: center; gap: 8px; padding: 2px 12px; border-radius: 999px;
+  font: 600 16px Inter, sans-serif; background: var(--carte-haut); color: var(--certitude-texte);
+  border: 1.5px solid var(--certitude-bord);
+}
+/* La forme du bord change aussi : l'info ne passe jamais par la seule couleur. */
+.preuve__certitude--approximatif { border-style: dotted; }
+.preuve__certitude--debattu { border-style: dashed; }
+.preuve__certitude--recit { border-style: double; border-width: 3px; }
+.methodes__certitudes { list-style: none; padding-left: 0; }
+.methodes__certitudes li { margin-bottom: 16px; }
+.methodes .preuve__certitude { margin-right: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .preuve[open] > .preuve__contenu { animation: monte 240ms ease-out; }
+}
+/* ---------- Vue 3D des monuments (pont vers Historivision) ---------- */
+.vue3d { display: grid; gap: 8px; }
+.vue3d__bouton,
+.vue3d__controles button {
+  min-height: 44px; min-width: 44px; padding: 0 16px; border: 0; border-radius: 22px;
+  background: var(--carte-bouton); color: var(--carte-texte);
+  font: 600 18px Inter, sans-serif; cursor: pointer;
+  transition: background 200ms ease;
+}
+.vue3d__bouton { justify-self: start; background: var(--etage-pale); color: var(--etage-encre); }
+.vue3d__bouton:hover, .vue3d__controles button:hover { background: var(--poignee); }
+.vue3d__panneau { display: grid; gap: 8px; }
+.vue3d__scene {
+  display: block; width: 100%; height: 320px; border-radius: 16px;
+  background: var(--vue3d-fond);
+}
+.vue3d__scene:focus-visible { outline: 3px solid var(--focus-carte); outline-offset: 2px; }
+.vue3d__controles { display: flex; flex-wrap: wrap; gap: 8px; }
+.vue3d__aide, .vue3d__etat, .vue3d__description, .vue3d__credit, .vue3d__etiquette {
+  margin: 0; font-size: 18px; line-height: 1.5; color: var(--carte-texte-doux);
+}
+.vue3d__etiquette { font-weight: 600; color: var(--carte-texte); }
+@media (min-width: 720px) { .vue3d__scene { height: 400px; } }
+@media (prefers-reduced-motion: reduce) {
+  .vue3d__bouton, .vue3d__controles button { transition: none; }
+}
+
+/* Page Historivision */
+.historivision__accroche { font-size: 22px; color: var(--texte); }
+.historivision__liste a { min-height: 44px; display: inline-flex; align-items: center; }

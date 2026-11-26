@@ -42,6 +42,20 @@
   /* Extinction : l'ambre est réservé aux espèces et groupes disparus */
   --eteint: #F59E0B;
 
+  /* Jeu « Remets dans l'ordre » : bien placé / mal placé (toujours accompagnés de ✅ ❌ et d'un texte) */
+  --jeu-accent: #FFE3A8;
+  --jeu-accent-encre: #241A05;
+  --jeu-bon: #6FD3A6;
+  --jeu-bon-fond: rgba(111, 211, 166, 0.15);
+  --jeu-faux: #E9876B;
+  --jeu-faux-fond: rgba(233, 135, 107, 0.15);
+  --jeu-carte-fond: rgba(255, 255, 255, 0.05);
+  /* Mode Classe : la feuille imprimée (noir sur blanc, pour économiser l'encre) */
+  --papier: #FFFFFF;
+  --encre: #000000;
+  --encre-douce: #444444;
+  --trait-papier: #999999;
+
   /* Focus clavier */
   --focus: #FFFFFF;
   --focus-carte: #1E2130;
@@ -100,4 +114,15 @@
   --etage-fonce: #1D4ED8;
   --etage-pale: #DCE8FD;
   --etage-encre: #1E3A8A;
+}
+
+/* « Comment on le sait ? » : fond des pastilles de certitude (sur la carte claire). */
+:root {
+  --certitude-texte: #1E2130;
+  --certitude-bord: #4E5468;
+}
+
+/* Vue 3D des monuments (pont vers Historivision) */
+:root {
+  --vue3d-fond: #E9E4D8;
 }

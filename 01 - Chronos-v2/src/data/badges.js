@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Les 45 BADGES CACHÉS. Pour en ajouter un : une ligne de plus ici, rien d'autre à toucher
+// Les 48 BADGES CACHÉS. Pour en ajouter un : une ligne de plus ici, rien d'autre à toucher
 // (sauf s'il faut un nouveau signal dans une page).
 //   id      : identifiant unique
 //   nom     : le nom du badge
@@ -10,7 +10,8 @@
 //   test    : la condition, à partir de ce qui a été vu
 // Signaux utilisés : recit-civ (civilisation écoutée jusqu'au bout), civ-filtre, recit (récit animé fini),
 // voyage (voyage « Tout voir » fini, ex. 'rapide-x4'), zoom-fin, periode, espece, espece-eteinte,
-// groupe, comparer, carte, carte-etage, spirale, recherche, page, quiz, jour.
+// groupe, comparer, carte, carte-etage, spirale, recherche, page, quiz, jour,
+// ordre (« Remets dans l'ordre », ex. 'expert-7-7'), defi (date du défi du jour joué).
 // ---------------------------------------------------------------------------
 const vu = (e, t, v) => (e.vus[t] || []).includes(v);
 const nb = (e, t) => (e.vus[t] || []).length;
@@ -21,7 +22,7 @@ export const FAMILLES = {
   voyages: { nom: 'Voyages dans le temps', trophee: 'Maître du temps', icone: '⏳' },
   vivant: { nom: 'Arbre du vivant', trophee: 'Naturaliste', icone: '🌿' },
   frise: { nom: 'La frise', trophee: 'Explorateur d’Odysseum', icone: '🧭' },
-  quiz: { nom: 'Quiz', trophee: 'Esprit vif', icone: '🎓' },
+  quiz: { nom: 'Jeux', trophee: 'Esprit vif', icone: '🎓' },
   secrets: { nom: 'Secrets', trophee: 'Fin limier', icone: '🗝️' },
 };
 
@@ -218,6 +219,26 @@ export const BADGES = [
     indice: 'La perfection existe.',
     consigne: 'Obtiens 20/20 au quiz.',
     test: (e) => (e.vus.quiz || []).some((s) => Number(s) >= 20),
+  },
+
+  // ---------- Remets dans l'ordre (3) ----------
+  {
+    id: 'ordre-fini', nom: 'Horloger', icone: '🕰️', famille: 'quiz',
+    indice: 'Dans le panneau Jeu, des cartes attendent d’être rangées.',
+    consigne: 'Termine une partie de « Remets dans l’ordre ».',
+    test: (e) => nb(e, 'ordre') >= 1,
+  },
+  {
+    id: 'ordre-expert', nom: 'Chronologiste', icone: '🧮', famille: 'quiz',
+    indice: 'Sept cartes très proches, et pas une seule erreur.',
+    consigne: '« Remets dans l’ordre », niveau Expert : place les 7 cartes sans faute.',
+    test: (e) => (e.vus.ordre || []).includes('expert-7-7'),
+  },
+  {
+    id: 'ordre-defi', nom: 'Rendez-vous quotidien', icone: '📆', famille: 'quiz',
+    indice: 'Chaque jour, un nouveau défi, le même pour tout le monde.',
+    consigne: 'Joue le défi du jour 3 jours différents.',
+    test: (e) => nb(e, 'defi') >= 3,
   },
 
   // ---------- Secrets (2) ----------

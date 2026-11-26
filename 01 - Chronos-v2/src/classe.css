@@ -1,0 +1,236 @@
+/* ---------- Mode Classe (#/classe) ----------
+   Couleurs : uniquement les variables de theme.css. Espacements en multiples de 8 px. */
+
+.classe { gap: 24px; max-width: 1100px; }
+.classe__entete { display: flex; flex-direction: column; gap: 16px; }
+.classe__sur-titre,
+.classe__niveau {
+  margin: 0;
+  font: 600 18px Inter, sans-serif;
+  color: var(--etage);
+  letter-spacing: 0.04em;
+}
+.classe__titre {
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(32px, 6vw, 48px);
+  line-height: 1.15;
+}
+.classe__titre2 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 28px; line-height: 1.25; }
+.classe__titre3 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 22px; line-height: 1.3; }
+.classe__texte { margin: 0; font-size: 18px; line-height: 1.5; max-width: 68ch; }
+.classe__detail { margin: 0; font-size: 18px; line-height: 1.5; color: var(--texte-doux); }
+.classe__avertissement { margin: 0; color: var(--texte-doux); max-width: 68ch; }
+.classe__date { margin: 0; font: 500 18px 'JetBrains Mono', monospace; color: var(--etage-fonce); }
+
+.classe__outils { display: flex; flex-wrap: wrap; gap: 16px; }
+.classe__bouton {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0 24px;
+  border: 1px solid var(--verre-bord);
+  border-radius: 999px;
+  background: var(--verre);
+  color: var(--texte);
+  font: 600 18px Inter, sans-serif;
+  cursor: pointer;
+}
+.classe__bouton:hover:not(:disabled) { background: rgba(var(--etage-rgb), 0.18); }
+.classe__bouton[aria-pressed='true'] { border-color: var(--etage); box-shadow: inset 0 0 0 2px var(--etage); }
+.classe__bouton[aria-pressed='true']::before { content: '✓ '; } /* pas seulement la couleur */
+.classe__bouton:disabled { opacity: 0.5; cursor: not-allowed; }
+.classe__bouton:focus-visible,
+.classe a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* La liste des parcours et les étapes : des cartes claires */
+.classe__liste,
+.classe__etapes { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.classe__parcours,
+.classe__etape {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--carte);
+  color: var(--carte-texte);
+  border-left: 8px solid var(--etage-fonce);
+}
+.classe__parcours .classe__niveau { color: var(--etage-encre); }
+.classe__parcours .classe__detail,
+.classe__etape .classe__detail { color: var(--carte-texte-doux); }
+.classe__parcours a { color: var(--carte-texte); }
+.classe__parcours .classe__titre2 a { text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.classe__parcours a:focus-visible,
+.classe__etape a:focus-visible { outline-color: var(--focus-carte); }
+.classe__etapes { counter-reset: etape; }
+.classe__etape { counter-increment: etape; }
+.classe__etape .classe__date::before { content: counter(etape) ' · '; color: var(--carte-texte-doux); }
+.classe__lien {
+  align-self: flex-start;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--etage-encre);
+  text-underline-offset: 4px;
+}
+.classe__navigation .classe__lien,
+.classe__entete .classe__lien { color: var(--texte); }
+
+@media (min-width: 720px) {
+  .classe__liste { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+}
+
+/* ---------- Mode tableau numérique : tout en grand, une étape à la fois ---------- */
+.app:has(.classe--tableau) .entete,
+.app:has(.classe--tableau) .pied { display: none; }
+.classe--tableau { padding-top: 32px; max-width: 1400px; }
+.classe--tableau .classe__texte,
+.classe--tableau .classe__detail,
+.classe--tableau .classe__date { font-size: 28px; }
+.classe--tableau .classe__titre2 { font-size: clamp(36px, 5vw, 56px); }
+.classe--tableau .classe__bouton { min-height: 64px; padding: 0 32px; font-size: 24px; }
+.classe--tableau .classe__lien { min-height: 64px; font-size: 26px; }
+.classe__projection { display: flex; flex-direction: column; gap: 24px; }
+.classe__compteur { margin: 0; font: 600 28px 'JetBrains Mono', monospace; color: var(--etage); }
+.classe__etape--grande { padding: 48px; gap: 24px; }
+.classe__etape--grande .classe__date::before { content: none; }
+.classe__defilement { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+.classe__bouton--gros { min-height: 80px !important; min-width: 200px; font-size: 28px !important; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .classe__bouton { transition: background 200ms ease, box-shadow 200ms ease; }
+}
+
+
+/* ---------- Une étape illustrée (image + étage + dates) ---------- */
+.classe__contenu { display: grid; gap: 16px; }
+.classe__corps { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.classe__image { border-radius: 16px; overflow: hidden; }
+.classe__image .image-wiki { width: 100%; }
+@media (min-width: 720px) {
+  .classe__contenu--image { grid-template-columns: minmax(200px, 2fr) 3fr; align-items: start; }
+}
+.classe__etiquettes { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.classe__etage {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--etage-pale);
+  color: var(--etage-encre);
+  font: 600 16px Inter, sans-serif;
+  letter-spacing: 0.02em;
+}
+.classe__cosmique { margin: 0; color: var(--carte-texte-doux); font-size: 18px; }
+.classe__cosmique-date { font-family: 'JetBrains Mono', monospace; color: var(--etage-encre); }
+
+/* La liste des parcours : une petite mosaïque d'images en tête de carte */
+.classe__mosaique { display: flex; gap: 8px; margin-bottom: 8px; }
+.classe__mosaique .image-wiki--mini { width: 88px; height: 88px; border-radius: 16px; }
+
+/* ---------- Questions flash ---------- */
+.classe__flash { display: grid; gap: 16px; margin-top: 8px; }
+.classe__flash-q {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 2px dashed var(--etage-fonce);
+  background: var(--carte-bouton);
+}
+.classe__flash-titre { margin: 0; font: 600 18px Inter, sans-serif; color: var(--etage-encre); }
+.classe__flash-r {
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: var(--etage-pale);
+  color: var(--etage-encre);
+  font-size: 18px;
+  font-weight: 600;
+}
+.classe__flash-r::before { content: '✓ '; }
+.classe__bouton--clair {
+  background: var(--carte);
+  color: var(--carte-texte);
+  border-color: var(--etage-fonce);
+}
+.classe__bouton--clair:focus-visible { outline-color: var(--focus-carte); }
+
+/* ---------- Frise de progression (mode tableau) ---------- */
+.classe__progression ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.classe__point {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--etage);
+  background: transparent;
+  color: var(--texte);
+  font: 600 18px 'JetBrains Mono', monospace;
+  cursor: pointer;
+}
+.classe__point--vu { background: rgba(var(--etage-rgb), 0.35); }
+.classe__point[aria-current='step'] {
+  background: var(--etage);
+  color: var(--ciel-haut);
+  box-shadow: 0 0 0 4px rgba(var(--etage-rgb), 0.35);
+  transform: scale(1.15);
+}
+.classe__point:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+.classe--tableau .classe__etage { font-size: 22px; min-height: 40px; }
+.classe--tableau .classe__cosmique,
+.classe--tableau .classe__flash-titre,
+.classe--tableau .classe__flash-r { font-size: 26px; }
+.classe--tableau .classe__point { width: 56px; height: 56px; font-size: 22px; }
+.classe--tableau .classe__contenu--image { grid-template-columns: 1fr 1fr; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .classe__point { transition: transform 240ms ease, background 240ms ease; }
+  .classe__flash-r { animation: classe-apparait 240ms ease-out; }
+  @keyframes classe-apparait { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---------- La feuille imprimée ---------- */
+.feuille { display: none; }
+
+@media print {
+  @page { margin: 16mm; }
+  /* On n'imprime que la feuille : tout le reste du site disparaît. */
+  body > :not(.feuille) { display: none !important; }
+  html, body { background: var(--papier) !important; color: var(--encre) !important; }
+  .feuille {
+    display: block;
+    font: 12pt/1.5 Inter, sans-serif;
+    color: var(--encre);
+    background: var(--papier);
+  }
+  .feuille__tete { border-bottom: 1pt solid var(--encre); padding-bottom: 8pt; margin-bottom: 16pt; }
+  .feuille__niveau { margin: 0; font-size: 10pt; color: var(--encre-douce); text-transform: uppercase; letter-spacing: 0.05em; }
+  .feuille__titre { margin: 4pt 0 8pt; font: 600 20pt/1.2 Fraunces, Georgia, serif; }
+  .feuille__eleve { margin: 8pt 0; }
+  .feuille__consigne { margin: 0 0 4pt; font-style: italic; }
+  .feuille__adresse { margin: 0; font: 9pt 'JetBrains Mono', monospace; color: var(--encre-douce); word-break: break-all; }
+  .feuille__questions { margin: 0; padding-left: 20pt; }
+  .feuille__question { margin-bottom: 14pt; break-inside: avoid; }
+  .feuille__q { margin: 0; font-weight: 600; }
+  .feuille__indice { margin: 0; font-size: 10pt; color: var(--encre-douce); }
+  .feuille__r { margin: 4pt 0 0; }
+  /* Trois lignes pour écrire la réponse. */
+  .feuille__lignes {
+    height: 60pt;
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 19pt, var(--trait-papier) 19pt, var(--trait-papier) 20pt);
+  }
+}
