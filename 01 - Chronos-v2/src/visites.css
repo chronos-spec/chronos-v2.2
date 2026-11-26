@@ -1,0 +1,98 @@
+/* ---------- Visites guidées (#/visites) ----------
+   Couleurs : uniquement les variables de theme.css. Espacements en multiples de 8 px. */
+
+.visites,
+.visite {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 104px 24px 64px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--texte);
+}
+.visites__titre,
+.visite__titre { margin: 0 0 16px; font: 600 40px/1.2 Fraunces, serif; }
+.visites__intro { margin: 0 0 32px; max-width: 65ch; color: var(--texte-doux); }
+.visites__liste { display: grid; gap: 24px; margin: 0; padding: 0; list-style: none; }
+.visites__choix {
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--verre);
+  border: 1px solid var(--verre-bord);
+  border-left: 8px solid var(--etage);
+}
+.visites__choix p { margin: 0 0 16px; max-width: 65ch; }
+.visites__nom { margin: 0 0 8px; font: 600 28px/1.25 Fraunces, serif; }
+.visites__duree { font-family: 'JetBrains Mono', monospace; color: var(--texte-doux); }
+
+/* Le lecteur */
+.visite__sur-titre { margin: 0 0 8px; font: 18px 'JetBrains Mono', monospace; color: var(--etage); }
+.visite__progression {
+  height: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--verre-bord);
+}
+.visite__progression span {
+  display: block;
+  height: 100%;
+  border-radius: 8px;
+  background: var(--etage);
+  transition: width 300ms ease;
+}
+.visite__compteur { margin: 8px 0 24px; font-family: 'JetBrains Mono', monospace; color: var(--texte-doux); }
+
+.visite__etape {
+  padding: 32px 24px;
+  border-radius: 24px;
+  background: var(--carte);
+  color: var(--carte-texte);
+  box-shadow: 0 0 32px rgba(var(--etage-rgb), 0.35); /* la carte ouverte brille doucement */
+  animation: visite-apparait 300ms ease both;
+}
+.visite__date { margin: 0 0 8px; font: 18px 'JetBrains Mono', monospace; color: var(--etage-encre); }
+.visite__fiche { margin: 0 0 16px; font: 600 32px/1.2 Fraunces, serif; }
+.visite__sous-titre { margin: 0 0 16px; max-width: 65ch; font-size: 22px; }
+.visite__details { color: var(--carte-texte-doux); }
+.visite__details summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--etage-encre);
+  border-radius: 8px;
+}
+.visite__details summary:focus-visible { outline: 3px solid var(--focus-carte); outline-offset: 2px; }
+.visite__details p { margin: 8px 0 0; max-width: 65ch; }
+
+.visite__info { margin: 24px 0 0; padding: 16px; border-radius: 16px; background: var(--verre); border: 1px solid var(--verre-bord); }
+
+.visite__commandes,
+.visite__sorties { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 24px; }
+.visite__commandes { justify-content: center; }
+.visite__commandes .bouton-principal { border: 0; font: 600 18px Inter, sans-serif; cursor: pointer; min-width: 160px; justify-content: center; }
+.visite .bouton-secondaire { display: inline-flex; align-items: center; text-decoration: none; }
+.visite .bouton-secondaire:disabled { opacity: 0.45; cursor: not-allowed; }
+.visite__lien { min-height: 44px; display: inline-flex; align-items: center; color: var(--texte); }
+.visite__aide { margin: 24px 0 0; color: var(--texte-doux); }
+
+.visites a:focus-visible,
+.visite a:focus-visible,
+.visite button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+@keyframes visite-apparait {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (min-width: 768px) {
+  .visite__etape { padding: 40px; }
+  .visites__titre, .visite__titre { font-size: 48px; }
+}
+
+/* Moins de mouvement demandé : ni apparition, ni glissement de la barre. */
+@media (prefers-reduced-motion: reduce) {
+  .visite__etape { animation: none; }
+  .visite__progression span { transition: none; }
+}
