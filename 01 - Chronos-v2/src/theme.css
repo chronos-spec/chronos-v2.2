@@ -42,6 +42,12 @@
   /* Extinction : l'ambre est réservé aux espèces et groupes disparus */
   --eteint: #F59E0B;
 
+  /* Mode Classe : la feuille imprimée (noir sur blanc, pour économiser l'encre) */
+  --papier: #FFFFFF;
+  --encre: #000000;
+  --encre-douce: #444444;
+  --trait-papier: #999999;
+
   /* Focus clavier */
   --focus: #FFFFFF;
   --focus-carte: #1E2130;
