@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { QUESTIONS, THEMES } from '../data/questionsJeu.js';
 import Collection from './Collection.jsx';
+import JeuOrdre from './JeuOrdre.jsx';
 import { signaler } from '../lib/badges.js';
 
 // ---------------------------------------------------------------------------
@@ -77,7 +78,7 @@ export default function Jeu() {
   const [ouvert, setOuvert] = useState(false);
   const [etat, setEtat] = useState(lire); // reponses : { indexQuestion: indexChoix }
   const [choix, setChoix] = useState(null);
-  const [onglet, setOnglet] = useState('quiz'); // « quiz » ou « collection » (badges cachés)
+  const [onglet, setOnglet] = useState('quiz'); // « quiz », « ordre » (Remets dans l'ordre) ou « collection » (badges cachés)
   const panneau = useRef(null);
   const bouton = useRef(null);
 
@@ -169,6 +170,9 @@ export default function Jeu() {
             <button type="button" className="jeu__onglet" aria-pressed={onglet === 'quiz'} onClick={() => setOnglet('quiz')}>
               Quiz
             </button>
+            <button type="button" className="jeu__onglet" aria-pressed={onglet === 'ordre'} onClick={() => setOnglet('ordre')}>
+              <span aria-hidden="true">↕</span> Dans l’ordre
+            </button>
             <button type="button" className="jeu__onglet" aria-pressed={onglet === 'collection'} onClick={() => setOnglet('collection')}>
               <span aria-hidden="true">🏅</span> Ma collection
             </button>
@@ -176,6 +180,8 @@ export default function Jeu() {
 
           {onglet === 'collection' ? (
             <Collection />
+          ) : onglet === 'ordre' ? (
+            <JeuOrdre />
           ) : !partie ? (
             <div className="jeu__accueil">
               <p>
