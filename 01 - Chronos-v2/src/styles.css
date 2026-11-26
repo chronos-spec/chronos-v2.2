@@ -2534,3 +2534,45 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
   /* L'onglet « 1 an » descend en bas à droite, loin du texte. */
   .cosmique__montrer { top: auto; bottom: 96px; }
 }
+
+/* ---------- Jeu « Remets dans l'ordre » (onglet du panneau Jeu) ---------- */
+.ordre { font-size: 18px; line-height: 1.5; }
+.ordre p { margin: 8px 0; }
+.ordre__titre { margin: 16px 0 8px; font: 600 20px Fraunces, serif; }
+.ordre__titre:focus { outline: none; }
+.ordre__aide { color: var(--texte-doux); }
+.ordre__large { width: 100%; }
+.ordre__liste { list-style: none; margin: 8px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ordre__carte {
+  display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 16px;
+  border: 1px solid var(--verre-bord); background: var(--jeu-carte-fond);
+}
+.ordre__carte--bon { border-color: var(--jeu-bon); background: var(--jeu-bon-fond); }
+.ordre__carte--faux { border-color: var(--jeu-faux); background: var(--jeu-faux-fond); }
+.ordre__rang { flex: none; width: 24px; text-align: center; font: 600 16px 'JetBrains Mono', monospace; color: var(--texte-doux); }
+.ordre__carte .image-wiki { flex: none; width: 56px; height: 56px; border-radius: 12px; overflow: hidden; }
+.ordre__carte .image-wiki img { width: 100%; height: 100%; object-fit: cover; }
+.ordre__texte { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ordre__nom { font-weight: 600; }
+.ordre__date { font: 16px 'JetBrains Mono', monospace; }
+.ordre__marque { font-family: Inter, sans-serif; font-weight: 600; }
+.ordre__fleches { flex: none; display: flex; flex-direction: column; gap: 8px; }
+.ordre__fleche {
+  min-width: 44px; min-height: 44px; border-radius: 12px; border: 1px solid var(--verre-bord);
+  background: transparent; color: var(--texte); font-size: 20px; cursor: pointer;
+  transition: background 200ms ease;
+}
+.ordre__fleche:hover:not(:disabled) { background: var(--jeu-carte-fond); border-color: var(--jeu-accent); }
+.ordre__fleche:disabled { opacity: 0.3; cursor: default; }
+.ordre__fleche:focus-visible, .ordre .jeu__principal:focus-visible, .ordre .jeu__secondaire:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 2px;
+}
+.ordre__partage { margin: 8px 0; }
+.ordre__resultat {
+  margin: 8px 0; padding: 16px; border-radius: 12px; background: var(--jeu-carte-fond);
+  font: 16px 'JetBrains Mono', monospace; white-space: pre-wrap; word-break: break-word;
+}
+@media (prefers-reduced-motion: reduce) { .ordre__fleche { transition: none; } }
+/* Trois onglets dans le panneau Jeu : ils passent à la ligne sur petit écran. */
+.jeu__onglets { flex-wrap: wrap; }
+.jeu__onglet { padding: 0 8px; }
