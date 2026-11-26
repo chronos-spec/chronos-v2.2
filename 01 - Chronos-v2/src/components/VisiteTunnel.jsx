@@ -187,22 +187,19 @@ const TERRES = CHEMIN(feature(terresActuelles, terresActuelles.objects.land));
 const SPHERE = CHEMIN({ type: 'Sphere' });
 
 function CarteRoute({ etapes, n, calme }) {
-  // Les points connus jusqu'à l'étape en cours, dans l'ordre de la visite.
-  const points = useMemo(() => {
-    const liste = [];
-    etapes.forEach((e, i) => {
-      if (!e.lieu) return;
-      liste.push({ i, nom: e.lieu.nom, coord: [e.lieu.lon, e.lieu.lat] });
-      if (e.lieu.puis) liste.push({ i, nom: e.lieu.nom, coord: [e.lieu.puis.lon, e.lieu.puis.lat] });
+  // Les lieux et les trajets de chaque étape. Chaque déplacement a son propre point de départ
+  // (on ne relie pas bêtement les étapes entre elles : l'Amérique n'est pas peuplée depuis l'Australie).
+  const points = useMemo(() => etapes.flatMap((e, i) => (e.lieu ? [{ i, nom: e.lieu.nom, coord: [e.lieu.lon, e.lieu.lat] }] : [])), [etapes]);
+  const troncons = useMemo(() => etapes.flatMap((e, i) => {
+    if (!e.lieu?.trajet) return [];
+    const suite = [...e.lieu.trajet, [e.lieu.lon, e.lieu.lat]];
+    // Un seul tracé par déplacement, qui suit la courbe la plus courte sur le globe entre chaque point.
+    const coords = suite.slice(1).flatMap((c, k) => {
+      const interp = geoInterpolate(suite[k], c);
+      return Array.from({ length: 16 }, (_, j) => interp(j / 15));
     });
-    return liste;
-  }, [etapes]);
-  // Chaque tronçon suit la courbe la plus courte sur le globe.
-  const troncons = points.slice(1).map((p, k) => {
-    const interp = geoInterpolate(points[k].coord, p.coord);
-    const ligne = { type: 'LineString', coordinates: Array.from({ length: 24 }, (_, j) => interp(j / 23)) };
-    return { d: CHEMIN(ligne), i: p.i };
-  });
+    return [{ i, d: CHEMIN({ type: 'LineString', coordinates: coords }) }];
+  }), [etapes]);
   const actuel = [...points].reverse().find((p) => p.i <= n);
   return (
     <figure className="tunnel__carte">
