@@ -1,5 +1,28 @@
 # Journal de Chronos
 
+## 26 novembre 2026 — Sept nouvelles fonctions (branche `integration`)
+
+**Ce qui a été fait**
+- Analyse des concurrents (ChronoZoom, OneZoom, Histography, Lumni…) et 7 idées pour faire la différence. Chacune a été codée par un agent sur sa propre branche, puis tout a été fusionné dans la branche **`integration`** (`main` n'est pas touché).
+- **Ta vie sur la frise** (`#/ma-vie`) : sa vie dans l'année cosmique et dans l'année de l'histoire écrite, les événements autour de sa naissance, bouton Partager.
+- **Mode Classe** (`#/classe`) : 3 parcours (6e Histoire, SVT collège, Seconde Histoire), mode tableau numérique, fiches d'activité imprimables avec corrigé.
+- **« Pendant ce temps… »** sur les cartes : 2 à 4 événements ou êtres vivants contemporains ailleurs (183 cartes sur 351 l'ont).
+- **Jeu « Remets dans l'ordre »** (onglet du panneau Jeu) : 3 niveaux, défi du jour partageable façon Wordle, 3 nouveaux badges (48 au total ; la famille « Quiz » devient « Jeux »).
+- **Visites guidées** (`#/visites`) : 3 visites lues par la voix du navigateur, sous-titres toujours affichés.
+- **« Comment on le sait ? »** sur les cartes : type de preuve et niveau de certitude (● Établi, ≈ Approximatif, ? Débattu, ◇ Récit) ; page `#/methodes`.
+- **Pont Historivision** : bouton « Voir en 3D » (model-viewer, chargé au premier clic) sur 6 monuments, visible seulement quand un modèle .glb est déposé dans `public/modeles/` ; page `#/historivision`.
+- Liens ajoutés : Visites et Classe dans l'en-tête ; les 4 nouvelles pages dans le menu téléphone ; Méthodes et Historivision dans le pied de page.
+
+**Décisions prises**
+- Pas d'IA dans le site pour l'instant : une clé API serait facturée à chaque question d'un visiteur (crédits de l'API, séparés de l'abonnement Claude).
+
+**Questions ouvertes**
+- Tester la branche `integration` dans un navigateur (ordinateur et téléphone, clavier, voix, impression).
+- Relire : niveaux de certitude des 20 cartes ; 3 narrations écrites sans texte de fiche (fer rubané, départ d'Afrique, premiers agriculteurs) ; 30 questions du mode Classe ; intitulés des programmes sur eduscol.
+- Bestiaire : donner d'office « fossile » et « Approximatif » à tous les animaux ?
+- Trouver des modèles 3D libres ; créer une carte Colisée (et Parthénon) pour la 3D.
+- Fusionner `integration` dans `main` après validation.
+
 ## 21 novembre 2026 — Le jeu devient une chasse aux badges cachés
 
 **Décision**
