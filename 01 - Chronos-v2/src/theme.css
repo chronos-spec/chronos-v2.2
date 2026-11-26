@@ -50,6 +50,11 @@
   --jeu-faux: #E9876B;
   --jeu-faux-fond: rgba(233, 135, 107, 0.15);
   --jeu-carte-fond: rgba(255, 255, 255, 0.05);
+  /* Mode Classe : la feuille imprimée (noir sur blanc, pour économiser l'encre) */
+  --papier: #FFFFFF;
+  --encre: #000000;
+  --encre-douce: #444444;
+  --trait-papier: #999999;
 
   /* Focus clavier */
   --focus: #FFFFFF;

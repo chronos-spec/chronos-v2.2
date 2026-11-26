@@ -12,6 +12,8 @@ import Spirale from './components/Spirale.jsx';
 import VueEnsemble from './components/VueEnsemble.jsx';
 // Le planisphère (et sa carte du monde) n'est chargé que si on ouvre sa page.
 const Planisphere = lazy(() => import('./components/Planisphere.jsx'));
+// Le Mode Classe (enseignants) n'est chargé que si on ouvre sa page.
+const ModeClasse = lazy(() => import('./components/ModeClasse.jsx'));
 import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
 import Visites from './components/Visites.jsx';
@@ -36,7 +38,7 @@ export default function App() {
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
   const spirale = route.page === 'etage' && route.etage === 'spirale';
   const [etageSpirale, setEtageSpirale] = useState('univers');
-  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte', 'visites'].includes(route.etage);
+  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte', 'visites', 'classe'].includes(route.etage);
   const etageActif = accueil ? etageVu : spirale ? etageSpirale : pageSpeciale ? (route.etage === 'ensemble' ? route.periode || null : null) : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
   // Accueil : tout replier pour ne voir que les titres des six étages.
@@ -245,6 +247,10 @@ export default function App() {
           ) : route.etage === 'carte' ? (
             <Suspense fallback={<p className="planisphere__etat">Chargement du planisphère…</p>}>
               <Planisphere />
+            </Suspense>
+          ) : route.etage === 'classe' ? (
+            <Suspense fallback={<p className="planisphere__etat">Chargement du Mode Classe…</p>}>
+              <ModeClasse idParcours={route.periode || null} />
             </Suspense>
           ) : route.etage === 'recit' ? (
             <Recit />
