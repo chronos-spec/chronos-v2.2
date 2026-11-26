@@ -13,6 +13,7 @@ const OUTILS = [
   { lien: '#/ensemble/vie', nom: 'Vue d’ensemble', detail: 'Un étage d’un coup d’œil' },
   { lien: '#/recit', nom: 'Récit', detail: 'L’histoire du monde en une minute' },
   { lien: '#/carte', nom: 'Planisphère', detail: 'Les continents à travers le temps (bêta)' },
+  { lien: '#/ma-vie', nom: 'Ta vie sur la frise', detail: 'Ta vie dans l’année cosmique' },
   { lien: '#/spirale', nom: 'Spirale', detail: 'Le temps enroulé (essai)' },
 ];
 
