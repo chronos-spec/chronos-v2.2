@@ -14,6 +14,7 @@ import VueEnsemble from './components/VueEnsemble.jsx';
 const Planisphere = lazy(() => import('./components/Planisphere.jsx'));
 import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
+import Visites from './components/Visites.jsx';
 import MentionsLegales from './components/MentionsLegales.jsx';
 import { demanderArbre } from './lib/arbreCible.js';
 import { signaler, noterVisite } from './lib/badges.js';
@@ -35,7 +36,7 @@ export default function App() {
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
   const spirale = route.page === 'etage' && route.etage === 'spirale';
   const [etageSpirale, setEtageSpirale] = useState('univers');
-  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte'].includes(route.etage);
+  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte', 'visites'].includes(route.etage);
   const etageActif = accueil ? etageVu : spirale ? etageSpirale : pageSpeciale ? (route.etage === 'ensemble' ? route.periode || null : null) : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
   // Accueil : tout replier pour ne voir que les titres des six étages.
@@ -247,6 +248,8 @@ export default function App() {
             </Suspense>
           ) : route.etage === 'recit' ? (
             <Recit />
+          ) : route.etage === 'visites' ? (
+            <Visites idVisite={route.periode} />
           ) : route.etage === 'mentions-legales' ? (
             <MentionsLegales />
           ) : spirale ? (
