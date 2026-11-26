@@ -7,6 +7,7 @@ import { dateCosmique } from '../lib/calendrier.js';
 import PendantCeTemps from './PendantCeTemps.jsx';
 import CommentOnLeSait from './CommentOnLeSait.jsx';
 import { preuveDe } from '../data/preuves.js';
+import Vue3D from './Vue3D.jsx';
 
 const ETIQUETTES = { bible: 'Selon la Bible', histoire: 'Fait historique' };
 
@@ -101,6 +102,8 @@ export default function Carte({ carte, etage, onFermer }) {
       )}
 
       <PendantCeTemps carte={carte} />
+      {/* Monuments : bouton « Voir en 3D » (seulement si un modèle 3D existe) */}
+      <Vue3D idCarte={carte.id} titre={carte.titre} />
 
       {cosmique && (
         <p className="carte__repere">
