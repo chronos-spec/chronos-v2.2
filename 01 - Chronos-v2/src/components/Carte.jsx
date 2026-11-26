@@ -4,6 +4,7 @@ import ImageWiki from './ImageWiki.jsx';
 import { lienPeriode } from '../lib/route.js';
 import { useEffect, useRef } from 'react';
 import { dateCosmique } from '../lib/calendrier.js';
+import Vue3D from './Vue3D.jsx';
 
 const ETIQUETTES = { bible: 'Selon la Bible', histoire: 'Fait historique' };
 
@@ -95,6 +96,9 @@ export default function Carte({ carte, etage, onFermer }) {
           )}
         </>
       )}
+
+      {/* Monuments : bouton « Voir en 3D » (seulement si un modèle 3D existe) */}
+      <Vue3D idCarte={carte.id} titre={carte.titre} />
 
       {cosmique && (
         <p className="carte__repere">

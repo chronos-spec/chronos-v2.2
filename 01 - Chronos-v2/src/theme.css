@@ -101,3 +101,8 @@
   --etage-pale: #DCE8FD;
   --etage-encre: #1E3A8A;
 }
+
+/* Vue 3D des monuments (pont vers Historivision) */
+:root {
+  --vue3d-fond: #E9E4D8;
+}

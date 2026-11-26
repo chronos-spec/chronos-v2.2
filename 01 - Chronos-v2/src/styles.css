@@ -2534,3 +2534,34 @@ a.infinie__periode:hover, a.infinie__periode:focus-visible { background: rgba(va
   /* L'onglet « 1 an » descend en bas à droite, loin du texte. */
   .cosmique__montrer { top: auto; bottom: 96px; }
 }
+
+/* ---------- Vue 3D des monuments (pont vers Historivision) ---------- */
+.vue3d { display: grid; gap: 8px; }
+.vue3d__bouton,
+.vue3d__controles button {
+  min-height: 44px; min-width: 44px; padding: 0 16px; border: 0; border-radius: 22px;
+  background: var(--carte-bouton); color: var(--carte-texte);
+  font: 600 18px Inter, sans-serif; cursor: pointer;
+  transition: background 200ms ease;
+}
+.vue3d__bouton { justify-self: start; background: var(--etage-pale); color: var(--etage-encre); }
+.vue3d__bouton:hover, .vue3d__controles button:hover { background: var(--poignee); }
+.vue3d__panneau { display: grid; gap: 8px; }
+.vue3d__scene {
+  display: block; width: 100%; height: 320px; border-radius: 16px;
+  background: var(--vue3d-fond);
+}
+.vue3d__scene:focus-visible { outline: 3px solid var(--focus-carte); outline-offset: 2px; }
+.vue3d__controles { display: flex; flex-wrap: wrap; gap: 8px; }
+.vue3d__aide, .vue3d__etat, .vue3d__description, .vue3d__credit, .vue3d__etiquette {
+  margin: 0; font-size: 18px; line-height: 1.5; color: var(--carte-texte-doux);
+}
+.vue3d__etiquette { font-weight: 600; color: var(--carte-texte); }
+@media (min-width: 720px) { .vue3d__scene { height: 400px; } }
+@media (prefers-reduced-motion: reduce) {
+  .vue3d__bouton, .vue3d__controles button { transition: none; }
+}
+
+/* Page Historivision */
+.historivision__accroche { font-size: 22px; color: var(--texte); }
+.historivision__liste a { min-height: 44px; display: inline-flex; align-items: center; }

@@ -15,6 +15,7 @@ const Planisphere = lazy(() => import('./components/Planisphere.jsx'));
 import LigneInfinie from './components/LigneInfinie.jsx';
 import Recit from './components/Recit.jsx';
 import MentionsLegales from './components/MentionsLegales.jsx';
+import Historivision from './components/Historivision.jsx';
 import { demanderArbre } from './lib/arbreCible.js';
 import { signaler, noterVisite } from './lib/badges.js';
 import AnnonceBadge from './components/AnnonceBadge.jsx';
@@ -35,7 +36,7 @@ export default function App() {
   const [etageVu, setEtageActif] = useState(null); // null = écran d'accueil
   const spirale = route.page === 'etage' && route.etage === 'spirale';
   const [etageSpirale, setEtageSpirale] = useState('univers');
-  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte'].includes(route.etage);
+  const pageSpeciale = !accueil && ['ensemble', 'recit', 'mentions-legales', 'carte', 'historivision'].includes(route.etage);
   const etageActif = accueil ? etageVu : spirale ? etageSpirale : pageSpeciale ? (route.etage === 'ensemble' ? route.periode || null : null) : route.etage;
   const [carteOuverte, setCarteOuverte] = useState(null); // id de la seule carte ouverte
   // Accueil : tout replier pour ne voir que les titres des six étages.
@@ -249,6 +250,8 @@ export default function App() {
             <Recit />
           ) : route.etage === 'mentions-legales' ? (
             <MentionsLegales />
+          ) : route.etage === 'historivision' ? (
+            <Historivision />
           ) : spirale ? (
             <Spirale
               parId={PAR_ID}
